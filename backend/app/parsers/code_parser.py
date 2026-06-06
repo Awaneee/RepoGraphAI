@@ -1,332 +1,333 @@
 import ast
 import os
+import sys
 
 from app.models.pydantic_models import (
+    ParsedDecorator,
     ParsedFile,
     ParsedClass,
     ParsedFunction,
-    ParsedRepository
+    ParsedRepository,
 )
 
 
-class CodeParser:
+# ---------------------------------------------------------------------------
+# Stdlib module names (top-level only; sufficient for origin classification)
+# ---------------------------------------------------------------------------
 
-    BUILTINS = {
-        "len",
-        "list",
-        "dict",
-        "set",
-        "tuple",
-        "sorted",
-        "print",
-        "str",
-        "int",
-        "float",
-        "bool",
-        "range",
-        "enumerate",
-        "open",
-        "min",
-        "max",
-        "sum",
-        "any",
-        "all",
-        "zip"
-    }
+_STDLIB_TOP_LEVEL: frozenset[str] = frozenset(sys.stdlib_module_names)  # Python 3.10+
+
+
+def _is_stdlib(module_name: str) -> bool:
+    top = module_name.split(".")[0]
+    return top in _STDLIB_TOP_LEVEL
+
+
+# ---------------------------------------------------------------------------
+# CodeParser
+# ---------------------------------------------------------------------------
+
+class CodeParser:
+    """
+    Parses Python source files into structured AST representations.
+
+    Design principles
+    -----------------
+    - All extraction is purely syntactic (no runtime imports, no type inference).
+    - The parser is intentionally liberal: it captures more than GraphBuilder
+      needs, so GraphBuilder can apply semantic filtering with a complete
+      symbol table rather than requiring multiple parse passes.
+    - Every new field added here has a corresponding edge type in
+      RelationshipType; nothing is extracted "speculatively".
+    """
+
+    BUILTINS: frozenset[str] = frozenset({
+        "len", "list", "dict", "set", "tuple", "sorted", "print",
+        "str", "int", "float", "bool", "range", "enumerate", "open",
+        "min", "max", "sum", "any", "all", "zip", "map", "filter",
+        "isinstance", "issubclass", "getattr", "setattr", "hasattr",
+        "type", "id", "repr", "hash", "iter", "next", "reversed",
+        "abs", "round", "pow", "divmod", "hex", "oct", "bin",
+        "callable", "vars", "dir", "super", "object",
+    })
+
+    # ------------------------------------------------------------------
+    # Decorator extraction
+    # ------------------------------------------------------------------
+
+    def _extract_decorator(self, decorator_node: ast.expr) -> ParsedDecorator:
+        """
+        Convert a decorator AST node to a ParsedDecorator.
+
+        Handles three forms:
+          @name                 → Name node
+          @a.b.c                → Attribute chain
+          @name(args)           → Call node (is_call=True)
+          @a.b(args)            → Call node on Attribute (is_call=True)
+        """
+
+        is_call = isinstance(decorator_node, ast.Call)
+
+        # Unwrap the call to get the underlying reference
+        ref = decorator_node.func if is_call else decorator_node
+
+        name = self._unparse_decorator_ref(ref)
+
+        return ParsedDecorator(name=name, is_call=is_call)
+
+    @staticmethod
+    def _unparse_decorator_ref(node: ast.expr) -> str:
+        """Flatten a Name or Attribute chain into a dotted string."""
+        if isinstance(node, ast.Name):
+            return node.id
+        if isinstance(node, ast.Attribute):
+            parent = CodeParser._unparse_decorator_ref(node.value)
+            return f"{parent}.{node.attr}"
+        # Fallback for exotic decorator expressions
+        try:
+            return ast.unparse(node)
+        except Exception:
+            return "<unknown>"
+
+    # ------------------------------------------------------------------
+    # Call / instantiation extraction
+    # ------------------------------------------------------------------
+
+    def _extract_calls_from_body(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef
+    ) -> list[str]:
+        """
+        Walk the function body and collect all called names.
+
+        Returns a sorted, deduplicated list of callee name strings.
+        Builtins are filtered out here for efficiency.
+
+        Note: GraphBuilder is responsible for splitting this list into
+        CALLS edges (callee is a Function/Method) and INSTANTIATES edges
+        (callee is a Class), because the full symbol table only exists
+        after parsing the entire repository.
+        """
+
+        seen: set[str] = set()
+
+        for child in ast.walk(node):
+            if not isinstance(child, ast.Call):
+                continue
+
+            name: str | None = None
+
+            if isinstance(child.func, ast.Name):
+                name = child.func.id
+
+            elif isinstance(child.func, ast.Attribute):
+                # Capture the method name; GraphBuilder resolves the receiver.
+                name = child.func.attr
+
+            if name and name not in self.BUILTINS:
+                seen.add(name)
+
+        return sorted(seen)
+
+    # ------------------------------------------------------------------
+    # Function / method extraction
+    # ------------------------------------------------------------------
 
     def extract_function(
         self,
-        node: ast.FunctionDef
+        node: ast.FunctionDef | ast.AsyncFunctionDef,
     ) -> ParsedFunction:
+        """
+        Extract a ParsedFunction from a function or async function def node.
+
+        Captures:
+          - arguments (positional + keyword, excluding *args/**kwargs names
+            for now to keep the schema clean)
+          - return type annotation (unparsed string)
+          - docstring
+          - all non-builtin call names (split into CALLS / INSTANTIATES by
+            GraphBuilder)
+          - decorators
+        """
 
         arguments = [
             arg.arg
             for arg in node.args.args
         ]
 
-        calls = []
+        calls = self._extract_calls_from_body(node)
 
-        for child in ast.walk(node):
-
-            if isinstance(
-                child,
-                ast.Call
-            ):
-
-                function_name = None
-
-                if isinstance(
-                    child.func,
-                    ast.Name
-                ):
-
-                    function_name = (
-                        child.func.id
-                    )
-
-                elif isinstance(
-                    child.func,
-                    ast.Attribute
-                ):
-
-                    function_name = (
-                        child.func.attr
-                    )
-
-                if (
-                    function_name
-                    and function_name
-                    not in self.BUILTINS
-                ):
-
-                    calls.append(
-                        function_name
-                    )
-
-        return_type = None
-
+        return_type: str | None = None
         if node.returns:
-
             try:
-
-                return_type = ast.unparse(
-                    node.returns
-                )
-
+                return_type = ast.unparse(node.returns)
             except Exception:
-
                 return_type = None
+
+        decorators = [
+            self._extract_decorator(d)
+            for d in node.decorator_list
+        ]
 
         return ParsedFunction(
             name=node.name,
             line_number=node.lineno,
             arguments=arguments,
             return_type=return_type,
-            docstring=ast.get_docstring(
-                node
-            ),
-            calls=sorted(
-                list(
-                    set(calls)
-                )
-            )
+            docstring=ast.get_docstring(node),
+            calls=calls,
+            instantiates=[],   # GraphBuilder fills this in second pass
+            decorators=decorators,
         )
 
-    def parse_file(
-        self,
-        file_path: str
-    ) -> ParsedFile:
+    # ------------------------------------------------------------------
+    # Class extraction
+    # ------------------------------------------------------------------
 
-        with open(
-            file_path,
-            "r",
-            encoding="utf-8"
-        ) as file:
+    def _extract_bases(self, node: ast.ClassDef) -> list[str]:
+        bases: list[str] = []
+        for base in node.bases:
+            try:
+                if isinstance(base, ast.Name):
+                    bases.append(base.id)
+                elif isinstance(base, ast.Attribute):
+                    bases.append(base.attr)
+                else:
+                    # Generic subscript bases like Generic[T]
+                    bases.append(ast.unparse(base))
+            except Exception:
+                continue
+        return bases
 
-            source_code = file.read()
+    def _extract_class(self, node: ast.ClassDef) -> ParsedClass:
 
-        tree = ast.parse(
-            source_code
+        bases = self._extract_bases(node)
+
+        methods: list[ParsedFunction] = []
+        for child in node.body:
+            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                methods.append(self.extract_function(child))
+
+        decorators = [
+            self._extract_decorator(d)
+            for d in node.decorator_list
+        ]
+
+        return ParsedClass(
+            name=node.name,
+            line_number=node.lineno,
+            inherits_from=bases,
+            docstring=ast.get_docstring(node),
+            methods=methods,
+            decorators=decorators,
         )
 
-        imports = []
-        classes = []
-        functions = []
+    # ------------------------------------------------------------------
+    # Import extraction
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _extract_imports(tree: ast.Module) -> list[str]:
+        """
+        Extract all imported module paths from the top level of a module.
+
+        `import os.path`             → "os.path"
+        `from fastapi import APIRouter` → "fastapi"
+        `from .utils import helper`  → relative imports are skipped
+                                       (they resolve to internal modules but
+                                        require package context we may not
+                                        have; GraphBuilder handles them via
+                                        file path matching)
+
+        Returns a sorted, deduplicated list.
+        """
+
+        seen: set[str] = set()
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    seen.add(alias.name)
+
+            elif isinstance(node, ast.ImportFrom):
+                if node.module and node.level == 0:
+                    # Absolute import only
+                    seen.add(node.module)
+                # Relative imports (node.level > 0) are skipped intentionally
+
+        return sorted(seen)
+
+    # ------------------------------------------------------------------
+    # File parsing
+    # ------------------------------------------------------------------
+
+    def parse_file(self, file_path: str) -> ParsedFile:
+
+        with open(file_path, "r", encoding="utf-8", errors="replace") as fh:
+            source_code = fh.read()
+
+        try:
+            tree = ast.parse(source_code, filename=file_path)
+        except SyntaxError as exc:
+            raise ValueError(f"Syntax error in {file_path}: {exc}") from exc
+
+        imports = self._extract_imports(tree)
+
+        classes: list[ParsedClass] = []
+        functions: list[ParsedFunction] = []
 
         for node in tree.body:
+            if isinstance(node, ast.ClassDef):
+                classes.append(self._extract_class(node))
 
-            if isinstance(
-                node,
-                ast.Import
-            ):
-
-                for alias in node.names:
-
-                    imports.append(
-                        alias.name
-                    )
-
-            elif isinstance(
-                node,
-                ast.ImportFrom
-            ):
-
-                if node.module:
-
-                    imports.append(
-                        node.module
-                    )
-
-            elif isinstance(
-                node,
-                ast.ClassDef
-            ):
-                base_classes = []
-
-                for base in node.bases:
-
-                    try:
-
-                        if isinstance(
-                           base,
-                           ast.Name
-                         ):
-
-                         base_classes.append(
-                             base.id
-                         )
-
-                        elif isinstance(
-                          base,
-                        ast.Attribute
-                        ):
-
-                           base_classes.append(
-                             base.attr
-                            )
-
-                    except Exception:
-
-                      continue
-
-                methods = []
-
-
-                for class_node in node.body:
-
-                    if isinstance(
-                        class_node,
-                        ast.FunctionDef
-                    ):
-
-                        methods.append(
-                            self.extract_function(
-                                class_node
-                            )
-                        )
-
-                classes.append(
-                    ParsedClass(
-                        name=node.name,
-                        line_number=node.lineno,
-                        inherits_from=base_classes,
-                        methods=methods
-                    )
-                )
-
-            elif isinstance(
-                node,
-                ast.FunctionDef
-            ):
-
-                functions.append(
-                    self.extract_function(
-                        node
-                    )
-                )
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                functions.append(self.extract_function(node))
 
         return ParsedFile(
             file_path=file_path,
-            imports=sorted(
-                list(
-                    set(imports)
-                )
-            ),
+            imports=imports,
             classes=classes,
-            functions=functions
+            functions=functions,
         )
 
-    def parse_repository(
-        self,
-        repository_path: str
-    ) -> ParsedRepository:
+    # ------------------------------------------------------------------
+    # Repository parsing
+    # ------------------------------------------------------------------
 
-        parsed_files = []
+    _SKIP_DIRS: frozenset[str] = frozenset({
+        ".git", "__pycache__", ".venv", "venv", "env",
+        "node_modules", "dist", "build",
+        "docs", "docs_src",
+        "examples", "example",
+        "tests", "test",
+        ".github", ".idea", ".vscode",
+        ".mypy_cache", ".pytest_cache", ".ruff_cache",
+    })
 
-        for root, dirs, files in os.walk(
-            repository_path
-        ):
+    def parse_repository(self, repository_path: str) -> ParsedRepository:
 
-            dirs[:] = [
-                d
-                for d in dirs
-                if d not in {
-                    ".git",
-                    "__pycache__",
-                    ".venv",
-                    "venv",
-                    "env",
-                    "node_modules",
-                    "dist",
-                    "build",
+        parsed_files: list[ParsedFile] = []
 
-                    # Documentation
-                    "docs",
-                    "docs_src",
+        for root, dirs, files in os.walk(repository_path, topdown=True):
+            dirs[:] = [d for d in dirs if d not in self._SKIP_DIRS]
 
-                    # Examples
-                    "examples",
-                    "example",
-
-                    # Tests
-                    "tests",
-                    "test",
-
-                    # IDE / CI
-                    ".github",
-                    ".idea",
-                    ".vscode"
-                }
-            ]
-
-            for file in files:
-
-                if not file.endswith(
-                    ".py"
-                ):
+            for filename in files:
+                if not filename.endswith(".py"):
+                    continue
+                if filename.startswith("test_") or filename.endswith("_test.py"):
                     continue
 
-                if (
-                    file.startswith(
-                        "test_"
-                    )
-                    or file.endswith(
-                        "_test.py"
-                    )
-                ):
-                    continue
-
-                file_path = os.path.join(
-                    root,
-                    file
-                )
+                file_path = os.path.join(root, filename)
 
                 try:
-
-                    parsed_files.append(
-                        self.parse_file(
-                            file_path
-                        )
-                    )
-
-                except Exception as e:
-
-                    print(
-                        f"Failed to parse {file_path}: {e}"
-                    )
-
+                    parsed_files.append(self.parse_file(file_path))
+                except Exception as exc:
+                    print(f"[CodeParser] Skipping {file_path}: {exc}")
                     continue
 
-        print(
-            f"Parsed {len(parsed_files)} Python files"
-        )
+        print(f"[CodeParser] Parsed {len(parsed_files)} Python files")
 
         return ParsedRepository(
-            repository_name=os.path.basename(
-                repository_path
-            ),
-            total_python_files=len(
-                parsed_files
-            ),
-            files=parsed_files
+            repository_name=os.path.basename(repository_path.rstrip("/\\")),
+            total_python_files=len(parsed_files),
+            files=parsed_files,
         )
