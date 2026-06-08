@@ -29,6 +29,29 @@ The builder runs in three passes:
   Pass 3 — Prune isolated nodes
     Remove any node that has no edges (avoids polluting the graph with
     unreachable symbols, though in practice this is rare after Pass 2).
+
+Graph Views
+-----------
+Three read-only filtered projections of the master graph are available:
+
+  build_architecture_graph(master)
+    Nodes : File, Module, Class
+    Edges : IMPORTS, CONTAINS
+    Purpose: Repository structure, dependency topology, architectural
+             component identification.
+
+  build_class_graph(master)
+    Nodes : Class
+    Edges : INHERITS, INSTANTIATES, DECORATES
+    Purpose: Object model, inheritance hierarchy, class coupling.
+
+  build_call_graph(master)
+    Nodes : Function, Method
+    Edges : CALLS
+    Purpose: Execution flow, call fan-in / fan-out, hotspot detection.
+
+Each view method filters the master RepositoryGraph in O(N+E) time
+without re-parsing the AST.  The master graph is never mutated.
 """
 
 import os
@@ -254,6 +277,14 @@ class GraphBuilder:
     list), Pydantic base classes (BaseModel), typing constructs (Protocol,
     Generic), framework base classes (Model, View, Task), and other external
     symbols from polluting the graph.
+
+    Graph Views
+    -----------
+    Three filtered projections are available after build_graph():
+
+      build_architecture_graph(master) → File + Module + Class / IMPORTS + CONTAINS
+      build_class_graph(master)        → Class / INHERITS + INSTANTIATES + DECORATES
+      build_call_graph(master)         → Function + Method / CALLS
     """
 
     # ------------------------------------------------------------------
@@ -551,6 +582,258 @@ class GraphBuilder:
         return RepositoryGraph(
             nodes=sorted(nodes.values(), key=lambda n: (n.type, n.id)),
             edges=graph_edges,
+        )
+
+    # ------------------------------------------------------------------
+    # Graph Views
+    # ------------------------------------------------------------------
+    #
+    # Design rationale
+    # ----------------
+    # All three view methods share the same two-step pattern:
+    #
+    #   1. Compute the set of allowed node types and allowed relationship
+    #      types for this view.
+    #   2. Filter master.nodes and master.edges accordingly, then drop any
+    #      node that has no surviving edges (same logic as Pass 3 above).
+    #
+    # The filtering is purely in-memory (O(N+E)); no AST traversal, no
+    # re-parsing, no new registry construction.
+    #
+    # Node selection drives edge selection, not the other way around:
+    # an edge is retained only when BOTH its source and target nodes
+    # survive the node-type filter.  This guarantees referential integrity
+    # — there are never dangling edges in a view.
+    #
+    # GraphRAG benefits
+    # -----------------
+    # Smaller, purpose-scoped graphs reduce context-window noise when fed
+    # to an LLM retriever.  Each view maps cleanly to a RAG query class:
+    #
+    #   Architecture graph → "Which files are central?  What depends on X?"
+    #   Class graph        → "What inherits from X?  Who creates Y?"
+    #   Call graph         → "What does function F call?  Who calls method M?"
+    #
+    # Because each view is itself a RepositoryGraph, it can be serialised,
+    # stored in a vector DB, or passed directly to generate_statistics()
+    # without any changes to downstream code.
+    # ------------------------------------------------------------------
+
+    _ARCHITECTURE_NODE_TYPES: frozenset[NodeType] = frozenset({
+        NodeType.FILE,
+        NodeType.MODULE,
+        NodeType.CLASS,
+    })
+
+    _ARCHITECTURE_EDGE_TYPES: frozenset[RelationshipType] = frozenset({
+        RelationshipType.IMPORTS,
+        RelationshipType.CONTAINS,
+    })
+
+    _CLASS_NODE_TYPES: frozenset[NodeType] = frozenset({
+        NodeType.CLASS,
+    })
+
+    _CLASS_EDGE_TYPES: frozenset[RelationshipType] = frozenset({
+        RelationshipType.INHERITS,
+        RelationshipType.INSTANTIATES,
+        RelationshipType.DECORATES,
+    })
+
+    _CALL_NODE_TYPES: frozenset[NodeType] = frozenset({
+        NodeType.FUNCTION,
+        NodeType.METHOD,
+    })
+
+    _CALL_EDGE_TYPES: frozenset[RelationshipType] = frozenset({
+        RelationshipType.CALLS,
+    })
+
+    def build_architecture_graph(self, master: RepositoryGraph) -> RepositoryGraph:
+        """
+        Architecture view: File, Module, Class nodes connected by IMPORTS
+        and CONTAINS edges.
+
+        Answers:
+          - Which files import which modules?
+          - Which modules are most widely depended upon?
+          - What are the major structural components of the repository?
+          - Which files are architectural hubs?
+
+        Node selection
+        --------------
+        Retain nodes whose type is FILE, MODULE, or CLASS.
+        FUNCTION and METHOD nodes are excluded; they belong to the call
+        graph, not the architectural skeleton.
+
+        Edge selection
+        --------------
+        IMPORTS  : File → Module.  The dependency backbone.
+        CONTAINS : File → Class (and File → Function, but Function nodes
+                   are excluded, so only File→Class CONTAINS edges survive
+                   the referential-integrity check).
+
+        Edges whose source or target was removed by the node filter are
+        automatically dropped.  This means Class→Method CONTAINS edges
+        disappear naturally — Method nodes are not in this view.
+        """
+        return self._filter_graph(
+            master,
+            allowed_node_types=self._ARCHITECTURE_NODE_TYPES,
+            allowed_edge_types=self._ARCHITECTURE_EDGE_TYPES,
+        )
+
+    def build_class_graph(self, master: RepositoryGraph) -> RepositoryGraph:
+        """
+        Class view: Class-only nodes connected by INHERITS, INSTANTIATES,
+        and DECORATES edges.
+
+        Answers:
+          - What is the full inheritance hierarchy?
+          - Which classes are the most-extended base classes?
+          - Which classes depend on (create) other classes?
+          - Which classes are decorated, and by what?
+
+        Node selection
+        --------------
+        Retain only CLASS nodes.  File, Module, Function, and Method nodes
+        are excluded; they are noise when the question is purely about the
+        object model.
+
+        Edge selection
+        --------------
+        INHERITS    : Class → parent Class.
+        INSTANTIATES: Function/Method → Class (source node filtered away,
+                      so only Class→Class INSTANTIATES survive).
+        DECORATES   : decorator_ref → Class or Method (Method nodes filtered
+                      away, so only decorator→Class DECORATES survive).
+
+        Note: DECORATES source nodes are decorator name strings, not typed
+        graph nodes.  They may not appear in master.nodes (decorators from
+        external libraries have no node), so they are kept as-is in the
+        view even if they have no corresponding node entry.  Downstream
+        consumers should treat them as opaque label strings.
+        """
+        return self._filter_graph(
+            master,
+            allowed_node_types=self._CLASS_NODE_TYPES,
+            allowed_edge_types=self._CLASS_EDGE_TYPES,
+        )
+
+    def build_call_graph(self, master: RepositoryGraph) -> RepositoryGraph:
+        """
+        Call view: Function and Method nodes connected by CALLS edges.
+
+        Answers:
+          - Which functions/methods call which?
+          - What is the fan-in (how many callers) of each callable?
+          - What is the fan-out (how many callees) of each callable?
+          - Which methods are reused most across the codebase?
+          - Which functions are entry points (no callers)?
+
+        Node selection
+        --------------
+        Retain FUNCTION and METHOD nodes.
+        File, Module, and Class nodes are excluded; they are structural
+        containers, not execution participants.
+
+        Edge selection
+        --------------
+        CALLS only.  CONTAINS, IMPORTS, INHERITS, INSTANTIATES, DECORATES,
+        and OVERRIDES are all excluded — each belongs to a different
+        semantic layer.
+
+        Edges whose source or target was removed by the node filter are
+        automatically dropped, preserving referential integrity.
+        """
+        return self._filter_graph(
+            master,
+            allowed_node_types=self._CALL_NODE_TYPES,
+            allowed_edge_types=self._CALL_EDGE_TYPES,
+        )
+
+    # ------------------------------------------------------------------
+    # Core filter engine (shared by all three view methods)
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _filter_graph(
+        master: RepositoryGraph,
+        allowed_node_types: frozenset[NodeType],
+        allowed_edge_types: frozenset[RelationshipType],
+    ) -> RepositoryGraph:
+        """
+        Return a new RepositoryGraph containing only the nodes and edges
+        that pass both the node-type and edge-type filters.
+
+        Algorithm
+        ---------
+        Step 1: Collect the IDs of all nodes whose type is in
+                allowed_node_types.  O(N).
+
+        Step 2: Retain edges whose relationship type is in
+                allowed_edge_types AND whose source ID is in the
+                allowed-node ID set OR whose target ID is in that set.
+
+                For DECORATES edges the source is a decorator name string
+                that may not have a corresponding node; we allow it through
+                if the target node survives.  All other edge types require
+                both endpoints to be in the allowed set.
+
+        Step 3: Compute the set of node IDs that actually appear in at
+                least one surviving edge (same as Pass 3 in build_graph).
+                Nodes that survive the type filter but have no surviving
+                edges are pruned.
+
+        Step 4: Build and return the filtered RepositoryGraph.
+
+        The master graph is never mutated.
+        """
+
+        # Step 1 — allowed node IDs
+        allowed_node_ids: set[str] = {
+            node.id
+            for node in master.nodes
+            if node.type in allowed_node_types
+        }
+
+        # Step 2 — filter edges
+        filtered_edges: list[GraphEdge] = []
+        for edge in master.edges:
+            if edge.relationship not in allowed_edge_types:
+                continue
+
+            # DECORATES edges: source is a decorator name string (may not
+            # have a node entry).  Admit the edge if the *target* is in
+            # the allowed set; the source is kept as an opaque label.
+            if edge.relationship == RelationshipType.DECORATES:
+                if edge.target in allowed_node_ids:
+                    filtered_edges.append(edge)
+                continue
+
+            # All other edge types: both endpoints must survive.
+            if edge.source in allowed_node_ids and edge.target in allowed_node_ids:
+                filtered_edges.append(edge)
+
+        # Step 3 — collect nodes that appear in surviving edges
+        referenced_ids: set[str] = set()
+        for edge in filtered_edges:
+            referenced_ids.add(edge.source)
+            referenced_ids.add(edge.target)
+
+        # Step 4 — assemble filtered node list
+        # Include a node only if it is in the allowed set AND referenced
+        # by at least one edge.  We deliberately do NOT include unreferenced
+        # decorator-name sources (they are not graph nodes).
+        filtered_nodes: list[GraphNode] = [
+            node
+            for node in master.nodes
+            if node.id in allowed_node_ids and node.id in referenced_ids
+        ]
+
+        return RepositoryGraph(
+            nodes=sorted(filtered_nodes, key=lambda n: (n.type, n.id)),
+            edges=filtered_edges,
         )
 
     # ------------------------------------------------------------------
