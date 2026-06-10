@@ -15,62 +15,93 @@ Architecture
 
     User Question
          ↓
-    extract_keywords()      — tokenise + normalise the question
+    _detect_phrases()      — identify multi-word phrases BEFORE tokenising
+                             so that "subgraph extracted" or "call graph"
+                             are not split into misleading single tokens
+                             (v4 NEW)
          ↓
-    detect_intent()         — classify the query into one or more
-                              IntentCategory values (v3 NEW)
+    extract_keywords()     — tokenise + normalise the question
          ↓
-    expand_keywords()       — add SE-domain synonyms for each keyword
-                              and for intent-specific terms (v3 NEW)
+    detect_intent()        — classify the query into one or more
+                              IntentCategory values
          ↓
-    _generate_candidates()  — match keywords against every node label/id
+    expand_keywords()      — add SE-domain synonyms for each keyword
+                              and for intent-specific terms
          ↓
-    rank_candidates()       — score each candidate on weighted signals
+    _generate_candidates() — match keywords against every node label/id
          ↓
-    QueryResolutionResult   — top-K QueryMatch objects ready for retrieval
+    rank_candidates()      — score each candidate on weighted signals
+         ↓
+    QueryResolutionResult  — top-K QueryMatch objects ready for retrieval
 
-Scoring signals (all additive, v3.1)
+Scoring signals (all additive, v4)
 -----------------------------------
-1.  EXACT_LABEL         (+10.0)  node.label == keyword (case-insensitive)
-2.  EXACT_ID            (+8.0)   node.id == keyword
-3.  PARTIAL_LABEL       (+4.0)   keyword in node.label
-4.  PARTIAL_ID          (+2.0)   keyword in node.id
-5.  NODE_TYPE_BASE      (+3.0)   CLASS / FUNCTION / METHOD preferred over
-                                 FILE / MODULE
-6.  HOTSPOT_BOOST       (+1.0 per edge, capped at +5.0)
-7.  SNAKE_EXPANSION     (+3.0)   snake_case token expansion match
-8.  INTENT_TYPE_BOOST   (+6.0)   node type matches the intent's preferred types
-9.  CALLABLE_SUPREMACY  (+5.0)   METHOD / FUNCTION in an implementation query
-                                 (v3.1 NEW — ensures callables always outrank
-                                 DTO classes that accumulate equal keyword hits)
-10. DTO_PENALTY         (−15.0)  node looks like a data container, for
-                                 implementation intents (v3.1: increased from −8)
+1.  EXACT_LABEL          (+10.0)  node.label == keyword (case-insensitive)
+2.  EXACT_ID             (+8.0)   node.id == keyword
+3.  PARTIAL_LABEL        (+4.0)   keyword in node.label
+4.  PARTIAL_ID           (+2.0)   keyword in node.id
+5.  NODE_TYPE_BASE       (+3.0)   CLASS / FUNCTION / METHOD preferred over
+                                  FILE / MODULE
+6.  HOTSPOT_BOOST        (+1.0 per edge, capped at +5.0)
+7.  SNAKE_EXPANSION      (+3.0)   snake_case token expansion match
+8.  INTENT_TYPE_BOOST    (+6.0)   node type matches the intent's preferred types
+9.  CALLABLE_SUPREMACY   (+5.0)   METHOD / FUNCTION in an implementation query
+10. DTO_PENALTY          (−15.0)  node looks like a data container, for
+                                  implementation intents
+11. PHRASE_MATCH         (+7.0)   node label/id contains a recognised multi-word
+                                  phrase from the query (v4 NEW)
+12. VERB_LABEL_BOOST     (+4.0)   node label contains an action-verb component
+                                  that aligns with the detected intent (v4 NEW)
 
-Design principles (v3 additions)
+Design principles (v4 additions)
 ----------------------------------
-- **Intent detection** is purely vocabulary-driven; no repo-specific knowledge.
-  The intent lexicons describe *what developers do* (parse, generate, render,
-  validate…), not what any particular codebase calls things.
-- **Query expansion** maps generic SE verbs to their common synonyms so that
-  "parse" also matches nodes whose labels say "read" or "load", and vice-versa.
-- **DTO detection** uses structural signals only: Pydantic/dataclass decorators,
-  "Parsed"/"Schema"/"Model"/"Result"/"Request"/"Response" naming patterns, or
-  nodes whose only edges are CONTAINS / IMPORTS (not CALLS / INSTANTIATES).
-  None of these signals are repository-specific.
-- **Explainability** — every score contribution is surfaced in
-  QueryMatch.reason so the caller (or a developer) can see exactly why a
-  node ranked where it did.
+- **Phrase detection** captures the semantic unit before it is destroyed by
+  word-boundary tokenisation.  The phrase table covers common SE compound
+  concepts (call graph, import chain, subgraph, dependency tree …) and maps
+  each phrase to the intent(s) it implies.  None of the phrases are
+  repository-specific; all describe generic code-analysis concepts.
+- **Verb-label boost** rewards callables whose *label* contains a verb
+  component that matches the detected intent (e.g. a RETRIEVAL query boosts
+  nodes labelled "fetch_node" or "get_results").  This directly targets the
+  reported weakness where retrieval and analytics queries surface data classes
+  over implementation callables.
+- **Graph-traversal intent** (new IntentCategory) recognises questions about
+  subgraph extraction, graph walking, node/edge traversal, and similar
+  structural operations.  Previously these queries fell into UNKNOWN or
+  ANALYSIS, causing traversal callables to rank below unrelated nodes.
+- **Aggregation intent** (new IntentCategory) recognises analytics questions
+  about counting, ranking, summing, and computing aggregate statistics.
+  Previously the STATISTICS intent lexicon was too broad and matched
+  too many unrelated nodes.
+- **DTO guard for graph infrastructure** — the DTO name patterns `node`,
+  `edge`, `vertex`, `arc` are removed from the auto-DTO list.  These labels
+  appear on graph infrastructure classes (GraphNode, GraphEdge) that are
+  *not* data containers to be penalised; they are core domain objects.
+  A new `_is_graph_infrastructure` signal explicitly exempts such nodes.
 
 Changelog
 ----------
-v3 (current)
+v4 (current)
+  - Phrase detection pre-pass (_detect_phrases, _PHRASE_TABLE).
+  - Verb-label boost for retrieval, analytics, and graph-traversal intents.
+  - New IntentCategory values: GRAPH_TRAVERSAL, AGGREGATION.
+  - Expanded intent lexicons for GRAPH_TRAVERSAL and AGGREGATION.
+  - Expanded query expansion table: graph, subgraph, hotspot, degree, rank,
+    aggregate, compute, traverse, extract, call, dependency, import.
+  - DTO detection: removed graph-node/edge suffix from DTO name patterns.
+  - Scoring: _W_PHRASE_MATCH (+7.0), _W_VERB_LABEL_BOOST (+4.0).
+  - Analytics queries: callable-supremacy now fires for STATISTICS and
+    AGGREGATION intents in addition to IMPLEMENTATION_INTENTS.
+  - Retrieval queries: separate retrieval-verb label boost.
+
+v3 (previous)
   - Intent detection + per-intent node-type weighting.
   - Query expansion table for software-engineering vocabulary.
   - DTO / data-container penalty for implementation-oriented queries.
   - Richer reason strings (intent boost, expansion, penalty all logged).
   - IntentCategory enum, QueryIntent dataclass.
 
-v2 (previous)
+v2
   - camelCase expansion before lowercasing.
   - Light suffix stemming (_stem).
   - Snake-case component expansion bonus.
@@ -155,21 +186,23 @@ class IntentCategory(str, Enum):
     These describe *what a developer is asking about* in terms of generic
     software-engineering concerns, not in terms of any specific codebase.
     """
-    PARSING        = "parsing"
-    GENERATION     = "generation"
-    RETRIEVAL      = "retrieval"
-    LOADING        = "loading"
-    SAVING         = "saving"
-    VISUALIZATION  = "visualization"
-    STATISTICS     = "statistics"
-    ANALYSIS       = "analysis"
-    AUTHENTICATION = "authentication"
-    ROUTING        = "routing"
-    VALIDATION     = "validation"
-    EXECUTION      = "execution"
-    CONFIGURATION  = "configuration"
-    TRANSFORMATION = "transformation"
-    UNKNOWN        = "unknown"
+    PARSING          = "parsing"
+    GENERATION       = "generation"
+    RETRIEVAL        = "retrieval"
+    LOADING          = "loading"
+    SAVING           = "saving"
+    VISUALIZATION    = "visualization"
+    STATISTICS       = "statistics"
+    ANALYSIS         = "analysis"
+    AUTHENTICATION   = "authentication"
+    ROUTING          = "routing"
+    VALIDATION       = "validation"
+    EXECUTION        = "execution"
+    CONFIGURATION    = "configuration"
+    TRANSFORMATION   = "transformation"
+    GRAPH_TRAVERSAL  = "graph_traversal"   # v4 NEW: subgraph, walk, traverse
+    AGGREGATION      = "aggregation"       # v4 NEW: count, rank, aggregate, compute
+    UNKNOWN          = "unknown"
 
 
 # ---------------------------------------------------------------------------
@@ -200,9 +233,10 @@ _INTENT_LEXICONS: dict[IntentCategory, frozenset[str]] = {
         "write", "compile",
     }),
     IntentCategory.RETRIEVAL: frozenset({
-        "retriev", "retrieve", "search", "find", "lookup", "look",
-        "fetch", "query", "filter", "select", "get", "load",
-        "resolve", "index", "scan",
+        "retriev", "retrieve", "retrieval", "search", "find", "lookup", "look",
+        "fetch", "query", "filter", "select", "resolve", "index", "scan",
+        # Explicit "get" kept out of stop words context but present here:
+        "getter", "getsource", "getnode",
     }),
     IntentCategory.LOADING: frozenset({
         "load", "import", "read", "open", "ingest", "stream",
@@ -224,7 +258,8 @@ _INTENT_LEXICONS: dict[IntentCategory, frozenset[str]] = {
     IntentCategory.ANALYSIS: frozenset({
         "analys", "analyze", "analyse", "inspect", "detect",
         "identify", "profile", "audit", "check", "scan",
-        "evaluate", "assess",
+        "evaluate", "assess", "dependency", "dependencies",
+        "impact", "blast", "radius",
     }),
     IntentCategory.AUTHENTICATION: frozenset({
         "auth", "authenticat", "login", "signin", "logout", "signout",
@@ -251,6 +286,22 @@ _INTENT_LEXICONS: dict[IntentCategory, frozenset[str]] = {
         "transform", "convert", "map", "translate", "normalize",
         "normalise", "clean", "process", "pipeline", "enrich",
     }),
+    # v4: Graph traversal — questions about walking/extracting the graph itself
+    IntentCategory.GRAPH_TRAVERSAL: frozenset({
+        "subgraph", "traverse", "traversal", "walk", "visit", "hop",
+        "neighbour", "neighbor", "adjacent", "reachable", "path",
+        "chain", "ancestry", "ancestor", "descendant", "connected",
+        "extract", "expand", "explore", "bfs", "dfs", "breadth", "depth",
+        "spanning", "topology", "topological",
+    }),
+    # v4: Aggregation — questions about computing metrics, rankings, summaries
+    IntentCategory.AGGREGATION: frozenset({
+        "aggregat", "aggregate", "count", "rank", "ranking", "ranked",
+        "compute", "calculat", "calculate", "sum", "total", "average",
+        "mean", "median", "top", "bottom", "most", "least",
+        "distribution", "frequency", "histogram", "percentile",
+        "hotspot", "hotspots", "degree", "centrality",
+    }),
 }
 
 # ---------------------------------------------------------------------------
@@ -272,25 +323,94 @@ _IMPLEMENTATION_INTENTS: frozenset[IntentCategory] = frozenset({
     IntentCategory.ROUTING,
     IntentCategory.EXECUTION,
     IntentCategory.TRANSFORMATION,
+    IntentCategory.GRAPH_TRAVERSAL,  # v4: traversal is always an operation
 })
+
+# v4: Intents for which callable-supremacy also fires (extends
+# IMPLEMENTATION_INTENTS to include analytics/aggregation where the
+# "how is X computed" question should surface the computing function,
+# not the result data model).
+_CALLABLE_SUPREMACY_INTENTS: frozenset[IntentCategory] = (
+    _IMPLEMENTATION_INTENTS
+    | frozenset({IntentCategory.STATISTICS, IntentCategory.AGGREGATION})
+)
 
 _INTENT_PREFERRED_TYPES: dict[IntentCategory, frozenset[NodeType]] = {
     # Implementation intents strongly prefer callables and service classes
-    IntentCategory.PARSING:        frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.GENERATION:     frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.RETRIEVAL:      frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.LOADING:        frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.SAVING:         frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.ANALYSIS:       frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.AUTHENTICATION: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.ROUTING:        frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.EXECUTION:      frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.TRANSFORMATION: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    # Data-oriented intents may legitimately return schema / model nodes
-    IntentCategory.STATISTICS:     frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.VALIDATION:     frozenset({NodeType.CLASS, NodeType.METHOD, NodeType.FUNCTION}),
-    IntentCategory.VISUALIZATION:  frozenset({NodeType.FUNCTION, NodeType.METHOD, NodeType.CLASS}),
-    IntentCategory.CONFIGURATION:  frozenset({NodeType.CLASS, NodeType.FUNCTION, NodeType.METHOD}),
+    IntentCategory.PARSING:         frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.GENERATION:      frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.RETRIEVAL:       frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.LOADING:         frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.SAVING:          frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.ANALYSIS:        frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.AUTHENTICATION:  frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.ROUTING:         frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.EXECUTION:       frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.TRANSFORMATION:  frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.GRAPH_TRAVERSAL: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    # Data-oriented intents may legitimately return schema / model nodes,
+    # but callables still score at least as well.
+    IntentCategory.STATISTICS:      frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.AGGREGATION:     frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.VALIDATION:      frozenset({NodeType.CLASS, NodeType.METHOD, NodeType.FUNCTION}),
+    IntentCategory.VISUALIZATION:   frozenset({NodeType.FUNCTION, NodeType.METHOD, NodeType.CLASS}),
+    IntentCategory.CONFIGURATION:   frozenset({NodeType.CLASS, NodeType.FUNCTION, NodeType.METHOD}),
+}
+
+# ---------------------------------------------------------------------------
+# v4: Per-intent verb components for the VERB_LABEL_BOOST signal.
+#
+# When a node's snake_case or camelCase label components include one of
+# these verbs AND the query has the matching intent, the node receives
+# _W_VERB_LABEL_BOOST.  This rewards callables named after what they *do*
+# (e.g. "fetch_candidates", "compute_degree", "extract_subgraph") rather
+# than what data they hold.
+#
+# Design rule: all verb strings must be generic SE verb roots.
+# ---------------------------------------------------------------------------
+
+_INTENT_VERB_COMPONENTS: dict[IntentCategory, frozenset[str]] = {
+    IntentCategory.RETRIEVAL: frozenset({
+        "fetch", "retrieve", "retriev", "find", "search", "lookup",
+        "resolve", "query", "filter", "select", "get",
+    }),
+    IntentCategory.PARSING: frozenset({
+        "parse", "pars", "read", "decode", "extract", "lex",
+        "tokenize", "tokenise", "scan", "load",
+    }),
+    IntentCategory.GENERATION: frozenset({
+        "build", "generate", "generat", "create", "construct",
+        "produce", "render", "emit", "format", "compile",
+    }),
+    IntentCategory.GRAPH_TRAVERSAL: frozenset({
+        "traverse", "walk", "visit", "explore", "expand",
+        "extract", "subgraph", "hop", "reach", "bfs", "dfs",
+    }),
+    IntentCategory.STATISTICS: frozenset({
+        "compute", "calculat", "calculate", "aggregate", "count",
+        "rank", "measure", "summarize", "summarise",
+    }),
+    IntentCategory.AGGREGATION: frozenset({
+        "compute", "calculat", "calculate", "aggregate", "count",
+        "rank", "sum", "total", "average",
+    }),
+    IntentCategory.ANALYSIS: frozenset({
+        "analyze", "analyse", "inspect", "detect", "identify",
+        "evaluate", "assess", "profile",
+    }),
+    IntentCategory.TRANSFORMATION: frozenset({
+        "transform", "convert", "map", "translate", "normalize",
+        "normalise", "clean", "process",
+    }),
+    IntentCategory.LOADING: frozenset({
+        "load", "import", "ingest", "stream", "fetch", "download",
+    }),
+    IntentCategory.SAVING: frozenset({
+        "save", "store", "persist", "export", "dump", "write",
+    }),
+    IntentCategory.EXECUTION: frozenset({
+        "run", "execut", "invoke", "trigger", "dispatch", "launch",
+    }),
 }
 
 
@@ -307,9 +427,163 @@ class QueryIntent:
     is_implementation_query : bool
         True when at least one detected category is in
         _IMPLEMENTATION_INTENTS.  Controls whether the DTO penalty fires.
+    phrase_hints : list[str]
+        Multi-word phrases detected in the raw query (v4 NEW).
+        Stored for reason-string annotation; not used for scoring directly.
     """
-    categories: list[IntentCategory]
+    categories:             list[IntentCategory]
     is_implementation_query: bool
+    phrase_hints:           list[str] = field(default_factory=list)
+
+
+# ===========================================================================
+# v4: Phrase detection
+#
+# Multi-word SE compound concepts that lose meaning when tokenised.
+# The table maps each phrase (lowercase, normalised) to the set of
+# IntentCategories it implies.  During candidate scoring, any node whose
+# label or id contains the concatenated or snake-cased form of the phrase
+# receives _W_PHRASE_MATCH.
+#
+# Design rule: every entry must be a generic code-analysis concept.
+# No repository-specific terms.
+# ===========================================================================
+
+@dataclass(frozen=True)
+class _PhraseEntry:
+    """A recognised multi-word phrase and the intents it implies."""
+    phrase:        str                   # lowercase, space-separated
+    intents:       frozenset[IntentCategory]
+    node_forms:    frozenset[str]        # how this phrase appears in node labels/ids
+
+
+_PHRASE_TABLE: list[_PhraseEntry] = [
+    # Graph structure phrases
+    _PhraseEntry(
+        phrase="call graph",
+        intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.ANALYSIS}),
+        node_forms=frozenset({"call_graph", "callgraph", "call graph"}),
+    ),
+    _PhraseEntry(
+        phrase="import graph",
+        intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.ANALYSIS}),
+        node_forms=frozenset({"import_graph", "importgraph"}),
+    ),
+    _PhraseEntry(
+        phrase="dependency graph",
+        intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.ANALYSIS}),
+        node_forms=frozenset({"dependency_graph", "dependencygraph", "dep_graph"}),
+    ),
+    _PhraseEntry(
+        phrase="inheritance tree",
+        intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.ANALYSIS}),
+        node_forms=frozenset({"inheritance_tree", "inheritancetree", "class_hierarchy"}),
+    ),
+    _PhraseEntry(
+        phrase="subgraph",
+        intents=frozenset({IntentCategory.GRAPH_TRAVERSAL}),
+        node_forms=frozenset({"subgraph", "sub_graph"}),
+    ),
+    _PhraseEntry(
+        phrase="subgraph extracted",
+        intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.RETRIEVAL}),
+        node_forms=frozenset({"extract_subgraph", "subgraph_extract", "get_subgraph",
+                               "build_subgraph", "subgraph"}),
+    ),
+    _PhraseEntry(
+        phrase="import chain",
+        intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.ANALYSIS}),
+        node_forms=frozenset({"import_chain", "importchain", "dependency_chain"}),
+    ),
+    _PhraseEntry(
+        phrase="call chain",
+        intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.ANALYSIS}),
+        node_forms=frozenset({"call_chain", "callchain", "invocation_chain"}),
+    ),
+    _PhraseEntry(
+        phrase="blast radius",
+        intents=frozenset({IntentCategory.ANALYSIS, IntentCategory.GRAPH_TRAVERSAL}),
+        node_forms=frozenset({"blast_radius", "blastradius", "impact_radius"}),
+    ),
+    _PhraseEntry(
+        phrase="impact analysis",
+        intents=frozenset({IntentCategory.ANALYSIS}),
+        node_forms=frozenset({"impact_analysis", "impactanalysis", "change_impact"}),
+    ),
+    # Analytics phrases
+    _PhraseEntry(
+        phrase="node degree",
+        intents=frozenset({IntentCategory.AGGREGATION, IntentCategory.STATISTICS}),
+        node_forms=frozenset({"node_degree", "nodedegree", "degree"}),
+    ),
+    _PhraseEntry(
+        phrase="most connected",
+        intents=frozenset({IntentCategory.AGGREGATION, IntentCategory.STATISTICS}),
+        node_forms=frozenset({"most_connected", "top_connected", "hotspot"}),
+    ),
+    _PhraseEntry(
+        phrase="architectural hotspot",
+        intents=frozenset({IntentCategory.AGGREGATION, IntentCategory.STATISTICS}),
+        node_forms=frozenset({"architectural_hotspot", "hotspot", "architectural_hotspots"}),
+    ),
+    _PhraseEntry(
+        phrase="graph statistics",
+        intents=frozenset({IntentCategory.STATISTICS, IntentCategory.AGGREGATION}),
+        node_forms=frozenset({"graph_statistics", "graphstatistics", "graph_stats",
+                               "compute_statistics", "calculate_statistics"}),
+    ),
+    _PhraseEntry(
+        phrase="top files",
+        intents=frozenset({IntentCategory.AGGREGATION, IntentCategory.STATISTICS}),
+        node_forms=frozenset({"top_files", "files_by_degree", "ranked_files"}),
+    ),
+    # Retrieval phrases
+    _PhraseEntry(
+        phrase="node context",
+        intents=frozenset({IntentCategory.RETRIEVAL, IntentCategory.GRAPH_TRAVERSAL}),
+        node_forms=frozenset({"get_node_context", "node_context", "fetch_context"}),
+    ),
+    _PhraseEntry(
+        phrase="callable context",
+        intents=frozenset({IntentCategory.RETRIEVAL}),
+        node_forms=frozenset({"get_callable_context", "callable_context"}),
+    ),
+    _PhraseEntry(
+        phrase="class context",
+        intents=frozenset({IntentCategory.RETRIEVAL}),
+        node_forms=frozenset({"get_class_context", "class_context"}),
+    ),
+    _PhraseEntry(
+        phrase="llm context",
+        intents=frozenset({IntentCategory.RETRIEVAL, IntentCategory.GENERATION}),
+        node_forms=frozenset({"build_llm_context", "llm_context", "llm_prompt"}),
+    ),
+]
+
+
+def _detect_phrases(question: str) -> list[_PhraseEntry]:
+    """
+    Return all phrase table entries whose phrase appears in *question*.
+
+    The match is case-insensitive.  Tokens in the phrase are checked both
+    with their original spacing and with underscores (so "call graph" also
+    matches "call_graph" in the question text).
+
+    Returns the list of matching PhraseEntry objects.
+    """
+    q_lower = question.lower()
+    # Normalise underscores → spaces for matching
+    q_norm = q_lower.replace("_", " ")
+    matched: list[_PhraseEntry] = []
+    for entry in _PHRASE_TABLE:
+        if entry.phrase in q_norm:
+            matched.append(entry)
+        else:
+            # Also check underscore form
+            phrase_snake = entry.phrase.replace(" ", "_")
+            if phrase_snake in q_lower:
+                matched.append(entry)
+    return matched
 
 
 # ===========================================================================
@@ -339,16 +613,20 @@ _QUERY_EXPANSION: dict[str, list[str]] = {
     "construct":  ["build", "create", "instantiate"],
 
     # ---- Retrieval / search ----
-    "retrieve":   ["search", "fetch", "find", "lookup", "query", "get"],
+    "retrieve":   ["search", "fetch", "find", "lookup", "query"],
     "retriev":    ["search", "fetch", "find", "lookup"],   # stemmed form
+    "retrieval":  ["retrieve", "search", "fetch", "find"],
     "search":     ["find", "retrieve", "lookup", "filter", "query"],
     "find":       ["search", "retrieve", "lookup", "query"],
-    "fetch":      ["retrieve", "get", "load", "download"],
+    "fetch":      ["retrieve", "load", "download"],
     "lookup":     ["find", "search", "retrieve", "resolve"],
     "query":      ["search", "find", "retrieve", "filter"],
+    "resolve":    ["lookup", "find", "fetch", "retrieve"],
 
     # ---- Saving / persisting ----
     "save":       ["store", "write", "persist", "export", "dump"],
+    "saved":      ["save", "store", "persist", "write"],   # past-tense form
+    "sav":        ["save", "store", "persist"],            # stemmed form
     "store":      ["save", "persist", "write", "cache"],
     "persist":    ["save", "store", "write"],
     "write":      ["save", "store", "output", "emit"],
@@ -356,15 +634,32 @@ _QUERY_EXPANSION: dict[str, list[str]] = {
 
     # ---- Traversal / walking ----
     "walk":       ["traverse", "visit", "iterate", "scan", "explore"],
-    "traverse":   ["walk", "visit", "iterate", "explore"],
+    "traverse":   ["walk", "visit", "iterate", "explore", "subgraph"],
+    "traversal":  ["traverse", "walk", "visit", "explore"],
     "visit":      ["walk", "traverse", "iterate"],
     "iterate":    ["walk", "traverse", "loop", "enumerate"],
+    "explore":    ["traverse", "walk", "visit", "expand"],
+    "expand":     ["explore", "traverse", "extend", "grow"],
+    "subgraph":   ["traverse", "extract", "subgraph", "walk", "graph"],
+    "hop":        ["traverse", "walk", "step", "neighbour"],
+    "neighbour":  ["adjacent", "connected", "hop", "neighbor"],
+    "neighbor":   ["adjacent", "connected", "hop", "neighbour"],
+
+    # ---- Graph concepts ----
+    "graph":      ["network", "topology", "structure"],
+    "node":       ["vertex", "element", "symbol"],
+    "edge":       ["link", "connection", "relationship", "arc"],
+    "degree":     ["centrality", "connectivity", "hotspot", "rank"],
+    "hotspot":    ["degree", "hub", "central", "connected"],
+    "dependency": ["import", "require", "depend"],
+    "chain":      ["path", "sequence", "pipeline"],
 
     # ---- Analysis ----
     "analyse":    ["analyze", "inspect", "evaluate", "examine"],
     "analyze":    ["analyse", "inspect", "evaluate", "examine"],
     "inspect":    ["analyse", "analyze", "examine", "check"],
     "evaluate":   ["analyse", "analyze", "assess", "check"],
+    "impact":     ["blast", "radius", "effect", "change"],
 
     # ---- Transformation ----
     "transform":  ["convert", "map", "translate", "process", "normalize"],
@@ -383,11 +678,17 @@ _QUERY_EXPANSION: dict[str, list[str]] = {
     "validat":    ["verify", "check", "sanitize"],   # stemmed form
     "verify":     ["validate", "check", "ensure", "confirm"],
 
-    # ---- Statistics / metrics ----
+    # ---- Statistics / aggregation ----
     "statistics": ["metrics", "analytics", "stats", "summary", "report"],
     "statistic":  ["metric", "analytic", "stat"],   # stemmed form
     "metrics":    ["statistics", "analytics", "stats", "measurements"],
     "analytics":  ["statistics", "metrics", "analysis", "reporting"],
+    "aggregate":  ["count", "sum", "compute", "calculate", "rank"],
+    "aggregat":   ["count", "sum", "compute", "rank"],   # stemmed form
+    "compute":    ["calculate", "aggregate", "rank", "measure"],
+    "calculat":   ["compute", "aggregate", "measure"],   # stemmed form
+    "rank":       ["sort", "order", "top", "degree", "hotspot"],
+    "count":      ["aggregate", "tally", "measure", "total"],
 
     # ---- Repository-level ----
     "repository": ["repo", "codebase", "project", "package"],
@@ -397,6 +698,8 @@ _QUERY_EXPANSION: dict[str, list[str]] = {
     "class":      ["type", "model", "schema", "entity"],
     "function":   ["method", "callable", "procedure", "routine"],
     "method":     ["function", "callable", "procedure"],
+    "callable":   ["function", "method", "routine"],
+    "extract":    ["retrieve", "fetch", "get", "pull", "subgraph"],
 }
 
 
@@ -406,26 +709,40 @@ _QUERY_EXPANSION: dict[str, list[str]] = {
 
 # Name prefixes/suffixes that suggest a DTO / schema / result object.
 # All are generic SE naming conventions (not repo-specific).
+#
+# v4 CHANGE: Removed `(node|edge|vertex|arc)$` from this list.
+# "GraphNode", "GraphEdge" are core domain infrastructure objects, not
+# data containers to be penalised.  The edge-profile signal (Signal 3
+# below) will still catch truly inert DTOs that happen to use those names.
 _DTO_NAME_PATTERNS: list[re.Pattern[str]] = [
-    # Prefix patterns
+    # Prefix patterns — past-participle class names are almost always DTOs.
     re.compile(r"^parsed",     re.IGNORECASE),
+    re.compile(r"^generated",  re.IGNORECASE),
+    re.compile(r"^fetched",    re.IGNORECASE),
+    re.compile(r"^loaded",     re.IGNORECASE),
+    re.compile(r"^saved",      re.IGNORECASE),
+    re.compile(r"^processed",  re.IGNORECASE),
     re.compile(r"^serialized", re.IGNORECASE),
     re.compile(r"^raw",        re.IGNORECASE),
     re.compile(r"^dto",        re.IGNORECASE),
 
     # Suffix patterns  (most common DTO naming conventions across frameworks)
-    re.compile(r"(schema|model|dto|data|record)$",            re.IGNORECASE),
-    re.compile(r"(request|response|reply|payload|body)$",     re.IGNORECASE),
-    re.compile(r"(result|output|summary|report)$",            re.IGNORECASE),
-    re.compile(r"(entity|document|row|item|entry)$",          re.IGNORECASE),
-    re.compile(r"(config|settings|options|params|args)$",     re.IGNORECASE),
-    re.compile(r"(event|message|packet|frame|envelope)$",     re.IGNORECASE),
-    re.compile(r"(node|edge|vertex|arc)$",                    re.IGNORECASE),
-    re.compile(r"(type|types|kind|enum)$",                    re.IGNORECASE),
+    re.compile(r"(schema|dto|record)$",                   re.IGNORECASE),
+    re.compile(r"(request|response|reply|payload|body)$", re.IGNORECASE),
+    re.compile(r"(result|output|summary|report)$",        re.IGNORECASE),
+    re.compile(r"(entity|document|row|item|entry)$",      re.IGNORECASE),
+    re.compile(r"(config|settings|options|params|args)$", re.IGNORECASE),
+    re.compile(r"(event|message|packet|frame|envelope)$", re.IGNORECASE),
+    re.compile(r"(type|types|kind|enum)$",                re.IGNORECASE),
+    # NOTE: "model" is intentionally excluded from the pattern suffix list
+    # because many service/manager classes inherit from BaseModel in
+    # Pydantic-based codebases.  The decorator signal handles Pydantic DTOs.
+    # NOTE: "data" is excluded to prevent false positives on classes like
+    # "DataLoader", "DataPipeline", "DataProcessor" which are implementation
+    # classes, not DTOs.
 ]
 
 # Decorator names that indicate a data-container class.
-# These are framework-agnostic decorator patterns, not hard-coded names.
 _DTO_DECORATOR_FRAGMENTS: frozenset[str] = frozenset({
     "dataclass",    # stdlib
     "basemodel",    # pydantic
@@ -438,6 +755,34 @@ _DTO_DECORATOR_FRAGMENTS: frozenset[str] = frozenset({
     "namedtuple",
 })
 
+# v4: Label fragments that suggest graph *infrastructure* (not DTOs).
+# Nodes whose labels contain these fragments are exempt from DTO penalties
+# because they are domain objects, not passive data containers.
+_GRAPH_INFRA_LABEL_FRAGMENTS: frozenset[str] = frozenset({
+    "graphnode", "graphedge", "repositorygraph",
+    "graph_node", "graph_edge", "repository_graph",
+    # camelCase splits:
+    "graphbuilder", "graph_builder",
+    "nodetype", "node_type",
+    "edgetype", "edge_type",
+    "relationshiptype", "relationship_type",
+})
+
+
+def _is_graph_infrastructure(node: GraphNode) -> bool:
+    """
+    Return True when *node* is a graph infrastructure object that should not
+    be penalised as a DTO, even if its label ends in "Node", "Edge", etc.
+
+    Specifically exempts: GraphNode, GraphEdge, RepositoryGraph, NodeType,
+    RelationshipType, and their snake_case variants.
+    """
+    label_lower = node.label.lower().replace("_", "")
+    for frag in _GRAPH_INFRA_LABEL_FRAGMENTS:
+        if frag.replace("_", "") in label_lower:
+            return True
+    return False
+
 
 def _looks_like_dto(node: GraphNode, graph: RepositoryGraph) -> bool:
     """
@@ -447,18 +792,24 @@ def _looks_like_dto(node: GraphNode, graph: RepositoryGraph) -> bool:
     Detection uses three independent signals; any one is sufficient:
 
     1. **Name pattern** — the node label matches a known DTO naming
-       convention (e.g. ends in "Schema", "Model", "Result", "Request", …).
-    2. **Decorator** — the node's decorators (derived from graph edges that
-       carry decorator metadata) suggest a data-class framework
-       (e.g. @dataclass, @BaseModel, @schema).
+       convention (e.g. ends in "Schema", "Result", "Request", …).
+    2. **Decorator** — the node's decorators (from DECORATES edges) suggest
+       a data-class framework (e.g. @dataclass, @BaseModel, @schema).
     3. **Edge profile** — a CLASS node whose only outgoing edge type is
        CONTAINS and whose only incoming edge types are CONTAINS / IMPORTS
-       is almost certainly a plain data container (it is never called or
-       instantiated by anything in the graph).
+       is almost certainly a plain data container.
 
-    All three signals are generic; none reference project-specific names.
+    v4: Graph infrastructure nodes are explicitly exempt (Signal 0).
+
+    All signals are generic; none reference project-specific names.
     """
     if node.type not in (NodeType.CLASS, NodeType.FUNCTION, NodeType.METHOD):
+        return False
+
+    # ------------------------------------------------------------------
+    # Signal 0 (v4 NEW): graph infrastructure exemption
+    # ------------------------------------------------------------------
+    if _is_graph_infrastructure(node):
         return False
 
     label = node.label
@@ -479,8 +830,7 @@ def _looks_like_dto(node: GraphNode, graph: RepositoryGraph) -> bool:
             and edge.target == node.id
             and edge.decorator_name
         ):
-            dec_lower = edge.decorator_name.lower().split(".")[-1]  # "router.get" → "get"
-            # Check if any fragment of the decorator name matches a DTO decorator
+            dec_lower = edge.decorator_name.lower().split(".")[-1]
             for frag in _DTO_DECORATOR_FRAGMENTS:
                 if frag in dec_lower:
                     return True
@@ -521,25 +871,26 @@ _W_EXACT_LABEL:      float = 10.0
 _W_EXACT_ID:         float = 8.0
 _W_PARTIAL_LABEL:    float = 4.0
 _W_PARTIAL_ID:       float = 2.0
-_W_NODE_TYPE_BASE:   float = 3.0   # generic code-node boost (CLASS/FN/METHOD)
-_W_HOTSPOT:          float = 1.0   # per edge
+_W_NODE_TYPE_BASE:   float = 3.0    # generic code-node boost (CLASS/FN/METHOD)
+_W_HOTSPOT:          float = 1.0    # per edge
 _W_HOTSPOT_CAP:      float = 5.0
-_W_SNAKE:            float = 3.0   # snake_case component match
-_W_INTENT_TYPE:      float = 6.0   # node type matches intent's preferred types
-_W_CALLABLE_BOOST:   float = 5.0   # extra boost for METHOD/FUNCTION in impl queries
-_W_DTO_PENALTY:      float = -15.0 # node looks like a data container
+_W_SNAKE:            float = 3.0    # snake_case component match
+_W_INTENT_TYPE:      float = 6.0    # node type matches intent's preferred types
+_W_CALLABLE_BOOST:   float = 5.0    # extra boost for METHOD/FUNCTION in impl queries
+_W_DTO_PENALTY:      float = -15.0  # node looks like a data container
+_W_PHRASE_MATCH:     float = 7.0    # v4: node label/id matches a recognised phrase
+_W_VERB_LABEL_BOOST: float = 4.0    # v4: node label verb component matches intent
 
 # Why these values?
 # -----------------
-# A DTO node can accumulate up to ~16 pts from keyword hits alone (e.g. a
-# name like "ParsedRecord" matches "parsed", "record", "pars", "records"
-# each at +4 partial-label = +16) before any boost/penalty.  An equivalent
-# METHOD node ("parse_record") accumulates comparable keyword points BUT
-# also earns _W_CALLABLE_BOOST (+5) on top.  The penalty of −15 guarantees
-# that even a maximum-match DTO (16 + 3 base + 6 intent = +25) falls below
-# a minimum-match callable (+keyword_score + 3 + 6 + 5 = keyword_score+14).
-# For the penalty NOT to fire on non-implementation queries, it is gated on
-# intent.is_implementation_query.
+# A DTO node can accumulate up to ~16 pts from keyword hits alone before any
+# boost/penalty.  The callable-supremacy (+5) + verb-label-boost (+4) ensures
+# that an implementation callable with the same keyword score outranks by ≥9.
+# The DTO penalty (−15) guarantees that even a maximum-match DTO falls below a
+# minimum-match callable.
+# Phrase match (+7) is higher than a partial-label hit (+4) but lower than an
+# exact-label hit (+10), reflecting that phrase containment is stronger than
+# substring matching but the node may not be the primary implementation site.
 
 _CODE_NODE_TYPES: frozenset[NodeType] = frozenset({
     NodeType.CLASS,
@@ -586,11 +937,11 @@ class QueryResolutionResult:
 
     Fields
     ------
-    query    : str                — original question
-    keywords : list[str]          — base keywords extracted from the query
-    expanded_keywords : list[str] — all keywords after synonym expansion
-    intent   : QueryIntent        — detected intent(s)
-    matches  : list[QueryMatch]   — top-K candidates, sorted by score descending
+    query             : str                — original question
+    keywords          : list[str]          — base keywords extracted
+    expanded_keywords : list[str]          — all keywords after synonym expansion
+    intent            : QueryIntent        — detected intent(s)
+    matches           : list[QueryMatch]   — top-K candidates, sorted by score desc
     """
     query:             str
     keywords:          list[str]
@@ -621,18 +972,27 @@ class QueryResolver:
     """
     Converts a natural-language question into a ranked list of graph nodes.
 
-    v3 improvements over v2
+    v4 improvements over v3
     -----------------------
-    1. **Intent detection** — classifies the query (parsing, generation,
-       retrieval, …) and adjusts which node types are preferred.
-    2. **Query expansion** — adds SE-domain synonyms so that, e.g., "parse"
-       also matches nodes containing "read", "decode", "extract", etc.
-    3. **DTO penalty** — nodes that look like data containers receive a
-       negative score adjustment for implementation-oriented queries, so that
-       `parse_file` outranks `ParsedFile` when the question is "How are files
-       parsed?".
-    4. **Richer reason strings** — every scoring signal (including expansion
-       hits, intent boosts, and penalties) is reflected in the reason field.
+    1. **Phrase detection** — a pre-pass identifies multi-word SE compound
+       concepts (e.g. "subgraph extracted", "call graph", "node degree")
+       before tokenisation.  Nodes whose labels match these phrases receive
+       a dedicated phrase-match boost that outranks pure substring hits.
+    2. **Verb-label boost** — callables whose snake_case/camelCase label
+       contains an action-verb component matching the detected intent receive
+       _W_VERB_LABEL_BOOST, directly addressing the reported weakness where
+       retrieval and analytics queries surface data classes over callables.
+    3. **GRAPH_TRAVERSAL intent** — traversal questions ("how is the subgraph
+       extracted?") now have their own intent category with dedicated lexicon,
+       preferred types, and verb components.
+    4. **AGGREGATION intent** — analytics computation questions ("how is the
+       hotspot score calculated?") separate from broad STATISTICS matches.
+    5. **Graph infrastructure exemption** — GraphNode, GraphEdge, and similar
+       core domain objects are exempt from the DTO penalty.
+    6. **Callable-supremacy extended** — now fires for STATISTICS and
+       AGGREGATION in addition to the implementation intents.
+    7. **Tighter DTO patterns** — removed node/edge/vertex/arc suffix
+       patterns which caused false positives on infrastructure classes.
 
     Parameters
     ----------
@@ -644,7 +1004,7 @@ class QueryResolver:
     ::
 
         resolver = QueryResolver(graph)
-        result   = resolver.resolve_query("How are files parsed?")
+        result   = resolver.resolve_query("How is the subgraph extracted?")
         for m in result.matches:
             print(m.node_id, m.score, m.reason)
     """
@@ -672,6 +1032,17 @@ class QueryResolver:
             for node_id, node in self._nodes.items()
         }
 
+        # Pre-compute label components for every node — used by verb-label
+        # boost.  Combines snake_case parts and camelCase splits.
+        self._label_parts: dict[str, frozenset[str]] = {}
+        for node_id, node in self._nodes.items():
+            parts: set[str] = set()
+            parts.update(_snake_parts(node.label))
+            parts.update(_split_camel_case(node.label))
+            # Also include the full lowercased label
+            parts.add(node.label.lower())
+            self._label_parts[node_id] = frozenset(parts)
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -691,10 +1062,10 @@ class QueryResolver:
         """
         k = top_k if top_k is not None else self._default_top_k
 
-        base_keywords    = self.extract_keywords(question)
-        intent           = self.detect_intent(base_keywords)
-        expanded_kws     = self.expand_keywords(base_keywords)
-        matches          = self.rank_candidates(question, expanded_kws, intent)[:k]
+        base_keywords = self.extract_keywords(question)
+        intent        = self.detect_intent(base_keywords, question)
+        expanded_kws  = self.expand_keywords(base_keywords)
+        matches       = self.rank_candidates(question, expanded_kws, intent)[:k]
 
         return QueryResolutionResult(
             query=question,
@@ -705,15 +1076,15 @@ class QueryResolver:
         )
 
     # ------------------------------------------------------------------
-    # Step 1 — keyword extraction  (identical pipeline to v2)
+    # Step 1 — keyword extraction  (identical pipeline to v2/v3)
     # ------------------------------------------------------------------
 
     def extract_keywords(self, question: str) -> list[str]:
         """
         Extract meaningful tokens from a natural-language question.
 
-        Pipeline (same as v2)
-        ---------------------
+        Pipeline
+        --------
         1. Split on whitespace (preserving original casing).
         2. Per token:
            a. camelCase / PascalCase split BEFORE lowercasing.
@@ -763,30 +1134,36 @@ class QueryResolver:
         return keywords
 
     # ------------------------------------------------------------------
-    # Step 2 — intent detection
+    # Step 2 — intent detection  (v4: also takes raw question for phrases)
     # ------------------------------------------------------------------
 
-    def detect_intent(self, keywords: list[str]) -> QueryIntent:
+    def detect_intent(
+        self,
+        keywords: list[str],
+        question: str = "",
+    ) -> QueryIntent:
         """
         Classify the query into one or more IntentCategory values.
 
         Strategy
         --------
-        For every keyword (and its stemmed form), count how many intent
-        lexicons it appears in.  Return all categories that received at
-        least one hit, ordered by hit count descending.
+        1. For every keyword (and its stemmed form), count lexicon hits.
+        2. (v4) Run phrase detection on the raw question; each matched
+           phrase's implied intents receive bonus hits proportional to
+           phrase specificity (2 × the phrase word count).
+        3. Return all categories that received at least one hit, ordered
+           by hit count descending.
 
-        The detection is vocabulary-driven and repository-agnostic: it
-        relies only on generic SE terms, never on project-specific names.
+        The detection is vocabulary-driven and repository-agnostic.
 
         Returns
         -------
-        QueryIntent with categories and is_implementation_query flag.
+        QueryIntent with categories, is_implementation_query flag, and
+        phrase_hints (v4 NEW).
         """
         category_scores: dict[IntentCategory, int] = defaultdict(int)
 
         kw_set = set(keywords)
-        # Also include stemmed forms of the keywords
         for kw in list(kw_set):
             s = _stem(kw)
             if s:
@@ -797,10 +1174,20 @@ class QueryResolver:
             if hits > 0:
                 category_scores[category] += hits
 
+        # v4: phrase-based intent boosting
+        phrase_matches = _detect_phrases(question) if question else []
+        phrase_hints: list[str] = []
+        for entry in phrase_matches:
+            phrase_hints.append(entry.phrase)
+            bonus = max(2, len(entry.phrase.split()))  # longer phrase → higher bonus
+            for cat in entry.intents:
+                category_scores[cat] += bonus
+
         if not category_scores:
             return QueryIntent(
                 categories=[IntentCategory.UNKNOWN],
                 is_implementation_query=False,
+                phrase_hints=phrase_hints,
             )
 
         sorted_cats = sorted(
@@ -810,7 +1197,11 @@ class QueryResolver:
 
         is_impl = any(c in _IMPLEMENTATION_INTENTS for c in sorted_cats)
 
-        return QueryIntent(categories=sorted_cats, is_implementation_query=is_impl)
+        return QueryIntent(
+            categories=sorted_cats,
+            is_implementation_query=is_impl,
+            phrase_hints=phrase_hints,
+        )
 
     # ------------------------------------------------------------------
     # Step 3 — query expansion
@@ -822,9 +1213,7 @@ class QueryResolver:
 
         For each keyword (and its stemmed form) that appears in the
         expansion table, add the mapped synonyms to the keyword list.
-        Synonyms are added at a lower priority than original keywords
-        (they are appended, not prepended) to avoid swamping exact
-        matches.
+        Synonyms are appended (lower priority than originals).
 
         Returns
         -------
@@ -841,7 +1230,6 @@ class QueryResolver:
         for kw in base_keywords:
             for expanded in _QUERY_EXPANSION.get(kw, []):
                 _try_add(expanded)
-            # Also try stemmed form of keyword
             s = _stem(kw)
             if s:
                 for expanded in _QUERY_EXPANSION.get(s, []):
@@ -874,24 +1262,22 @@ class QueryResolver:
 
         Per node (once, independent of keyword count):
           + 3.0  base code-node type boost (CLASS / FUNCTION / METHOD)
-          + 6.0  intent-type boost — node type matches the detected intent's
-                 preferred types
-          + 5.0  callable-supremacy boost — METHOD / FUNCTION in an
-                 implementation query (v3.1 NEW)
-          + 0–5  hotspot boost — proportional to node degree
-          −15.0  DTO penalty — node looks like a data container AND the query
-                 intent is implementation-oriented (v3.1: increased from −8)
-
-        Every signal that fires is appended to the node's reason string.
+          + 6.0  intent-type boost
+          + 5.0  callable-supremacy boost (METHOD / FUNCTION in impl or
+                 analytics queries)
+          + 0–5  hotspot boost (proportional to node degree)
+          + 7.0  phrase-match boost (v4 NEW)
+          + 4.0  verb-label boost (v4 NEW)
+          −15.0  DTO penalty
         """
         if keywords is None:
             base_kws = self.extract_keywords(question)
-            intent   = self.detect_intent(base_kws)
+            intent   = self.detect_intent(base_kws, question)
             keywords = self.expand_keywords(base_kws)
 
         if intent is None:
             base_kws = self.extract_keywords(question)
-            intent   = self.detect_intent(base_kws)
+            intent   = self.detect_intent(base_kws, question)
 
         if not keywords:
             return []
@@ -899,11 +1285,6 @@ class QueryResolver:
         scores:  dict[str, float]      = defaultdict(float)
         reasons: dict[str, list[str]]  = defaultdict(list)
 
-        # Identify which keywords are "expanded" (not in base set) for
-        # reporting purposes.  We track the original base set via a simple
-        # heuristic: the first len(base_kws) entries.
-        # Since we always pass expanded_keywords here, mark the boundary.
-        # (We re-extract base keywords only to annotate reason strings.)
         base_kws_set: set[str] = set(self.extract_keywords(question))
 
         # Pre-compute snake parts cache
@@ -918,6 +1299,16 @@ class QueryResolver:
         if intent.categories and intent.categories[0] != IntentCategory.UNKNOWN:
             primary_intent = intent.categories[0]
             preferred_types = _INTENT_PREFERRED_TYPES.get(primary_intent, frozenset())
+
+        # v4: collect phrase entries matched in this question
+        phrase_matches = _detect_phrases(question)
+
+        # v4: collect all intent verb sets for the detected categories
+        active_verb_sets: list[frozenset[str]] = []
+        for cat in intent.categories:
+            vset = _INTENT_VERB_COMPONENTS.get(cat)
+            if vset:
+                active_verb_sets.append(vset)
 
         # ----------------------------------------------------------------
         # First pass: keyword-driven signals
@@ -942,16 +1333,22 @@ class QueryResolver:
                 else:
                     if kw_lower in label_lower:
                         scores[node_id] += _W_PARTIAL_LABEL
-                        reasons[node_id].append(f"partial label {kw_tag} +{_W_PARTIAL_LABEL:.0f}")
+                        reasons[node_id].append(
+                            f"partial label {kw_tag} +{_W_PARTIAL_LABEL:.0f}"
+                        )
 
                     if kw_lower in id_lower:
                         scores[node_id] += _W_PARTIAL_ID
-                        reasons[node_id].append(f"partial id {kw_tag} +{_W_PARTIAL_ID:.0f}")
+                        reasons[node_id].append(
+                            f"partial id {kw_tag} +{_W_PARTIAL_ID:.0f}"
+                        )
 
                     parts = snake_parts_cache.get(node_id, [])
                     if kw_lower in parts:
                         scores[node_id] += _W_SNAKE
-                        reasons[node_id].append(f"snake component {kw_tag} +{_W_SNAKE:.0f}")
+                        reasons[node_id].append(
+                            f"snake component {kw_tag} +{_W_SNAKE:.0f}"
+                        )
 
         # ----------------------------------------------------------------
         # Second pass: per-node boosts and penalties
@@ -979,21 +1376,45 @@ class QueryResolver:
                     f"intent={intent_label} prefers {node.type.value} +{_W_INTENT_TYPE:.0f}"
                 )
 
-            # Callable supremacy boost — METHOD and FUNCTION nodes receive an
-            # additional boost over CLASS nodes for implementation queries.
-            # Rationale: when a user asks "how does X work?", the answer is
-            # almost always a function or method, not a class definition.
-            # This bonus is intentionally larger than a single partial-label
-            # hit so that an implementation callable always outranks a DTO
-            # class that matched the same keyword set.
+            # Callable supremacy boost (v4: extended to STATISTICS + AGGREGATION)
             if (
-                intent.is_implementation_query
+                any(c in _CALLABLE_SUPREMACY_INTENTS for c in intent.categories)
                 and node.type in (NodeType.METHOD, NodeType.FUNCTION)
             ):
                 scores[node_id] += _W_CALLABLE_BOOST
                 reasons[node_id].append(
                     f"callable-supremacy {node.type.value} +{_W_CALLABLE_BOOST:.0f}"
                 )
+
+            # v4: Verb-label boost — reward callables whose label contains a
+            # verb component that aligns with the active intent(s).
+            if node.type in (NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS):
+                node_label_parts = self._label_parts.get(node_id, frozenset())
+                for verb_set in active_verb_sets:
+                    if node_label_parts & verb_set:
+                        matching_verbs = sorted(node_label_parts & verb_set)
+                        scores[node_id] += _W_VERB_LABEL_BOOST
+                        reasons[node_id].append(
+                            f"verb-label {matching_verbs} intent={intent_label}"
+                            f" +{_W_VERB_LABEL_BOOST:.0f}"
+                        )
+                        break  # one verb-label boost per node maximum
+
+            # v4: Phrase-match boost — reward nodes whose label/id contains
+            # a recognised phrase from the query.
+            if phrase_matches:
+                label_lower = node.label.lower()
+                id_lower    = node.id.lower()
+                for entry in phrase_matches:
+                    for form in entry.node_forms:
+                        form_lower = form.lower()
+                        if form_lower in label_lower or form_lower in id_lower:
+                            scores[node_id] += _W_PHRASE_MATCH
+                            reasons[node_id].append(
+                                f"phrase-match '{entry.phrase}' ({form})"
+                                f" +{_W_PHRASE_MATCH:.0f}"
+                            )
+                            break  # one phrase-match boost per phrase per node
 
             # Hotspot boost
             degree = self._degree.get(node_id, 0)
