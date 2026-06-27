@@ -33,6 +33,7 @@ from app.rag.graphrag_engine import (
     AnthropicLLMProvider,
     CallableLLMProvider,
     EchoLLMProvider,
+    GeminiLLMProvider,
     GraphRAGEngine,
     GraphRAGPromptBuilder,
     GraphRAGResponse,
@@ -376,6 +377,48 @@ class TestLLMProviderImplementations:
         assert result == "anthropic answer"
         assert fake_client.messages.last_kwargs["model"] == "some-model-id"
         assert fake_client.messages.last_kwargs["system"] == "sys"
+
+    def test_gemini_provider_defaults_to_model(self):
+        provider = GeminiLLMProvider(api_key="fake-key")
+        assert provider._model == "gemini-2.5-flash"
+
+    def test_gemini_provider_requires_api_key(self, monkeypatch):
+        # Ensure environment does not have GOOGLE_API_KEY
+        monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+        provider = GeminiLLMProvider()
+        with pytest.raises(ValueError) as excinfo:
+            provider.generate(system_prompt="sys", user_prompt="usr")
+        assert "GeminiLLMProvider requires the GOOGLE_API_KEY environment variable" in str(excinfo.value)
+
+    def test_gemini_provider_uses_injected_client(self):
+        class FakeResponse:
+            text = "gemini answer"
+
+        class FakeModels:
+            def __init__(self):
+                self.last_kwargs = None
+
+            def generate_content(self, **kwargs):
+                self.last_kwargs = kwargs
+                return FakeResponse()
+
+        class FakeClient:
+            def __init__(self):
+                self.models = FakeModels()
+
+        fake_client = FakeClient()
+        provider = GeminiLLMProvider(model="gemini-custom", client=fake_client)
+
+        result = provider.generate(system_prompt="sys", user_prompt="usr")
+
+        assert result == "gemini answer"
+        assert fake_client.models.last_kwargs["model"] == "gemini-custom"
+        assert fake_client.models.last_kwargs["contents"] == "usr"
+        
+        # Verify system_instruction is passed via config
+        config = fake_client.models.last_kwargs["config"]
+        assert config is not None
+        assert config.system_instruction == "sys"
 
 
 # ===========================================================================

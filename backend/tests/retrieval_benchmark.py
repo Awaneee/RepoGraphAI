@@ -1,14 +1,13 @@
-
 import os
 import sys
 from collections import defaultdict
 
-# Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+# Add the backend directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from backend.app.parsers.code_parser import CodeParser
-from backend.app.graph.graph_builder import GraphBuilder
-from backend.app.rag.context_builder import build_context_builder
+from app.parsers.code_parser import CodeParser
+from app.graph.graph_builder import GraphBuilder
+from app.rag.context_builder import build_context_builder
 
 # --- Configuration --- #
 # Path to the repository to benchmark against (assuming current project for now)
@@ -55,17 +54,17 @@ class RetrievalBenchmark:
             {
                 "category": "Graph Construction",
                 "question": "How are graph nodes created?",
-                "expected_symbol": "GraphBuilder._add_node"
+                "expected_symbol": "GraphBuilder.build_graph"  # _add_node is nested inside build_graph, not a standalone node
             },
             {
                 "category": "Graph Construction",
                 "question": "How are graph edges created?",
-                "expected_symbol": "GraphBuilder._add_edge"
+                "expected_symbol": "GraphBuilder.build_graph"  # _add_edge is nested inside build_graph, not a standalone node
             },
             {
                 "category": "Graph Construction",
                 "question": "How is inheritance represented?",
-                "expected_symbol": "GraphBuilder.build_graph"
+                "expected_symbol": "GraphBuilder.build_class_graph"  # build_class_graph specifically models inheritance
             },
             {
                 "category": "Analytics",

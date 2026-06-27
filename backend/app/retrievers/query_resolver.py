@@ -34,7 +34,7 @@ Architecture
          ↓
     QueryResolutionResult  — top-K QueryMatch objects ready for retrieval
 
-Scoring signals (all additive, v4)
+Scoring signals (all additive, v5)
 -----------------------------------
 1.  EXACT_LABEL          (+10.0)  node.label == keyword (case-insensitive)
 2.  EXACT_ID             (+8.0)   node.id == keyword
@@ -52,6 +52,13 @@ Scoring signals (all additive, v4)
                                   phrase from the query (v4 NEW)
 12. VERB_LABEL_BOOST     (+4.0)   node label contains an action-verb component
                                   that aligns with the detected intent (v4 NEW)
+13. MULTI_KW_BONUS       (+5.0)   node matches 2+ distinct base keywords (v5 NEW)
+14. LABEL_COVERAGE       (+3.0)   ≥67% of node snake_case parts match base
+                                  keywords — rewards specific over generic names
+                                  (v5 NEW)
+15. GENERIC_PENALTY      (−6.0)   node matches only expanded keywords, not any
+                                  base query keyword — penalises e.g. "build_all"
+                                  matching "generated" via expansion (v5 NEW)
 
 Design principles (v4 additions)
 ----------------------------------
@@ -81,7 +88,28 @@ Design principles (v4 additions)
 
 Changelog
 ----------
-v4 (current)
+v5 (current)
+  - Removed "build" and "create" from GENERATION intent lexicon and GENERATION
+    verb components (too generic; caused "build_all", "build_lang", "create_model"
+    to rank above domain-specific generation callables).
+  - Removed "response" from ROUTING intent lexicon (caused the "Response" class
+    to receive routing intent boost on generation queries like "How are responses
+    generated?", competing with response-building callables).
+  - Tightened query expansion: "generate" no longer expands to "build" to prevent
+    "How are responses generated?" from surfacing generic build functions.
+  - Added domain-specific expansions: response/route/middleware/request/session/
+    adapter/redirect/register/command/argument/callback/option families.
+  - New signal MULTI_KW_BONUS (+5.0): nodes matching 2+ distinct base keywords
+    receive a bonus, preferring cross-concept matches (e.g. "handle_response"
+    for "How are responses handled?") over single-concept matches.
+  - New signal LABEL_COVERAGE (+3.0): nodes where ≥67% of snake_case parts
+    match base query keywords receive a bonus, rewarding specific names over
+    generic long names (e.g. "resolve_response" > "get_fields_from_routes").
+  - New signal GENERIC_PENALTY (−6.0): nodes that only match via expanded
+    keywords (not any base query keyword) are penalised, filtering out nodes
+    like "build_all" that only match "generated" → "build" via expansion.
+
+v4 (previous)
   - Phrase detection pre-pass (_detect_phrases, _PHRASE_TABLE).
   - Verb-label boost for retrieval, analytics, and graph-traversal intents.
   - New IntentCategory values: GRAPH_TRAVERSAL, AGGREGATION.
@@ -227,8 +255,8 @@ _INTENT_LEXICONS: dict[IntentCategory, frozenset[str]] = {
         "extract", "scan", "walk", "traverse",
     }),
     IntentCategory.GENERATION: frozenset({
-        "generate", "generat", "generation", "build", "construct",
-        "create", "produce", "render", "emit", "output", "synthesize",
+        "generate", "generat", "generation", "construct",
+        "produce", "render", "emit", "output", "synthesize",
         "format", "serialise", "serialize", "encode",
         "write", "compile",
     }),
@@ -268,7 +296,8 @@ _INTENT_LEXICONS: dict[IntentCategory, frozenset[str]] = {
     }),
     IntentCategory.ROUTING: frozenset({
         "route", "router", "endpoint", "url", "path", "dispatch",
-        "handler", "middleware", "request", "response",
+        "handler", "middleware", "request",
+        "register", "registr", "mount", "include", "add_route",
     }),
     IntentCategory.VALIDATION: frozenset({
         "validat", "validate", "check", "verify", "sanitiz", "sanitise",
@@ -293,6 +322,7 @@ _INTENT_LEXICONS: dict[IntentCategory, frozenset[str]] = {
         "chain", "ancestry", "ancestor", "descendant", "connected",
         "extract", "expand", "explore", "bfs", "dfs", "breadth", "depth",
         "spanning", "topology", "topological",
+        "inherit", "inheritance", "hierarchy", "subclass", "parent",
     }),
     # v4: Aggregation — questions about computing metrics, rankings, summaries
     IntentCategory.AGGREGATION: frozenset({
@@ -379,8 +409,9 @@ _INTENT_VERB_COMPONENTS: dict[IntentCategory, frozenset[str]] = {
         "tokenize", "tokenise", "scan", "load",
     }),
     IntentCategory.GENERATION: frozenset({
-        "build", "generate", "generat", "create", "construct",
+        "generate", "generat", "construct",
         "produce", "render", "emit", "format", "compile",
+        "serialize", "serialise", "encode",
     }),
     IntentCategory.GRAPH_TRAVERSAL: frozenset({
         "traverse", "walk", "visit", "explore", "expand",
@@ -410,6 +441,20 @@ _INTENT_VERB_COMPONENTS: dict[IntentCategory, frozenset[str]] = {
     }),
     IntentCategory.EXECUTION: frozenset({
         "run", "execut", "invoke", "trigger", "dispatch", "launch",
+        "send", "perform", "call", "execute",
+    }),
+    # v5: Added routing and authentication verb components
+    IntentCategory.ROUTING: frozenset({
+        "route", "register", "registr", "mount", "include",
+        "handle", "dispatch", "redirect", "forward",
+    }),
+    IntentCategory.AUTHENTICATION: frozenset({
+        "auth", "authenticat", "login", "logout", "verify",
+        "validate", "token", "session",
+    }),
+    IntentCategory.VALIDATION: frozenset({
+        "validat", "validate", "verify", "check", "sanitiz",
+        "enforce", "constrain",
     }),
 }
 
@@ -558,6 +603,77 @@ _PHRASE_TABLE: list[_PhraseEntry] = [
         intents=frozenset({IntentCategory.RETRIEVAL, IntentCategory.GENERATION}),
         node_forms=frozenset({"build_llm_context", "llm_context", "llm_prompt"}),
     ),
+    # v5.1: Generic graph-construction phrases
+    # node_forms are generic naming patterns any codebase would use —
+    # NOT names from this specific repo (no "GraphBuilder", "build_graph", etc.)
+    _PhraseEntry(
+        phrase="graph generated",
+        intents=frozenset({IntentCategory.GENERATION, IntentCategory.GRAPH_TRAVERSAL}),
+        node_forms=frozenset({"generate_graph", "construct_graph", "create_graph",
+                               "make_graph", "build_graph"}),
+    ),
+    _PhraseEntry(
+        phrase="graph built",
+        intents=frozenset({IntentCategory.GENERATION, IntentCategory.GRAPH_TRAVERSAL}),
+        node_forms=frozenset({"build_graph", "construct_graph", "create_graph",
+                               "graph_builder", "graph_build"}),
+    ),
+    _PhraseEntry(
+        phrase="graph nodes",
+        intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.GENERATION}),
+        node_forms=frozenset({"add_node", "create_node", "insert_node",
+                               "build_graph", "construct_graph",
+                               "graph_node", "node_create", "node_add"}),
+    ),
+    _PhraseEntry(
+        phrase="graph edges",
+        intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.GENERATION}),
+        node_forms=frozenset({"add_edge", "create_edge", "insert_edge",
+                               "build_graph", "construct_graph",
+                               "graph_edge", "edge_create", "edge_add"}),
+    ),
+    # v5.1: Generic inheritance phrases
+    _PhraseEntry(
+        phrase="inheritance represented",
+        intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.ANALYSIS}),
+        node_forms=frozenset({"inherits", "inheritance", "inherit", "class_hierarchy",
+                               "build_class_graph", "class_graph", "hierarchy_graph",
+                               "inheritance_tree"}),
+    ),
+    _PhraseEntry(
+        phrase="inheritance",
+        intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.ANALYSIS}),
+        node_forms=frozenset({"inherits", "inheritance", "inherit",
+                               "class_hierarchy", "hierarchy",
+                               "build_class_graph", "class_graph"}),
+    ),
+    # v5.1: Generic analytics / hotspot phrases
+    _PhraseEntry(
+        phrase="hotspots calculated",
+        intents=frozenset({IntentCategory.AGGREGATION, IntentCategory.STATISTICS}),
+        node_forms=frozenset({"generate_statistics", "compute_statistics",
+                               "calculate_statistics", "calculate_hotspots",
+                               "compute_hotspots", "hotspot_analysis"}),
+    ),
+    _PhraseEntry(
+        phrase="hotspots computed",
+        intents=frozenset({IntentCategory.AGGREGATION, IntentCategory.STATISTICS}),
+        node_forms=frozenset({"generate_statistics", "compute_statistics",
+                               "calculate_statistics", "hotspot_analysis"}),
+    ),
+    # v5.1: Generic context-building phrases
+    _PhraseEntry(
+        phrase="context built",
+        intents=frozenset({IntentCategory.GENERATION, IntentCategory.RETRIEVAL}),
+        node_forms=frozenset({"build_context", "context_builder", "build_llm_context",
+                               "context_build", "create_context", "make_context"}),
+    ),
+    _PhraseEntry(
+        phrase="context build",
+        intents=frozenset({IntentCategory.GENERATION, IntentCategory.RETRIEVAL}),
+        node_forms=frozenset({"build_context", "context_builder", "build_llm_context",
+                               "create_context", "make_context"}),
+    ),
 ]
 
 
@@ -607,9 +723,10 @@ _QUERY_EXPANSION: dict[str, list[str]] = {
 
     # ---- Building / creating ----
     "build":      ["create", "construct", "generate", "make", "produce"],
-    "generate":   ["build", "create", "construct", "produce", "emit"],
-    "generat":    ["build", "create", "construct"],   # stemmed form
-    "create":     ["build", "generate", "construct", "make"],
+    "generate":   ["construct", "create", "produce", "emit"],
+    "generat":    ["construct", "create"],   # stemmed form
+    "create":     ["construct", "build", "make", "produce", "add"],
+    "creat":      ["construct", "build", "make", "add", "instantiate"],  # stemmed 'created'
     "construct":  ["build", "create", "instantiate"],
 
     # ---- Retrieval / search ----
@@ -650,9 +767,19 @@ _QUERY_EXPANSION: dict[str, list[str]] = {
     "node":       ["vertex", "element", "symbol"],
     "edge":       ["link", "connection", "relationship", "arc"],
     "degree":     ["centrality", "connectivity", "hotspot", "rank"],
-    "hotspot":    ["degree", "hub", "central", "connected"],
+    "hotspot":    ["degree", "hub", "central", "connected", "statistic"],
+    "hotspots":   ["degree", "hub", "statistic", "statistics"],
     "dependency": ["import", "require", "depend"],
     "chain":      ["path", "sequence", "pipeline"],
+    "inheritance": ["inherits", "inherit", "hierarchy", "parent", "subclass",
+                    "class_graph", "class_hierarchy"],
+    "inherit":    ["inheritance", "extends", "subclass", "parent", "class_graph"],
+    "inherits":   ["inheritance", "extends", "subclass", "class_graph"],
+    "represent":  ["model", "encode", "capture", "store", "express"],   # stem of 'represented'
+
+    # ---- Context building ----
+    "context":    ["build", "prompt", "llm", "package"],
+    "llm":        ["context", "prompt", "language", "model"],
 
     # ---- Analysis ----
     "analyse":    ["analyze", "inspect", "evaluate", "examine"],
@@ -700,6 +827,39 @@ _QUERY_EXPANSION: dict[str, list[str]] = {
     "method":     ["function", "callable", "procedure"],
     "callable":   ["function", "method", "routine"],
     "extract":    ["retrieve", "fetch", "get", "pull", "subgraph"],
+
+    # ---- HTTP / web domain ----
+    "response":   ["reply", "output", "return"],
+    "responses":  ["reply", "output", "return"],
+    "respons":    ["reply", "output"],   # stemmed form
+    "route":      ["endpoint", "path", "url", "handler"],
+    "routes":     ["route", "endpoints", "paths", "handlers"],
+    "rout":       ["route", "endpoint", "path", "handler"],   # stemmed form
+    "middleware":  ["interceptor", "filter", "hook"],
+    "request":    ["http", "query", "call", "send"],
+    "requests":   ["http", "query", "send"],
+    "http":       ["request", "send", "connection", "transport"],
+    "session":    ["connection", "client", "pool", "send"],
+    "adapter":    ["transport", "connector", "client", "send"],
+    "redirect":   ["forward", "location", "status"],
+    "register":   ["add", "mount", "attach", "include"],
+    "registered": ["added", "mounted", "attached"],
+    "registr":    ["add", "mount", "attach"],   # stemmed form
+    "execut":     ["run", "invoke", "send", "call", "perform", "dispatch"],  # stem of 'executed'
+    "execute":    ["run", "invoke", "send", "call", "perform"],
+    "manag":      ["handle", "control", "maintain", "create"],  # stem of 'managed'
+    "manage":     ["handle", "control", "maintain", "create"],
+    "handl":      ["process", "execute", "run", "dispatch"],    # stem of 'handled'
+    "handle":     ["process", "execute", "run", "dispatch"],
+
+    # ---- CLI domain ----
+    "command":    ["cmd", "subcommand", "cli"],
+    "argument":   ["arg", "param", "option", "flag"],
+    "arguments":  ["args", "params", "options", "flags"],
+    "argument":   ["arg", "param", "option"],   # type: ignore[dict-overwrite]
+    "callback":   ["handler", "hook", "action"],
+    "option":     ["flag", "param", "argument"],
+    "options":    ["flags", "params", "arguments"],
 }
 
 
@@ -734,6 +894,7 @@ _DTO_NAME_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"(config|settings|options|params|args)$", re.IGNORECASE),
     re.compile(r"(event|message|packet|frame|envelope)$", re.IGNORECASE),
     re.compile(r"(type|types|kind|enum)$",                re.IGNORECASE),
+    re.compile(r"(degree|metric|stat|stats|counter)$",    re.IGNORECASE),  # v5.1: data holder
     # NOTE: "model" is intentionally excluded from the pattern suffix list
     # because many service/manager classes inherit from BaseModel in
     # Pydantic-based codebases.  The decorator signal handles Pydantic DTOs.
@@ -836,6 +997,19 @@ def _looks_like_dto(node: GraphNode, graph: RepositoryGraph) -> bool:
                     return True
 
     # ------------------------------------------------------------------
+    # Signal 2b (v5.2): INHERITS from a known DTO base class.
+    # Catches classes like Components(BaseModel) or MySchema(BaseModel)
+    # where the DTO pattern is expressed via inheritance rather than a
+    # decorator.  Only the direct parent label is checked (one hop).
+    # ------------------------------------------------------------------
+    for edge in graph.edges:
+        if edge.relationship == RelationshipType.INHERITS and edge.source == node.id:
+            parent_label_lower = edge.target.lower().split(".")[-1]
+            for frag in _DTO_DECORATOR_FRAGMENTS:
+                if frag in parent_label_lower:
+                    return True
+
+    # ------------------------------------------------------------------
     # Signal 3: edge profile (CLASS only)
     # ------------------------------------------------------------------
     if node.type == NodeType.CLASS:
@@ -880,6 +1054,12 @@ _W_CALLABLE_BOOST:   float = 5.0    # extra boost for METHOD/FUNCTION in impl qu
 _W_DTO_PENALTY:      float = -15.0  # node looks like a data container
 _W_PHRASE_MATCH:     float = 7.0    # v4: node label/id matches a recognised phrase
 _W_VERB_LABEL_BOOST: float = 4.0    # v4: node label verb component matches intent
+
+# v5: New signals
+_W_MULTI_KW_BONUS:   float = 5.0    # v5: node matches 2+ distinct base keywords
+_W_LABEL_COVERAGE:   float = 3.0    # v5: most snake parts of label match query keywords
+_W_GENERIC_PENALTY:  float = -4.0   # v5: node matches only expanded (not base) keywords
+_W_SUBJECT_PRIORITY: float = 4.0    # v5.2: node matches subject (non-verb) query keyword
 
 # Why these values?
 # -----------------
@@ -1287,6 +1467,11 @@ class QueryResolver:
 
         base_kws_set: set[str] = set(self.extract_keywords(question))
 
+        # v5: track which base keywords each node matches (for multi-kw bonus)
+        base_kw_hits: dict[str, set[str]] = defaultdict(set)
+        # v5: track if a node has ANY base keyword hit (vs only expansion hits)
+        has_base_hit: dict[str, bool] = defaultdict(bool)
+
         # Pre-compute snake parts cache
         snake_parts_cache: dict[str, list[str]] = {}
         for node_id, node in self._nodes.items():
@@ -1322,13 +1507,17 @@ class QueryResolver:
                 label_lower = node.label.lower()
                 id_lower    = node.id.lower()
 
+                matched_this_kw = False
+
                 if label_lower == kw_lower:
                     scores[node_id] += _W_EXACT_LABEL
                     reasons[node_id].append(f"exact label {kw_tag} +{_W_EXACT_LABEL:.0f}")
+                    matched_this_kw = True
 
                 elif id_lower == kw_lower:
                     scores[node_id] += _W_EXACT_ID
                     reasons[node_id].append(f"exact id {kw_tag} +{_W_EXACT_ID:.0f}")
+                    matched_this_kw = True
 
                 else:
                     if kw_lower in label_lower:
@@ -1336,12 +1525,14 @@ class QueryResolver:
                         reasons[node_id].append(
                             f"partial label {kw_tag} +{_W_PARTIAL_LABEL:.0f}"
                         )
+                        matched_this_kw = True
 
                     if kw_lower in id_lower:
                         scores[node_id] += _W_PARTIAL_ID
                         reasons[node_id].append(
                             f"partial id {kw_tag} +{_W_PARTIAL_ID:.0f}"
                         )
+                        matched_this_kw = True
 
                     parts = snake_parts_cache.get(node_id, [])
                     if kw_lower in parts:
@@ -1349,6 +1540,12 @@ class QueryResolver:
                         reasons[node_id].append(
                             f"snake component {kw_tag} +{_W_SNAKE:.0f}"
                         )
+                        matched_this_kw = True
+
+                # v5: track base keyword coverage
+                if matched_this_kw and not is_expansion:
+                    base_kw_hits[node_id].add(kw_lower)
+                    has_base_hit[node_id] = True
 
         # ----------------------------------------------------------------
         # Second pass: per-node boosts and penalties
@@ -1369,6 +1566,18 @@ class QueryResolver:
                     f"code-node type={node.type.value} +{_W_NODE_TYPE_BASE:.0f}"
                 )
 
+            # v5.2: File/module penalty for implementation queries.
+            # Module and file nodes match on path strings (e.g. starlette.responses
+            # matches 'respons') but are not implementation symbols.  For any
+            # implementation-oriented query, penalise non-code nodes so callables
+            # always rank above module/file path matches.
+            if (
+                intent.is_implementation_query
+                and node.type in (NodeType.FILE, NodeType.MODULE)
+            ):
+                scores[node_id] -= 8.0
+                reasons[node_id].append("file/module-penalty (impl query) -8")
+
             # Intent-type boost
             if preferred_types and node.type in preferred_types:
                 scores[node_id] += _W_INTENT_TYPE
@@ -1388,17 +1597,30 @@ class QueryResolver:
 
             # v4: Verb-label boost — reward callables whose label contains a
             # verb component that aligns with the active intent(s).
+            # v5.2: Requires that the node has a base keyword hit on a SUBJECT
+            # term (not just the verb itself).  This prevents generic verb-named
+            # functions (e.g. generate_lang_path, generate_docs) from being
+            # boosted on queries like "How are responses generated?" where they
+            # match 'generat' (the verb) but have no overlap with 'responses'
+            # (the subject).  Only nodes matching both the verb AND the subject
+            # receive the boost (e.g. generate_response).
             if node.type in (NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS):
                 node_label_parts = self._label_parts.get(node_id, frozenset())
-                for verb_set in active_verb_sets:
-                    if node_label_parts & verb_set:
-                        matching_verbs = sorted(node_label_parts & verb_set)
-                        scores[node_id] += _W_VERB_LABEL_BOOST
-                        reasons[node_id].append(
-                            f"verb-label {matching_verbs} intent={intent_label}"
-                            f" +{_W_VERB_LABEL_BOOST:.0f}"
-                        )
-                        break  # one verb-label boost per node maximum
+                # Collect all verb tokens across all active verb sets
+                all_active_verbs: frozenset[str] = frozenset().union(*active_verb_sets) if active_verb_sets else frozenset()
+                # Node's base hits that are NOT verb tokens = subject hits
+                node_base_hits = base_kw_hits.get(node_id, set())
+                has_subject_hit = bool(node_base_hits - all_active_verbs)
+                if has_subject_hit:
+                    for verb_set in active_verb_sets:
+                        if node_label_parts & verb_set:
+                            matching_verbs = sorted(node_label_parts & verb_set)
+                            scores[node_id] += _W_VERB_LABEL_BOOST
+                            reasons[node_id].append(
+                                f"verb-label {matching_verbs} intent={intent_label}"
+                                f" +{_W_VERB_LABEL_BOOST:.0f}"
+                            )
+                            break  # one verb-label boost per node maximum
 
             # v4: Phrase-match boost — reward nodes whose label/id contains
             # a recognised phrase from the query.
@@ -1430,6 +1652,62 @@ class QueryResolver:
                 scores[node_id] += _W_DTO_PENALTY
                 reasons[node_id].append(
                     f"dto-penalty (impl query) {_W_DTO_PENALTY:.0f}"
+                )
+
+            # v5: Multi-keyword bonus — node matches 2+ distinct base keywords
+            base_hits = base_kw_hits.get(node_id, set())
+            if len(base_hits) >= 2:
+                scores[node_id] += _W_MULTI_KW_BONUS
+                reasons[node_id].append(
+                    f"multi-kw-bonus hits={sorted(base_hits)} +{_W_MULTI_KW_BONUS:.0f}"
+                )
+
+            # v5.2: Subject-keyword priority — for intent-driven queries, prefer
+            # nodes that match the SUBJECT of the query (the domain term) over
+            # nodes that only match the VERB (the intent term).
+            # Example: "How are responses generated?"
+            #   - serialize_response matches 'respons' (subject) → priority boost
+            #   - generate_lang_path matches 'generat' (verb/intent) → no boost
+            # This prevents high-degree verb-named functions from outranking
+            # lower-degree subject-named functions via hotspot score alone.
+            if intent.categories and intent.categories[0] != IntentCategory.UNKNOWN:
+                all_active_verbs_for_priority: frozenset[str] = (
+                    frozenset().union(*active_verb_sets) if active_verb_sets else frozenset()
+                )
+                node_base_hits_for_priority = base_kw_hits.get(node_id, set())
+                subject_hits_for_priority = node_base_hits_for_priority - all_active_verbs_for_priority
+                if subject_hits_for_priority:
+                    scores[node_id] += _W_SUBJECT_PRIORITY
+                    reasons[node_id].append(
+                        f"subject-priority hits={sorted(subject_hits_for_priority)}"
+                        f" +{_W_SUBJECT_PRIORITY:.0f}"
+                    )
+
+            # v5: Label coverage bonus — most snake_case parts of the node label
+            # match query base keywords (rewards specific, targeted names over
+            # generic "build_all" or "get_fields_from_routes" that only partially match)
+            snake_parts = snake_parts_cache.get(node_id, [])
+            if snake_parts:
+                content_parts = [p for p in snake_parts if p not in _STOP_WORDS and len(p) >= 3]
+                if content_parts:
+                    matched_parts = sum(
+                        1 for p in content_parts
+                        if any(p in kw or kw in p for kw in base_kws_set)
+                    )
+                    coverage = matched_parts / len(content_parts)
+                    if coverage >= 0.67:  # most parts match
+                        scores[node_id] += _W_LABEL_COVERAGE
+                        reasons[node_id].append(
+                            f"label-coverage={coverage:.0%} +{_W_LABEL_COVERAGE:.0f}"
+                        )
+
+            # v5: Generic penalty — node only got hits from expanded keywords,
+            # not from any base keywords.  This penalises nodes like "build_all"
+            # that only match because "generate" expands to "build".
+            if node_id in scores and not has_base_hit.get(node_id, False):
+                scores[node_id] += _W_GENERIC_PENALTY
+                reasons[node_id].append(
+                    f"generic-penalty (expansion-only hits) {_W_GENERIC_PENALTY:.0f}"
                 )
 
         # Build QueryMatch objects

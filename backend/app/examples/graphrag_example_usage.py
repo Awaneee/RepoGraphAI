@@ -38,12 +38,13 @@ from app.graph.graph_builder import GraphBuilder
 from app.rag.graphrag_engine import (
     AnthropicLLMProvider,
     EchoLLMProvider,
+    GeminiLLMProvider,
     GraphRAGPromptBuilder,
     build_graphrag_engine,
 )
 
 
-def build_engine(repository_path: str, *, use_echo: bool, model: str | None):
+def build_engine(repository_path: str, *, use_echo: bool, use_gemini: bool, model: str | None):
     print(f"Parsing repository: {repository_path}")
     parsed_repository = CodeParser().parse_repository(repository_path)
 
@@ -53,11 +54,15 @@ def build_engine(repository_path: str, *, use_echo: bool, model: str | None):
     if use_echo:
         print("Using EchoLLMProvider (no real LLM call, diagnostic mode).")
         llm_provider = EchoLLMProvider()
+    elif use_gemini:
+        gemini_model = model or "gemini-2.5-flash"
+        print(f"Using GeminiLLMProvider (model={gemini_model}).")
+        llm_provider = GeminiLLMProvider(model=gemini_model)
     else:
         if not model:
             raise SystemExit(
-                "Pass --model <model-id> to use AnthropicLLMProvider, or pass "
-                "--echo to run without a real LLM."
+                "Pass --model <model-id> to use AnthropicLLMProvider, --gemini to use GeminiLLMProvider, "
+                "or pass --echo to run without a real LLM."
             )
         print(f"Using AnthropicLLMProvider (model={model}).")
         llm_provider = AnthropicLLMProvider(model=model)
@@ -74,8 +79,9 @@ def build_engine(repository_path: str, *, use_echo: bool, model: str | None):
 def main() -> None:
     parser = argparse.ArgumentParser(description="Ask GraphRAG v1 questions about a Python repository.")
     parser.add_argument("repository_path", help="Path to the repository to analyze.")
-    parser.add_argument("--model", help="Anthropic model id to use (see https://docs.claude.com).")
+    parser.add_argument("--model", help="Model id to use (defaults to gemini-2.5-flash for Gemini).")
     parser.add_argument("--echo", action="store_true", help="Use EchoLLMProvider instead of a real LLM.")
+    parser.add_argument("--gemini", action="store_true", help="Use GeminiLLMProvider instead of Anthropic.")
     parser.add_argument(
         "--question",
         action="append",
@@ -90,7 +96,12 @@ def main() -> None:
         "How are graph statistics computed?",
     ]
 
-    engine = build_engine(args.repository_path, use_echo=args.echo, model=args.model)
+    engine = build_engine(
+        args.repository_path,
+        use_echo=args.echo,
+        use_gemini=args.gemini,
+        model=args.model,
+    )
 
     for question in questions:
         print("\n" + "=" * 70)

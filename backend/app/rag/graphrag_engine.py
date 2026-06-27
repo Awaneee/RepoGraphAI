@@ -247,6 +247,79 @@ class AnthropicLLMProvider(LLMProvider):
         return "".join(text_blocks)
 
 
+class GeminiLLMProvider(LLMProvider):
+    """
+    Production ``LLMProvider`` backed by the Google Gemini API.
+
+    Requires the ``google-genai`` package (``pip install google-genai``) and a
+    valid API key.
+
+    Parameters
+    ----------
+    model : str
+        The Gemini model id to use (defaults to "gemini-2.5-flash").
+    api_key : str | None
+        Explicit API key. If omitted, the implementation checks for the
+        ``GOOGLE_API_KEY`` environment variable.
+    client : object | None
+        Pre-constructed ``google.genai.Client``. Primarily for dependency injection
+        in tests; if omitted, a client is constructed lazily on first use.
+    """
+
+    def __init__(
+        self,
+        model: str = "gemini-2.5-flash",
+        *,
+        api_key: Optional[str] = None,
+        client: Optional[object] = None,
+    ) -> None:
+        self._model = model
+        self._api_key = api_key
+        self._client = client
+
+    def _get_client(self):
+        if self._client is None:
+            try:
+                from google import genai
+            except ImportError as exc:
+                raise ImportError(
+                    "GeminiLLMProvider requires the 'google-genai' package. "
+                    "Install it with `pip install google-genai`."
+                ) from exc
+
+            import os
+            api_key = self._api_key or os.getenv("GOOGLE_API_KEY")
+            if not api_key:
+                raise ValueError(
+                    "GeminiLLMProvider requires the GOOGLE_API_KEY environment variable "
+                    "or an explicit api_key to be set."
+                )
+
+            self._client = genai.Client(api_key=api_key)
+        return self._client
+
+    def generate(self, *, system_prompt: str, user_prompt: str) -> str:
+        client = self._get_client()
+        try:
+            from google.genai import types
+        except ImportError as exc:
+            raise ImportError(
+                "GeminiLLMProvider requires the 'google-genai' package. "
+                "Install it with `pip install google-genai`."
+            ) from exc
+
+        response = client.models.generate_content(
+            model=self._model,
+            contents=user_prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+            ),
+        )
+        if response.text is None:
+            return ""
+        return response.text
+
+
 # ===========================================================================
 # Prompt construction strategy
 # ===========================================================================
