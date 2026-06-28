@@ -1,0 +1,1455 @@
+{
+  "generated": "2026-06-28T21:47:15.474165",
+  "overall": {
+    "top_1": 0.6667,
+    "top_3": 0.9,
+    "top_5": 0.9667,
+    "recall_1": 0.4,
+    "recall_3": 0.7556,
+    "recall_5": 0.9111,
+    "precision_1": 0.6667,
+    "precision_3": 0.4889,
+    "precision_5": 0.36,
+    "mrr": 0.7872
+  },
+  "per_dataset": {
+    "internal": {
+      "aggregate": {
+        "top_1": 0.5333,
+        "top_3": 0.8,
+        "top_5": 0.9333,
+        "recall_1": 0.5333,
+        "recall_3": 0.8,
+        "recall_5": 0.9333,
+        "precision_1": 0.5333,
+        "precision_3": 0.2667,
+        "precision_5": 0.1867,
+        "mrr": 0.6744
+      },
+      "questions": [
+        {
+          "repository": "internal",
+          "category": "Parsing",
+          "question": "How are files parsed?",
+          "expected_symbols": [
+            "CodeParser.parse_file"
+          ],
+          "retrieved_ids": [
+            "CodeParser.parse_file",
+            "CodeParser._extract_class",
+            "CodeParser.extract_function",
+            "_file_id",
+            "CodeParser._extract_decorator"
+          ],
+          "retrieved_labels": [
+            "parse_file",
+            "_extract_class",
+            "extract_function",
+            "_file_id",
+            "_extract_decorator"
+          ],
+          "retrieved_scores": [
+            47.0,
+            30.0,
+            29.0,
+            29.0,
+            28.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0042,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Parsing",
+          "question": "How are imports extracted?",
+          "expected_symbols": [
+            "CodeParser._extract_imports"
+          ],
+          "retrieved_ids": [
+            "CodeParser._extract_imports",
+            "CodeParser._extract_class",
+            "CodeParser.extract_function",
+            "CodeParser._extract_decorator",
+            "QueryResolver.extract_keywords"
+          ],
+          "retrieved_labels": [
+            "_extract_imports",
+            "_extract_class",
+            "extract_function",
+            "_extract_decorator",
+            "extract_keywords"
+          ],
+          "retrieved_scores": [
+            56.0,
+            28.0,
+            27.0,
+            26.0,
+            26.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0023,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Parsing",
+          "question": "How are classes extracted?",
+          "expected_symbols": [
+            "CodeParser._extract_class"
+          ],
+          "retrieved_ids": [
+            "CodeParser._extract_class",
+            "_class_id",
+            "RepositoryRetriever.get_class_context",
+            "GraphVisualizer.save_class_graph",
+            "GraphBuilder.build_class_graph"
+          ],
+          "retrieved_labels": [
+            "_extract_class",
+            "_class_id",
+            "get_class_context",
+            "save_class_graph",
+            "build_class_graph"
+          ],
+          "retrieved_scores": [
+            53.0,
+            32.0,
+            31.0,
+            30.0,
+            29.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0027,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Graph Construction",
+          "question": "How is the graph generated?",
+          "expected_symbols": [
+            "GraphBuilder.build_graph"
+          ],
+          "retrieved_ids": [
+            "generate_graph",
+            "GraphService.generate_graph",
+            "GraphBuilder.build_graph",
+            "GraphBuilder.generate_statistics",
+            "_render_graph"
+          ],
+          "retrieved_labels": [
+            "generate_graph",
+            "generate_graph",
+            "build_graph",
+            "generate_statistics",
+            "_render_graph"
+          ],
+          "retrieved_scores": [
+            56.0,
+            55.0,
+            39.0,
+            38.0,
+            36.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 3,
+          "retrieval_time": 0.0047,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.3333
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Graph Construction",
+          "question": "How are graph nodes created?",
+          "expected_symbols": [
+            "GraphBuilder.build_graph"
+          ],
+          "retrieved_ids": [
+            "GraphRAGEngine._build_source_nodes",
+            "ContextBuilder._build_resolved_nodes",
+            "GraphBuilder.build_graph",
+            "_emit_nodes",
+            "build_graphrag_engine"
+          ],
+          "retrieved_labels": [
+            "_build_source_nodes",
+            "_build_resolved_nodes",
+            "build_graph",
+            "_emit_nodes",
+            "build_graphrag_engine"
+          ],
+          "retrieved_scores": [
+            52.0,
+            51.0,
+            48.0,
+            44.0,
+            43.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 3,
+          "retrieval_time": 0.0045,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.3333
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Graph Construction",
+          "question": "How are graph edges created?",
+          "expected_symbols": [
+            "GraphBuilder.build_graph"
+          ],
+          "retrieved_ids": [
+            "GraphBuilder.build_graph",
+            "build_graphrag_engine",
+            "RepositoryRetriever._group_edges",
+            "GraphBuilder.build_architecture_graph",
+            "GraphBuilder.build_call_graph"
+          ],
+          "retrieved_labels": [
+            "build_graph",
+            "build_graphrag_engine",
+            "_group_edges",
+            "build_architecture_graph",
+            "build_call_graph"
+          ],
+          "retrieved_scores": [
+            48.0,
+            43.0,
+            40.0,
+            38.0,
+            38.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0039,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Graph Construction",
+          "question": "How is inheritance represented?",
+          "expected_symbols": [
+            "GraphBuilder.build_class_graph"
+          ],
+          "retrieved_ids": [
+            "GraphVisualizer.save_class_graph",
+            "GraphBuilder.build_class_graph",
+            "_SymbolRegistry.parent_defines_method",
+            "C:\\Users\\awane\\RepoGraphAI\\backend\\app\\models\\pydantic_models.py",
+            "app.models.pydantic_models"
+          ],
+          "retrieved_labels": [
+            "save_class_graph",
+            "build_class_graph",
+            "parent_defines_method",
+            "pydantic_models.py",
+            "pydantic_models"
+          ],
+          "retrieved_scores": [
+            33.0,
+            32.0,
+            20.0,
+            -1.0,
+            -1.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0024,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.5
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Analytics",
+          "question": "How are hotspots calculated?",
+          "expected_symbols": [
+            "GraphBuilder.generate_statistics"
+          ],
+          "retrieved_ids": [
+            "GraphBuilder.generate_statistics",
+            "GraphStatistics",
+            "NodeDegree"
+          ],
+          "retrieved_labels": [
+            "generate_statistics",
+            "GraphStatistics",
+            "NodeDegree"
+          ],
+          "retrieved_scores": [
+            35.0,
+            19.0,
+            13.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0019,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Analytics",
+          "question": "How are graph statistics generated?",
+          "expected_symbols": [
+            "GraphBuilder.generate_statistics"
+          ],
+          "retrieved_ids": [
+            "GraphBuilder.generate_statistics",
+            "GraphStatistics",
+            "generate_graph",
+            "GraphService.generate_graph",
+            "_render_graph"
+          ],
+          "retrieved_labels": [
+            "generate_statistics",
+            "GraphStatistics",
+            "generate_graph",
+            "generate_graph",
+            "_render_graph"
+          ],
+          "retrieved_scores": [
+            62.0,
+            51.0,
+            49.0,
+            48.0,
+            36.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0077,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Retrieval",
+          "question": "How does retrieval work?",
+          "expected_symbols": [
+            "RepositoryRetriever.get_node_context"
+          ],
+          "retrieved_ids": [
+            "ContextBuilder._collect_retrieval_results",
+            "RepositoryRetriever.search_by_label",
+            "RetrievalMetadata",
+            "RetrievalResult.__repr__",
+            "RetrievalResult.neighbour_ids"
+          ],
+          "retrieved_labels": [
+            "_collect_retrieval_results",
+            "search_by_label",
+            "RetrievalMetadata",
+            "__repr__",
+            "neighbour_ids"
+          ],
+          "retrieved_scores": [
+            31.0,
+            22.0,
+            21.0,
+            21.0,
+            21.0
+          ],
+          "pass_fail": "FAIL",
+          "first_hit_rank": null,
+          "retrieval_time": 0.0016,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": false,
+            "top_5": false,
+            "recall_1": 0.0,
+            "recall_3": 0.0,
+            "recall_5": 0.0,
+            "precision_1": 0.0,
+            "precision_3": 0.0,
+            "precision_5": 0.0,
+            "mrr": 0.0
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Retrieval",
+          "question": "How are neighbours retrieved?",
+          "expected_symbols": [
+            "RepositoryRetriever._collect_neighbours"
+          ],
+          "retrieved_ids": [
+            "RepositoryRetriever._collect_neighbours",
+            "RetrievalResult.neighbour_ids",
+            "RepositoryRetriever.search_by_label",
+            "ContextBuilder._collect_retrieval_results",
+            "RepositoryRetriever.build_llm_context"
+          ],
+          "retrieved_labels": [
+            "_collect_neighbours",
+            "neighbour_ids",
+            "search_by_label",
+            "_collect_retrieval_results",
+            "build_llm_context"
+          ],
+          "retrieved_scores": [
+            41.0,
+            35.0,
+            26.0,
+            24.0,
+            21.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0022,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Retrieval",
+          "question": "How is a subgraph extracted?",
+          "expected_symbols": [
+            "RepositoryRetriever.get_subgraph"
+          ],
+          "retrieved_ids": [
+            "RepositoryRetriever.get_subgraph",
+            "RepositoryRetriever.get_subgraph_for_intent",
+            "_build_subgraph_summary",
+            "CodeParser._extract_class",
+            "CodeParser.extract_function"
+          ],
+          "retrieved_labels": [
+            "get_subgraph",
+            "get_subgraph_for_intent",
+            "_build_subgraph_summary",
+            "_extract_class",
+            "extract_function"
+          ],
+          "retrieved_scores": [
+            50.0,
+            47.0,
+            31.0,
+            28.0,
+            27.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.003,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Query Resolution",
+          "question": "How does query resolution work?",
+          "expected_symbols": [
+            "QueryResolver.resolve_query"
+          ],
+          "retrieved_ids": [
+            "QueryResolutionResult",
+            "QueryResolutionResult.__repr__",
+            "QueryResolutionResult.top_node_ids",
+            "QueryResolver.resolve_query",
+            "GraphBuilder._filter_graph"
+          ],
+          "retrieved_labels": [
+            "QueryResolutionResult",
+            "__repr__",
+            "top_node_ids",
+            "resolve_query",
+            "_filter_graph"
+          ],
+          "retrieved_scores": [
+            30.0,
+            30.0,
+            30.0,
+            28.0,
+            22.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 4,
+          "retrieval_time": 0.0019,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": false,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 0.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.0,
+            "precision_5": 0.2,
+            "mrr": 0.25
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Query Resolution",
+          "question": "How are symbols ranked?",
+          "expected_symbols": [
+            "QueryResolver.rank_candidates"
+          ],
+          "retrieved_ids": [
+            "_SymbolRegistry.is_repo_symbol",
+            "QueryResolver.rank_candidates",
+            "_SymbolRegistry",
+            "_SymbolRegistry.__init__",
+            "_SymbolRegistry.build"
+          ],
+          "retrieved_labels": [
+            "is_repo_symbol",
+            "rank_candidates",
+            "_SymbolRegistry",
+            "__init__",
+            "build"
+          ],
+          "retrieved_scores": [
+            31.0,
+            28.0,
+            27.0,
+            21.0,
+            21.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0032,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.5
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Context Building",
+          "question": "How is LLM context built?",
+          "expected_symbols": [
+            "ContextBuilder.build"
+          ],
+          "retrieved_ids": [
+            "ContextBuilder._build_llm_context_text",
+            "RepositoryRetriever.build_llm_context",
+            "build_context_builder",
+            "RepositoryRetriever.get_node_context",
+            "ContextBuilder.build"
+          ],
+          "retrieved_labels": [
+            "_build_llm_context_text",
+            "build_llm_context",
+            "build_context_builder",
+            "get_node_context",
+            "build"
+          ],
+          "retrieved_scores": [
+            69.0,
+            69.0,
+            48.0,
+            36.0,
+            35.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 5,
+          "retrieval_time": 0.0032,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": false,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 0.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.0,
+            "precision_5": 0.2,
+            "mrr": 0.2
+          }
+        }
+      ]
+    },
+    "FastAPI": {
+      "aggregate": {
+        "top_1": 1.0,
+        "top_3": 1.0,
+        "top_5": 1.0,
+        "recall_1": 0.3333,
+        "recall_3": 0.6667,
+        "recall_5": 0.8667,
+        "precision_1": 1.0,
+        "precision_3": 0.6667,
+        "precision_5": 0.52,
+        "mrr": 1.0
+      },
+      "questions": [
+        {
+          "repository": "FastAPI",
+          "category": "",
+          "question": "How are routes registered?",
+          "expected_symbols": [
+            "APIRouter.add_api_route",
+            "APIRouter.add_route",
+            "APIRouter.add_api_websocket_route"
+          ],
+          "retrieved_ids": [
+            "APIRouter.add_api_route",
+            "APIRoute.get_route_handler",
+            "APIRouter.add_api_websocket_route",
+            "APIRouter.add_route",
+            "APIRouter.add_websocket_route"
+          ],
+          "retrieved_labels": [
+            "add_api_route",
+            "get_route_handler",
+            "add_api_websocket_route",
+            "add_route",
+            "add_websocket_route"
+          ],
+          "retrieved_scores": [
+            50.0,
+            49.0,
+            49.0,
+            49.0,
+            49.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0201,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.3333,
+            "recall_3": 0.6667,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.6667,
+            "precision_5": 0.6,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "",
+          "question": "How does dependency injection work?",
+          "expected_symbols": [
+            "get_dependant",
+            "solve_dependencies",
+            "add_non_field_param_to_dependency"
+          ],
+          "retrieved_ids": [
+            "add_non_field_param_to_dependency",
+            "DependencyScopeError",
+            "get_dependant",
+            "get_flat_dependant",
+            "solve_dependencies"
+          ],
+          "retrieved_labels": [
+            "add_non_field_param_to_dependency",
+            "DependencyScopeError",
+            "get_dependant",
+            "get_flat_dependant",
+            "solve_dependencies"
+          ],
+          "retrieved_scores": [
+            36.0,
+            28.0,
+            21.0,
+            21.0,
+            21.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0057,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.3333,
+            "recall_3": 0.6667,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.6667,
+            "precision_5": 0.6,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "",
+          "question": "How are requests handled?",
+          "expected_symbols": [
+            "get_request_handler",
+            "APIRoute.handle",
+            "request_validation_exception_handler"
+          ],
+          "retrieved_ids": [
+            "get_request_handler",
+            "request_validation_exception_handler",
+            "websocket_request_validation_exception_handler",
+            "http_exception_handler",
+            "APIRoute.handle"
+          ],
+          "retrieved_labels": [
+            "get_request_handler",
+            "request_validation_exception_handler",
+            "websocket_request_validation_exception_handler",
+            "http_exception_handler",
+            "handle"
+          ],
+          "retrieved_scores": [
+            46.0,
+            40.0,
+            40.0,
+            36.0,
+            33.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0143,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.3333,
+            "recall_3": 0.6667,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.6667,
+            "precision_5": 0.6,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "",
+          "question": "How are responses generated?",
+          "expected_symbols": [
+            "ORJSONResponse.render",
+            "UJSONResponse.render",
+            "serialize_response"
+          ],
+          "retrieved_ids": [
+            "ORJSONResponse.render",
+            "UJSONResponse.render",
+            "generate_lang_path",
+            "ResponseValidationError",
+            "create_model_field"
+          ],
+          "retrieved_labels": [
+            "render",
+            "render",
+            "generate_lang_path",
+            "ResponseValidationError",
+            "create_model_field"
+          ],
+          "retrieved_scores": [
+            26.0,
+            26.0,
+            25.0,
+            24.0,
+            24.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0095,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.3333,
+            "recall_3": 0.6667,
+            "recall_5": 0.6667,
+            "precision_1": 1.0,
+            "precision_3": 0.6667,
+            "precision_5": 0.4,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "",
+          "question": "How are middleware components registered?",
+          "expected_symbols": [
+            "FastAPI.middleware",
+            "FastAPI.build_middleware_stack",
+            "AsyncExitStackMiddleware.__call__"
+          ],
+          "retrieved_ids": [
+            "FastAPI.middleware",
+            "FastAPI.build_middleware_stack",
+            "APIRouter.include_router",
+            "add_missing",
+            "add_permalinks_page"
+          ],
+          "retrieved_labels": [
+            "middleware",
+            "build_middleware_stack",
+            "include_router",
+            "add_missing",
+            "add_permalinks_page"
+          ],
+          "retrieved_scores": [
+            29.0,
+            28.0,
+            24.0,
+            24.0,
+            24.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0092,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.3333,
+            "recall_3": 0.6667,
+            "recall_5": 0.6667,
+            "precision_1": 1.0,
+            "precision_3": 0.6667,
+            "precision_5": 0.4,
+            "mrr": 1.0
+          }
+        }
+      ]
+    },
+    "Typer": {
+      "aggregate": {
+        "top_1": 0.8,
+        "top_3": 1.0,
+        "top_5": 1.0,
+        "recall_1": 0.2667,
+        "recall_3": 0.8667,
+        "recall_5": 1.0,
+        "precision_1": 0.8,
+        "precision_3": 0.8667,
+        "precision_5": 0.6,
+        "mrr": 0.9
+      },
+      "questions": [
+        {
+          "repository": "Typer",
+          "category": "",
+          "question": "How are CLI commands registered?",
+          "expected_symbols": [
+            "TyperCLIGroup.list_commands",
+            "TyperGroup.format_commands",
+            "TyperGroup._click_resolve_command"
+          ],
+          "retrieved_ids": [
+            "TyperCLIGroup.list_commands",
+            "TyperGroup._click_resolve_command",
+            "TyperGroup.format_commands",
+            "TyperCLIGroup.get_command",
+            "_complete_visible_commands"
+          ],
+          "retrieved_labels": [
+            "list_commands",
+            "_click_resolve_command",
+            "format_commands",
+            "get_command",
+            "_complete_visible_commands"
+          ],
+          "retrieved_scores": [
+            44.0,
+            43.0,
+            43.0,
+            41.0,
+            41.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0095,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.3333,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 1.0,
+            "precision_5": 0.6,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "",
+          "question": "How are command arguments parsed?",
+          "expected_symbols": [
+            "Command.parse_args",
+            "TyperArgument._parse_decls",
+            "_OptionParser.add_argument"
+          ],
+          "retrieved_ids": [
+            "get_install_completion_arguments",
+            "_OptionParser.add_argument",
+            "Command.parse_args",
+            "Argument",
+            "TyperArgument._parse_decls"
+          ],
+          "retrieved_labels": [
+            "get_install_completion_arguments",
+            "add_argument",
+            "parse_args",
+            "Argument",
+            "_parse_decls"
+          ],
+          "retrieved_scores": [
+            48.0,
+            44.0,
+            40.0,
+            39.0,
+            39.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0153,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 0.6667,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.6667,
+            "precision_5": 0.6,
+            "mrr": 0.5
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "",
+          "question": "How are options defined?",
+          "expected_symbols": [
+            "Command.format_options",
+            "TyperCommand.format_options",
+            "TyperGroup.format_options"
+          ],
+          "retrieved_ids": [
+            "Command.format_options",
+            "TyperGroup.format_options",
+            "TyperCommand.format_options",
+            "_print_options_panel",
+            "_typer_format_options"
+          ],
+          "retrieved_labels": [
+            "format_options",
+            "format_options",
+            "format_options",
+            "_print_options_panel",
+            "_typer_format_options"
+          ],
+          "retrieved_scores": [
+            37.0,
+            37.0,
+            36.0,
+            36.0,
+            36.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0084,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.3333,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 1.0,
+            "precision_5": 0.6,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "",
+          "question": "How is help text generated?",
+          "expected_symbols": [
+            "Command.format_help_text",
+            "_get_help_text",
+            "_sanitize_help_text"
+          ],
+          "retrieved_ids": [
+            "Command.format_help_text",
+            "_get_help_text",
+            "_sanitize_help_text",
+            "Context.get_help",
+            "HelpFormatter.write_text"
+          ],
+          "retrieved_labels": [
+            "format_help_text",
+            "_get_help_text",
+            "_sanitize_help_text",
+            "get_help",
+            "write_text"
+          ],
+          "retrieved_scores": [
+            49.0,
+            48.0,
+            46.0,
+            39.0,
+            37.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.007,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.3333,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 1.0,
+            "precision_5": 0.6,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "",
+          "question": "How are callbacks executed?",
+          "expected_symbols": [
+            "get_callback",
+            "Typer.callback",
+            "get_param_callback"
+          ],
+          "retrieved_ids": [
+            "get_callback",
+            "callback",
+            "Typer.callback",
+            "get_param_callback",
+            "install_callback"
+          ],
+          "retrieved_labels": [
+            "get_callback",
+            "callback",
+            "callback",
+            "get_param_callback",
+            "install_callback"
+          ],
+          "retrieved_scores": [
+            41.0,
+            39.0,
+            38.0,
+            38.0,
+            37.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0071,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.3333,
+            "recall_3": 0.6667,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.6667,
+            "precision_5": 0.6,
+            "mrr": 1.0
+          }
+        }
+      ]
+    },
+    "Requests": {
+      "aggregate": {
+        "top_1": 0.6,
+        "top_3": 1.0,
+        "top_5": 1.0,
+        "recall_1": 0.2,
+        "recall_3": 0.6,
+        "recall_5": 0.8,
+        "precision_1": 0.6,
+        "precision_3": 0.6,
+        "precision_5": 0.48,
+        "mrr": 0.8
+      },
+      "questions": [
+        {
+          "repository": "Requests",
+          "category": "",
+          "question": "How are HTTP requests executed?",
+          "expected_symbols": [
+            "HTTPAdapter.send",
+            "Session.send",
+            "HTTPAdapter.request_url"
+          ],
+          "retrieved_ids": [
+            "HTTPAdapter.send",
+            "HTTPDigestAuth.__call__",
+            "HTTPAdapter.request_url",
+            "HTTPBasicAuth.__call__",
+            "HTTPProxyAuth.__call__"
+          ],
+          "retrieved_labels": [
+            "send",
+            "__call__",
+            "request_url",
+            "__call__",
+            "__call__"
+          ],
+          "retrieved_scores": [
+            39.0,
+            38.0,
+            37.0,
+            37.0,
+            36.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0081,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.3333,
+            "recall_3": 0.6667,
+            "recall_5": 0.6667,
+            "precision_1": 1.0,
+            "precision_3": 0.6667,
+            "precision_5": 0.4,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "",
+          "question": "How are sessions managed?",
+          "expected_symbols": [
+            "Session.send",
+            "Session.__init__",
+            "session"
+          ],
+          "retrieved_ids": [
+            "HTTPAdapter.init_poolmanager",
+            "Session.send",
+            "HTTPAdapter.build_connection_pool_key_attributes",
+            "SessionRedirectMixin.send",
+            "HTTPAdapter.proxy_manager_for"
+          ],
+          "retrieved_labels": [
+            "init_poolmanager",
+            "send",
+            "build_connection_pool_key_attributes",
+            "send",
+            "proxy_manager_for"
+          ],
+          "retrieved_scores": [
+            31.0,
+            31.0,
+            30.0,
+            28.0,
+            27.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0035,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 0.3333,
+            "recall_5": 0.3333,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.5
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "",
+          "question": "How are adapters used?",
+          "expected_symbols": [
+            "HTTPAdapter",
+            "BaseAdapter",
+            "Session.get_adapter"
+          ],
+          "retrieved_ids": [
+            "C:\\Users\\awane\\RepoGraphAI\\backend\\repos\\requests\\src\\requests\\adapters.py",
+            "Session.get_adapter",
+            "BaseAdapter",
+            "HTTPAdapter",
+            "HTTPAdapter.build_response"
+          ],
+          "retrieved_labels": [
+            "adapters.py",
+            "get_adapter",
+            "BaseAdapter",
+            "HTTPAdapter",
+            "build_response"
+          ],
+          "retrieved_scores": [
+            22.0,
+            15.0,
+            14.0,
+            14.0,
+            10.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0016,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 0.6667,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.6667,
+            "precision_5": 0.6,
+            "mrr": 0.5
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "",
+          "question": "How are redirects handled?",
+          "expected_symbols": [
+            "SessionRedirectMixin.resolve_redirects",
+            "HTTPDigestAuth.handle_redirect",
+            "Response.is_redirect"
+          ],
+          "retrieved_ids": [
+            "SessionRedirectMixin.resolve_redirects",
+            "HTTPDigestAuth.handle_redirect",
+            "TooManyRedirects",
+            "Response.is_redirect",
+            "HTTPDigestAuth.handle_401"
+          ],
+          "retrieved_labels": [
+            "resolve_redirects",
+            "handle_redirect",
+            "TooManyRedirects",
+            "is_redirect",
+            "handle_401"
+          ],
+          "retrieved_scores": [
+            28.0,
+            27.0,
+            23.0,
+            17.0,
+            14.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.003,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.3333,
+            "recall_3": 0.6667,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.6667,
+            "precision_5": 0.6,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "",
+          "question": "How are responses processed?",
+          "expected_symbols": [
+            "Response.iter_content",
+            "Response.content",
+            "stream_decode_response_unicode"
+          ],
+          "retrieved_ids": [
+            "stream_decode_response_unicode",
+            "Response.iter_content",
+            "Response.links",
+            "Response.__init__",
+            "Response.content"
+          ],
+          "retrieved_labels": [
+            "stream_decode_response_unicode",
+            "iter_content",
+            "links",
+            "__init__",
+            "content"
+          ],
+          "retrieved_scores": [
+            26.0,
+            25.0,
+            24.0,
+            23.0,
+            23.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0026,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.3333,
+            "recall_3": 0.6667,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.6667,
+            "precision_5": 0.6,
+            "mrr": 1.0
+          }
+        }
+      ]
+    }
+  }
+}
