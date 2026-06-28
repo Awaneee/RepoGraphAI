@@ -575,6 +575,157 @@ class RepositoryRetriever:
             edges=subgraph_edges,
         )
 
+    def get_subgraph_for_intent(
+        self,
+        node_ids: set[str],
+        edge_hop_limits: dict[RelationshipType, int],
+        default_hops: int = 1,
+    ) -> RepositoryGraph:
+        """
+        Intent-aware subgraph expansion that follows each edge type for a
+        different number of hops.
+
+        Unlike ``get_subgraph``, which expands all edge types uniformly for
+        *max_hops* hops, this method accepts a per-edge-type hop budget.
+        High-signal edge types (e.g. CALLS for execution queries, INHERITS
+        for analysis queries) can be followed deeper; low-signal or noisy
+        edge types (e.g. CONTAINS, DECORATES) are kept shallow or excluded.
+
+        Traversal strategy
+        ------------------
+        The expansion is a modified BFS where each frontier node tracks
+        *how many hops it has been expanded so far* for each edge type
+        independently.  A node is eligible for further expansion along an
+        edge type R only if the hop count for R is less than
+        ``edge_hop_limits.get(R, default_hops)``.
+
+        This means the same node may be reached via different paths and
+        different edge types; the algorithm ensures it is only expanded
+        once per edge type per depth level to prevent redundant work.
+
+        Parameters
+        ----------
+        node_ids : set[str]
+            Seed nodes.  Nodes absent from the graph are silently ignored.
+        edge_hop_limits : dict[RelationshipType, int]
+            Per-edge-type maximum hops.  Edge types absent from this dict
+            use ``default_hops`` (typically 1 for CONTAINS / DECORATES,
+            which are structural but rarely informative for the LLM).
+            Set a type's limit to 0 to exclude it entirely from expansion.
+        default_hops : int
+            Hop budget for edge types not listed in *edge_hop_limits*.
+            Defaults to 1.
+
+        Returns
+        -------
+        RepositoryGraph
+            Self-contained subgraph with all reachable nodes and the edges
+            connecting them, identical in shape to ``get_subgraph``'s return
+            value so callers need no structural changes.
+
+        Examples
+        --------
+        Execution / CALLS-heavy policy (follow call chains 2 hops, others 1):
+
+        >>> limits = {
+        ...     RelationshipType.CALLS:       2,
+        ...     RelationshipType.INHERITS:    1,
+        ...     RelationshipType.IMPORTS:     1,
+        ...     RelationshipType.CONTAINS:    0,
+        ...     RelationshipType.DECORATES:   1,
+        ...     RelationshipType.INSTANTIATES:1,
+        ...     RelationshipType.OVERRIDES:   1,
+        ... }
+        >>> subgraph = retriever.get_subgraph_for_intent(seeds, limits)
+        """
+        # Seed set — filter to known nodes
+        valid_seeds: set[str] = {nid for nid in node_ids if nid in self._nodes}
+
+        # all_ids accumulates every node admitted to the subgraph
+        all_ids: set[str] = set(valid_seeds)
+
+        # For each (node_id, rel_type) pair track how many hops have been
+        # taken so far along that edge type FROM that node.
+        # Initial seeds have 0 hops taken along any edge type.
+        # frontier: list of (node_id, hops_by_rel) where hops_by_rel is a
+        # dict[RelationshipType, int] — hops taken to reach this node.
+        frontier: list[tuple[str, dict[RelationshipType, int]]] = [
+            (nid, {}) for nid in valid_seeds
+        ]
+
+        # Track which (node_id, rel_type, depth) combinations we've already
+        # expanded to avoid redundant BFS work.
+        expanded: set[tuple[str, RelationshipType, int]] = set()
+
+        while frontier:
+            next_frontier: list[tuple[str, dict[RelationshipType, int]]] = []
+
+            for nid, hops_taken in frontier:
+                # Try expanding along every outgoing edge type
+                for edge in self._out_index.get(nid, []):
+                    rel = edge.relationship
+                    max_for_rel = edge_hop_limits.get(rel, default_hops)
+                    current_depth = hops_taken.get(rel, 0)
+
+                    if max_for_rel == 0:
+                        continue  # this edge type is excluded
+                    if current_depth >= max_for_rel:
+                        continue  # budget exhausted for this type
+
+                    expand_key = (nid, rel, current_depth)
+                    if expand_key in expanded:
+                        continue
+                    expanded.add(expand_key)
+
+                    target = edge.target
+                    if target not in self._nodes:
+                        continue
+
+                    all_ids.add(target)
+                    new_hops = dict(hops_taken)
+                    new_hops[rel] = current_depth + 1
+                    next_frontier.append((target, new_hops))
+
+                # Try expanding along every incoming edge type
+                for edge in self._in_index.get(nid, []):
+                    rel = edge.relationship
+                    max_for_rel = edge_hop_limits.get(rel, default_hops)
+                    current_depth = hops_taken.get(rel, 0)
+
+                    if max_for_rel == 0:
+                        continue
+                    if current_depth >= max_for_rel:
+                        continue
+
+                    expand_key = (nid, rel, current_depth)
+                    if expand_key in expanded:
+                        continue
+                    expanded.add(expand_key)
+
+                    source = edge.source
+                    if source not in self._nodes:
+                        continue
+
+                    all_ids.add(source)
+                    new_hops = dict(hops_taken)
+                    new_hops[rel] = current_depth + 1
+                    next_frontier.append((source, new_hops))
+
+            frontier = next_frontier
+
+        subgraph_nodes = [self._nodes[nid] for nid in all_ids if nid in self._nodes]
+        subgraph_edges = [
+            edge
+            for nid in all_ids
+            for edge in self._out_index.get(nid, [])
+            if edge.target in all_ids
+        ]
+
+        return RepositoryGraph(
+            nodes=sorted(subgraph_nodes, key=lambda n: (n.type.value, n.id)),
+            edges=subgraph_edges,
+        )
+
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------

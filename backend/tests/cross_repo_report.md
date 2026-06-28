@@ -1,6 +1,6 @@
 # Cross Repository Benchmark
 
-Generated: 2026-06-28 01:44:41.803980
+Generated: 2026-06-28 21:13:23.623340
 
 # FastAPI
 
@@ -16,9 +16,9 @@ How are routes registered?
 
 ### Timing
 
-- Retrieval time: 0.0086s
-- Generation time: 0.0050s
-- Total time: 0.0136s
+- Retrieval time: 0.0133s
+- Generation time: 0.0013s
+- Total time: 0.0147s
 
 ### Retrieved Nodes
 
@@ -33,8 +33,8 @@ How are routes registered?
 - Intent Categories: ['routing']
 - Keywords: ['routes', 'rout', 'registered', 'register']
 - Resolved Nodes: 5
-- Subgraph Nodes: 11
-- Subgraph Edges: 10
+- Subgraph Nodes: 9
+- Subgraph Edges: 4
 - top_k: 5
 - max_hops: 1
 
@@ -42,7 +42,7 @@ How are routes registered?
 
 [EchoLLMProvider — no real LLM configured]
 system_prompt length: 496 chars
-user_prompt length: 5613 chars
+user_prompt length: 5287 chars
 Replace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer.
 
 ---
@@ -53,9 +53,9 @@ How does dependency injection work?
 
 ### Timing
 
-- Retrieval time: 0.0046s
-- Generation time: 0.0012s
-- Total time: 0.0058s
+- Retrieval time: 0.0048s
+- Generation time: 0.0000s
+- Total time: 0.0048s
 
 ### Retrieved Nodes
 
@@ -70,8 +70,8 @@ How does dependency injection work?
 - Intent Categories: ['analysis']
 - Keywords: ['dependency', 'injection', 'injec']
 - Resolved Nodes: 5
-- Subgraph Nodes: 29
-- Subgraph Edges: 60
+- Subgraph Nodes: 12
+- Subgraph Edges: 14
 - top_k: 5
 - max_hops: 1
 
@@ -79,7 +79,7 @@ How does dependency injection work?
 
 [EchoLLMProvider — no real LLM configured]
 system_prompt length: 496 chars
-user_prompt length: 10366 chars
+user_prompt length: 7772 chars
 Replace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer.
 
 ---
@@ -90,9 +90,9 @@ How are requests handled?
 
 ### Timing
 
-- Retrieval time: 0.0071s
-- Generation time: 0.0007s
-- Total time: 0.0078s
+- Retrieval time: 0.0127s
+- Generation time: 0.0000s
+- Total time: 0.0127s
 
 ### Retrieved Nodes
 
@@ -107,8 +107,8 @@ How are requests handled?
 - Intent Categories: ['routing']
 - Keywords: ['requests', 'request', 'handled', 'handl']
 - Resolved Nodes: 5
-- Subgraph Nodes: 26
-- Subgraph Edges: 43
+- Subgraph Nodes: 19
+- Subgraph Edges: 22
 - top_k: 5
 - max_hops: 1
 
@@ -116,7 +116,7 @@ How are requests handled?
 
 [EchoLLMProvider — no real LLM configured]
 system_prompt length: 496 chars
-user_prompt length: 8514 chars
+user_prompt length: 7267 chars
 Replace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer.
 
 ---
@@ -127,9 +127,9 @@ How are responses generated?
 
 ### Timing
 
-- Retrieval time: 0.0051s
-- Generation time: 0.0000s
-- Total time: 0.0051s
+- Retrieval time: 0.0066s
+- Generation time: 0.0010s
+- Total time: 0.0076s
 
 ### Retrieved Nodes
 
@@ -144,8 +144,8 @@ How are responses generated?
 - Intent Categories: ['generation']
 - Keywords: ['responses', 'respons', 'generated', 'generat']
 - Resolved Nodes: 5
-- Subgraph Nodes: 26
-- Subgraph Edges: 37
+- Subgraph Nodes: 14
+- Subgraph Edges: 11
 - top_k: 5
 - max_hops: 1
 
@@ -153,7 +153,7 @@ How are responses generated?
 
 [EchoLLMProvider — no real LLM configured]
 system_prompt length: 496 chars
-user_prompt length: 6753 chars
+user_prompt length: 5389 chars
 Replace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer.
 
 ---
@@ -164,9 +164,9 @@ How are middleware components registered?
 
 ### Timing
 
-- Retrieval time: 0.0085s
+- Retrieval time: 0.0121s
 - Generation time: 0.0000s
-- Total time: 0.0085s
+- Total time: 0.0121s
 
 ### Retrieved Nodes
 
@@ -181,8 +181,8 @@ How are middleware components registered?
 - Intent Categories: ['routing']
 - Keywords: ['middleware', 'components', 'component', 'registered', 'register']
 - Resolved Nodes: 5
-- Subgraph Nodes: 22
-- Subgraph Edges: 27
+- Subgraph Nodes: 17
+- Subgraph Edges: 16
 - top_k: 5
 - max_hops: 1
 
@@ -190,7 +190,7 @@ How are middleware components registered?
 
 [EchoLLMProvider — no real LLM configured]
 system_prompt length: 496 chars
-user_prompt length: 6330 chars
+user_prompt length: 5674 chars
 Replace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer.
 
 ---
@@ -209,9 +209,9 @@ How are CLI commands registered?
 
 ### Timing
 
-- Retrieval time: 0.0106s
-- Generation time: 0.0000s
-- Total time: 0.0106s
+- Retrieval time: 0.0089s
+- Generation time: 0.0031s
+- Total time: 0.0120s
 
 ### Retrieved Nodes
 
@@ -226,8 +226,8 @@ How are CLI commands registered?
 - Intent Categories: ['routing']
 - Keywords: ['cli', 'commands', 'command', 'registered', 'register']
 - Resolved Nodes: 5
-- Subgraph Nodes: 13
-- Subgraph Edges: 17
+- Subgraph Nodes: 10
+- Subgraph Edges: 8
 - top_k: 5
 - max_hops: 1
 
@@ -235,7 +235,7 @@ How are CLI commands registered?
 
 [EchoLLMProvider — no real LLM configured]
 system_prompt length: 496 chars
-user_prompt length: 6027 chars
+user_prompt length: 5528 chars
 Replace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer.
 
 ---
@@ -246,9 +246,9 @@ How are command arguments parsed?
 
 ### Timing
 
-- Retrieval time: 0.0152s
+- Retrieval time: 0.0162s
 - Generation time: 0.0000s
-- Total time: 0.0152s
+- Total time: 0.0162s
 
 ### Retrieved Nodes
 
@@ -263,8 +263,8 @@ How are command arguments parsed?
 - Intent Categories: ['parsing']
 - Keywords: ['command', 'arguments', 'argument', 'parsed', 'pars']
 - Resolved Nodes: 5
-- Subgraph Nodes: 21
-- Subgraph Edges: 22
+- Subgraph Nodes: 35
+- Subgraph Edges: 43
 - top_k: 5
 - max_hops: 1
 
@@ -272,7 +272,7 @@ How are command arguments parsed?
 
 [EchoLLMProvider — no real LLM configured]
 system_prompt length: 496 chars
-user_prompt length: 6516 chars
+user_prompt length: 7456 chars
 Replace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer.
 
 ---
@@ -283,9 +283,9 @@ How are options defined?
 
 ### Timing
 
-- Retrieval time: 0.0089s
-- Generation time: 0.0220s
-- Total time: 0.0310s
+- Retrieval time: 0.0074s
+- Generation time: 0.0024s
+- Total time: 0.0098s
 
 ### Retrieved Nodes
 
@@ -301,7 +301,7 @@ How are options defined?
 - Keywords: ['options', 'option', 'defined', 'defin']
 - Resolved Nodes: 5
 - Subgraph Nodes: 12
-- Subgraph Edges: 17
+- Subgraph Edges: 16
 - top_k: 5
 - max_hops: 1
 
@@ -309,7 +309,7 @@ How are options defined?
 
 [EchoLLMProvider — no real LLM configured]
 system_prompt length: 496 chars
-user_prompt length: 5887 chars
+user_prompt length: 5857 chars
 Replace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer.
 
 ---
@@ -320,9 +320,9 @@ How is help text generated?
 
 ### Timing
 
-- Retrieval time: 0.0407s
+- Retrieval time: 0.0060s
 - Generation time: 0.0000s
-- Total time: 0.0407s
+- Total time: 0.0060s
 
 ### Retrieved Nodes
 
@@ -337,8 +337,8 @@ How is help text generated?
 - Intent Categories: ['generation']
 - Keywords: ['help', 'text', 'generated', 'generat']
 - Resolved Nodes: 5
-- Subgraph Nodes: 17
-- Subgraph Edges: 17
+- Subgraph Nodes: 9
+- Subgraph Edges: 5
 - top_k: 5
 - max_hops: 1
 
@@ -346,7 +346,7 @@ How is help text generated?
 
 [EchoLLMProvider — no real LLM configured]
 system_prompt length: 496 chars
-user_prompt length: 6122 chars
+user_prompt length: 5484 chars
 Replace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer.
 
 ---
@@ -357,9 +357,9 @@ How are callbacks executed?
 
 ### Timing
 
-- Retrieval time: 0.0115s
-- Generation time: 0.0039s
-- Total time: 0.0154s
+- Retrieval time: 0.0090s
+- Generation time: 0.0000s
+- Total time: 0.0090s
 
 ### Retrieved Nodes
 
@@ -374,8 +374,8 @@ How are callbacks executed?
 - Intent Categories: ['execution']
 - Keywords: ['callbacks', 'callback', 'executed', 'execut']
 - Resolved Nodes: 5
-- Subgraph Nodes: 29
-- Subgraph Edges: 47
+- Subgraph Nodes: 19
+- Subgraph Edges: 18
 - top_k: 5
 - max_hops: 1
 
@@ -383,7 +383,7 @@ How are callbacks executed?
 
 [EchoLLMProvider — no real LLM configured]
 system_prompt length: 496 chars
-user_prompt length: 7847 chars
+user_prompt length: 6517 chars
 Replace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer.
 
 ---
@@ -402,9 +402,9 @@ How are HTTP requests executed?
 
 ### Timing
 
-- Retrieval time: 0.0087s
-- Generation time: 0.0000s
-- Total time: 0.0087s
+- Retrieval time: 0.0061s
+- Generation time: 0.0025s
+- Total time: 0.0086s
 
 ### Retrieved Nodes
 
@@ -419,8 +419,8 @@ How are HTTP requests executed?
 - Intent Categories: ['routing', 'execution']
 - Keywords: ['http', 'requests', 'request', 'executed', 'execut']
 - Resolved Nodes: 5
-- Subgraph Nodes: 21
-- Subgraph Edges: 21
+- Subgraph Nodes: 13
+- Subgraph Edges: 11
 - top_k: 5
 - max_hops: 1
 
@@ -428,7 +428,7 @@ How are HTTP requests executed?
 
 [EchoLLMProvider — no real LLM configured]
 system_prompt length: 496 chars
-user_prompt length: 6425 chars
+user_prompt length: 5979 chars
 Replace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer.
 
 ---
@@ -439,9 +439,9 @@ How are sessions managed?
 
 ### Timing
 
-- Retrieval time: 0.0051s
-- Generation time: 0.0004s
-- Total time: 0.0054s
+- Retrieval time: 0.0059s
+- Generation time: 0.0000s
+- Total time: 0.0059s
 
 ### Retrieved Nodes
 
@@ -456,8 +456,8 @@ How are sessions managed?
 - Intent Categories: ['authentication']
 - Keywords: ['sessions', 'session', 'managed', 'manag']
 - Resolved Nodes: 5
-- Subgraph Nodes: 14
-- Subgraph Edges: 15
+- Subgraph Nodes: 8
+- Subgraph Edges: 4
 - top_k: 5
 - max_hops: 1
 
@@ -465,7 +465,7 @@ How are sessions managed?
 
 [EchoLLMProvider — no real LLM configured]
 system_prompt length: 496 chars
-user_prompt length: 5346 chars
+user_prompt length: 4845 chars
 Replace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer.
 
 ---
@@ -476,9 +476,9 @@ How are adapters used?
 
 ### Timing
 
-- Retrieval time: 0.0018s
-- Generation time: 0.0003s
-- Total time: 0.0021s
+- Retrieval time: 0.0020s
+- Generation time: 0.0000s
+- Total time: 0.0020s
 
 ### Retrieved Nodes
 
@@ -513,9 +513,9 @@ How are redirects handled?
 
 ### Timing
 
-- Retrieval time: 0.0028s
-- Generation time: 0.0001s
-- Total time: 0.0029s
+- Retrieval time: 0.0033s
+- Generation time: 0.0004s
+- Total time: 0.0038s
 
 ### Retrieved Nodes
 
@@ -550,9 +550,9 @@ How are responses processed?
 
 ### Timing
 
-- Retrieval time: 0.0039s
+- Retrieval time: 0.0030s
 - Generation time: 0.0000s
-- Total time: 0.0039s
+- Total time: 0.0030s
 
 ### Retrieved Nodes
 
@@ -567,8 +567,8 @@ How are responses processed?
 - Intent Categories: ['transformation']
 - Keywords: ['responses', 'respons', 'processed', 'process']
 - Resolved Nodes: 5
-- Subgraph Nodes: 15
-- Subgraph Edges: 16
+- Subgraph Nodes: 16
+- Subgraph Edges: 13
 - top_k: 5
 - max_hops: 1
 
@@ -576,7 +576,7 @@ How are responses processed?
 
 [EchoLLMProvider — no real LLM configured]
 system_prompt length: 496 chars
-user_prompt length: 5134 chars
+user_prompt length: 4893 chars
 Replace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer.
 
 ---
@@ -586,5 +586,5 @@ Replace this provider with a real LLMProvider implementation (e.g. AnthropicLLMP
 - Total Questions: 15
 - Successful Questions: 15
 - Failed Questions: 0
-- Average Retrieval Time: 0.0095s
-- Average Generation Time: 0.0022s
+- Average Retrieval Time: 0.0078s
+- Average Generation Time: 0.0007s

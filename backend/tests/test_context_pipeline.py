@@ -540,7 +540,7 @@ if __name__ == "__main__":
     from app.models.pydantic_models import (
         GraphEdge, GraphNode, NodeType, RelationshipType, RepositoryGraph,
     )
-    from app.retrievers.context_builder import build_context_builder
+    from backend.app.rag.context_builder import build_context_builder
 
     # Re-use the same synthetic graph logic defined above
     # (copy–paste avoided; import the fixture directly when running as script)

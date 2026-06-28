@@ -75,6 +75,7 @@ from app.models.pydantic_models import (
     RepositoryGraph,
 )
 from app.retrievers.query_resolver import (
+    IntentCategory,
     QueryMatch,
     QueryResolutionResult,
     QueryResolver,
@@ -83,6 +84,380 @@ from app.retrievers.code_retriever import (
     RetrievalResult,
     RepositoryRetriever,
 )
+
+
+# ===========================================================================
+# Intent-aware traversal policies
+# ===========================================================================
+#
+# Each ``IntentExpansionPolicy`` maps every RelationshipType to a hop budget.
+# The budget controls how many edge hops ``RepositoryRetriever.get_subgraph_for_intent``
+# will follow for that edge type from the seed nodes.
+#
+# Design rationale
+# ----------------
+# Not all edges are equally informative for every query intent:
+#
+#   CALLS       — The call graph.  Critical for implementation, execution, and
+#                 routing questions ("how does X work?", "what calls Y?").
+#                 Follow deeply (2 hops) when the question is about runtime
+#                 behaviour; 1 hop otherwise.
+#
+#   INHERITS    — The class hierarchy.  Essential for analysis, OOP, and
+#                 polymorphism questions.  Follow deeply for analysis/graph
+#                 traversal queries; 1 hop for everything else.
+#
+#   IMPORTS     — Module-level dependencies.  Important for dependency,
+#                 loading, and configuration questions.  1 hop is almost
+#                 always sufficient — second-hop imports become too noisy.
+#
+#   INSTANTIATES— Construction relationships ("who creates an X?").  Useful
+#                 for generation and execution queries where object lifecycle
+#                 matters.
+#
+#   DECORATES   — Decorator application (@router.get, @property, etc.).
+#                 Relevant for routing queries (decorators register routes/
+#                 callbacks).  1 hop; rarely useful to expand further.
+#
+#   OVERRIDES   — Method override chain.  Valuable for analysis and graph
+#                 traversal queries (MRO impact analysis).  1 hop default;
+#                 2 hops for deep analysis.
+#
+#   CONTAINS    — Structural containment (File→Class, Class→Method).
+#                 Excluded (0 hops) by default: it generates massive noise
+#                 (every file contains many symbols) and contributes little
+#                 to answering semantic questions.  Kept at 0 unless the
+#                 query is explicitly about structure/modules.
+#
+# Per-intent summary
+# ------------------
+# ROUTING      : CALLS=2, DECORATES=2, INHERITS=1, IMPORTS=1  — follow the
+#                call chain and decorator chain; routes are registered via
+#                decorators and dispatched via nested calls.
+#
+# EXECUTION    : CALLS=2, INSTANTIATES=2, INHERITS=1, IMPORTS=1  — deep call
+#                chains reveal what happens at runtime; object creation is
+#                part of execution flow.
+#
+# ANALYSIS     : INHERITS=2, OVERRIDES=2, CALLS=1, IMPORTS=1  — class
+#                hierarchy and override chains are the primary signal for
+#                structural analysis.
+#
+# GRAPH_TRAVERSAL: INHERITS=2, OVERRIDES=2, CALLS=1, IMPORTS=1  — same as
+#                  ANALYSIS; hierarchy traversal IS the intent.
+#
+# PARSING      : CALLS=2, IMPORTS=1, CONTAINS=1  — parsing pipelines are
+#                linear call chains; the file structure (CONTAINS) is
+#                relevant because parsers operate on file/AST nodes.
+#
+# LOADING      : IMPORTS=2, CALLS=1  — dependency resolution is about
+#                import chains; follow IMPORTS two hops to surface
+#                transitive dependencies.
+#
+# GENERATION   : CALLS=1, INSTANTIATES=1, IMPORTS=1  — generation functions
+#                call renderers/serialisers; shallow expansion is sufficient.
+#
+# RETRIEVAL    : CALLS=1, IMPORTS=1  — retrieval methods call each other
+#                one level deep; INHERITS useful for abstract base classes.
+#
+# AUTHENTICATION: CALLS=1, INSTANTIATES=1, IMPORTS=1  — auth flows are
+#                 typically shallow.
+#
+# VALIDATION   : CALLS=1, INHERITS=1, DECORATES=1  — validators often use
+#                decorators and call each other.
+#
+# CONFIGURATION: IMPORTS=1, CONTAINS=1  — config is about what's imported
+#                and what a module contains.
+#
+# STATISTICS/AGGREGATION: CALLS=1, IMPORTS=1  — analytics pipelines are
+#                          shallow call chains.
+#
+# TRANSFORMATION: CALLS=2, IMPORTS=1  — data transformation chains can be
+#                 multi-step.
+#
+# SAVING       : CALLS=1, INSTANTIATES=1  — saving flows are shallow.
+#
+# UNKNOWN      : all types at 1 hop (safe default).
+#
+# ``DEFAULT_EXPANSION_POLICY`` is used when intent is UNKNOWN or when no
+# specific policy is registered.
+
+@dataclass(frozen=True)
+class IntentExpansionPolicy:
+    """
+    Per-edge-type hop budgets for intent-aware subgraph expansion.
+
+    Attributes
+    ----------
+    edge_hop_limits : dict[RelationshipType, int]
+        Maps each RelationshipType to its maximum hop count.
+        0 = exclude entirely; 1 = immediate neighbours only; 2 = two hops.
+    default_hops : int
+        Hop budget for any RelationshipType absent from ``edge_hop_limits``.
+    name : str
+        Human-readable label for logging and the ``traversal_strategy`` field
+        on ``ContextPackage``.
+    """
+    edge_hop_limits: dict[RelationshipType, int]
+    default_hops: int = 1
+    name: str = "unknown"
+
+
+# Shorthand aliases for readability in the policy table below
+_R = RelationshipType
+
+DEFAULT_EXPANSION_POLICY = IntentExpansionPolicy(
+    name="default",
+    edge_hop_limits={
+        _R.CALLS:        1,
+        _R.INHERITS:     1,
+        _R.IMPORTS:      1,
+        _R.INSTANTIATES: 1,
+        _R.DECORATES:    1,
+        _R.OVERRIDES:    1,
+        _R.CONTAINS:     0,   # always suppress structural noise
+    },
+    default_hops=1,
+)
+
+_INTENT_EXPANSION_POLICIES: dict[IntentCategory, IntentExpansionPolicy] = {
+
+    IntentCategory.ROUTING: IntentExpansionPolicy(
+        name="routing",
+        edge_hop_limits={
+            _R.CALLS:        2,   # follow dispatch chains (middleware→handler→body)
+            _R.DECORATES:    2,   # decorators register routes (@router.get etc.)
+            _R.INHERITS:     1,   # router classes inherit base routers
+            _R.IMPORTS:      1,   # routing modules import each other
+            _R.INSTANTIATES: 1,
+            _R.OVERRIDES:    1,
+            _R.CONTAINS:     0,
+        },
+    ),
+
+    IntentCategory.EXECUTION: IntentExpansionPolicy(
+        name="execution",
+        edge_hop_limits={
+            _R.CALLS:        2,   # deep call chains show what executes at runtime
+            _R.INSTANTIATES: 2,   # object construction is part of execution flow
+            _R.INHERITS:     1,   # abstract base classes for callables
+            _R.IMPORTS:      1,
+            _R.DECORATES:    1,
+            _R.OVERRIDES:    1,
+            _R.CONTAINS:     0,
+        },
+    ),
+
+    IntentCategory.ANALYSIS: IntentExpansionPolicy(
+        name="analysis",
+        edge_hop_limits={
+            _R.INHERITS:     2,   # full class hierarchy is the point of analysis
+            _R.OVERRIDES:    2,   # override chains show MRO impact
+            _R.CALLS:        1,
+            _R.IMPORTS:      1,
+            _R.INSTANTIATES: 1,
+            _R.DECORATES:    1,
+            _R.CONTAINS:     0,
+        },
+    ),
+
+    IntentCategory.GRAPH_TRAVERSAL: IntentExpansionPolicy(
+        name="graph_traversal",
+        edge_hop_limits={
+            _R.INHERITS:     2,   # hierarchy IS the subject of graph traversal
+            _R.OVERRIDES:    2,
+            _R.CALLS:        1,
+            _R.IMPORTS:      1,
+            _R.INSTANTIATES: 1,
+            _R.DECORATES:    0,
+            _R.CONTAINS:     0,
+        },
+    ),
+
+    IntentCategory.PARSING: IntentExpansionPolicy(
+        name="parsing",
+        edge_hop_limits={
+            _R.CALLS:        2,   # parsing pipelines are linear call chains
+            _R.IMPORTS:      1,
+            _R.CONTAINS:     1,   # parsers operate on file/AST containers
+            _R.INHERITS:     1,
+            _R.INSTANTIATES: 1,
+            _R.DECORATES:    0,
+            _R.OVERRIDES:    1,
+        },
+    ),
+
+    IntentCategory.LOADING: IntentExpansionPolicy(
+        name="loading",
+        edge_hop_limits={
+            _R.IMPORTS:      2,   # import chains reveal transitive dependencies
+            _R.CALLS:        1,
+            _R.INHERITS:     1,
+            _R.INSTANTIATES: 1,
+            _R.DECORATES:    0,
+            _R.OVERRIDES:    0,
+            _R.CONTAINS:     0,
+        },
+    ),
+
+    IntentCategory.GENERATION: IntentExpansionPolicy(
+        name="generation",
+        edge_hop_limits={
+            _R.CALLS:        1,
+            _R.INSTANTIATES: 1,   # generators often instantiate response objects
+            _R.IMPORTS:      1,
+            _R.INHERITS:     1,
+            _R.DECORATES:    1,
+            _R.OVERRIDES:    0,
+            _R.CONTAINS:     0,
+        },
+    ),
+
+    IntentCategory.RETRIEVAL: IntentExpansionPolicy(
+        name="retrieval",
+        edge_hop_limits={
+            _R.CALLS:        1,
+            _R.INHERITS:     1,   # abstract base classes for retrievers
+            _R.IMPORTS:      1,
+            _R.INSTANTIATES: 1,
+            _R.DECORATES:    0,
+            _R.OVERRIDES:    1,
+            _R.CONTAINS:     0,
+        },
+    ),
+
+    IntentCategory.AUTHENTICATION: IntentExpansionPolicy(
+        name="authentication",
+        edge_hop_limits={
+            _R.CALLS:        1,
+            _R.INSTANTIATES: 1,
+            _R.IMPORTS:      1,
+            _R.INHERITS:     1,
+            _R.DECORATES:    1,
+            _R.OVERRIDES:    0,
+            _R.CONTAINS:     0,
+        },
+    ),
+
+    IntentCategory.VALIDATION: IntentExpansionPolicy(
+        name="validation",
+        edge_hop_limits={
+            _R.CALLS:        1,
+            _R.INHERITS:     1,
+            _R.DECORATES:    1,   # validators use decorators
+            _R.IMPORTS:      1,
+            _R.INSTANTIATES: 0,
+            _R.OVERRIDES:    0,
+            _R.CONTAINS:     0,
+        },
+    ),
+
+    IntentCategory.CONFIGURATION: IntentExpansionPolicy(
+        name="configuration",
+        edge_hop_limits={
+            _R.IMPORTS:      1,
+            _R.CONTAINS:     1,   # config modules contain settings
+            _R.CALLS:        0,
+            _R.INHERITS:     1,
+            _R.INSTANTIATES: 0,
+            _R.DECORATES:    0,
+            _R.OVERRIDES:    0,
+        },
+    ),
+
+    IntentCategory.STATISTICS: IntentExpansionPolicy(
+        name="statistics",
+        edge_hop_limits={
+            _R.CALLS:        1,
+            _R.IMPORTS:      1,
+            _R.INHERITS:     1,
+            _R.INSTANTIATES: 0,
+            _R.DECORATES:    0,
+            _R.OVERRIDES:    0,
+            _R.CONTAINS:     0,
+        },
+    ),
+
+    IntentCategory.AGGREGATION: IntentExpansionPolicy(
+        name="aggregation",
+        edge_hop_limits={
+            _R.CALLS:        1,
+            _R.IMPORTS:      1,
+            _R.INHERITS:     1,
+            _R.INSTANTIATES: 0,
+            _R.DECORATES:    0,
+            _R.OVERRIDES:    0,
+            _R.CONTAINS:     0,
+        },
+    ),
+
+    IntentCategory.TRANSFORMATION: IntentExpansionPolicy(
+        name="transformation",
+        edge_hop_limits={
+            _R.CALLS:        2,   # transformation pipelines chain calls
+            _R.IMPORTS:      1,
+            _R.INHERITS:     1,
+            _R.INSTANTIATES: 1,
+            _R.DECORATES:    0,
+            _R.OVERRIDES:    0,
+            _R.CONTAINS:     0,
+        },
+    ),
+
+    IntentCategory.SAVING: IntentExpansionPolicy(
+        name="saving",
+        edge_hop_limits={
+            _R.CALLS:        1,
+            _R.INSTANTIATES: 1,
+            _R.IMPORTS:      1,
+            _R.INHERITS:     1,
+            _R.DECORATES:    0,
+            _R.OVERRIDES:    0,
+            _R.CONTAINS:     0,
+        },
+    ),
+
+    IntentCategory.UNKNOWN: DEFAULT_EXPANSION_POLICY,
+}
+
+
+def _policy_for_intent(categories: list[IntentCategory]) -> IntentExpansionPolicy:
+    """
+    Select the most specific expansion policy for a list of intent categories.
+
+    When multiple intents are detected (e.g. ['routing', 'execution']), the
+    policy with the highest combined hop budgets is chosen — i.e. the most
+    expansive policy wins, ensuring that complex multi-intent questions still
+    surface relevant context across all detected dimensions.
+
+    If no categories are provided, returns ``DEFAULT_EXPANSION_POLICY``.
+    """
+    if not categories:
+        return DEFAULT_EXPANSION_POLICY
+
+    # Collect all candidate policies
+    candidates = [
+        _INTENT_EXPANSION_POLICIES.get(cat, DEFAULT_EXPANSION_POLICY)
+        for cat in categories
+    ]
+
+    if len(candidates) == 1:
+        return candidates[0]
+
+    # Merge by taking the maximum hop budget per edge type across all policies
+    merged_limits: dict[RelationshipType, int] = {}
+    for policy in candidates:
+        for rel, hops in policy.edge_hop_limits.items():
+            merged_limits[rel] = max(merged_limits.get(rel, 0), hops)
+
+    max_default = max(p.default_hops for p in candidates)
+    merged_names = "+".join(p.name for p in candidates)
+
+    return IntentExpansionPolicy(
+        name=f"merged({merged_names})",
+        edge_hop_limits=merged_limits,
+        default_hops=max_default,
+    )
 
 
 # ===========================================================================
@@ -178,6 +553,15 @@ class ContextPackage(BaseModel):
     subgraph_summary:    SubgraphSummary
 
     llm_context:         str
+
+    traversal_strategy:  str = "default"
+    """
+    Name of the ``IntentExpansionPolicy`` used for subgraph expansion.
+    One of the policy names defined in ``_INTENT_EXPANSION_POLICIES``, or
+    ``"default"`` if the query intent was UNKNOWN.  Included in the
+    ContextPackage so benchmarks and diagnostics can confirm which policy
+    fired for a given question.
+    """
 
     # Runtime-only — excluded from serialisation
     raw_resolution: Optional[QueryResolutionResult] = None
@@ -293,9 +677,35 @@ class ContextBuilder:
         # --- Step 2: per-node retrieval ----------------------------------
         retrieval_results = self._collect_retrieval_results(resolution.matches)
 
-        # --- Step 3: subgraph expansion ----------------------------------
-        seed_ids  = {m.node_id for m in resolution.matches}
-        subgraph  = self._retriever.get_subgraph(seed_ids, max_hops=effective_hops)
+        # --- Step 3: intent-aware subgraph expansion ---------------------
+        seed_ids = {m.node_id for m in resolution.matches}
+        policy   = _policy_for_intent(resolution.intent.categories)
+
+        if (
+            policy is DEFAULT_EXPANSION_POLICY
+            or resolution.intent.categories == [IntentCategory.UNKNOWN]
+        ):
+            # Fall back to uniform expansion when intent is unknown
+            subgraph = self._retriever.get_subgraph(
+                seed_ids, max_hops=effective_hops
+            )
+        else:
+            # Scale the per-edge-type budgets by effective_hops.
+            # effective_hops is normally 1; callers that pass max_hops=2
+            # want a deeper expansion, so we multiply each budget by the
+            # ratio to preserve the relative weighting between edge types.
+            if effective_hops == 1:
+                scaled_limits = policy.edge_hop_limits
+            else:
+                scaled_limits = {
+                    rel: min(hops * effective_hops, 3)  # cap at 3 to prevent explosion
+                    for rel, hops in policy.edge_hop_limits.items()
+                }
+            subgraph = self._retriever.get_subgraph_for_intent(
+                seed_ids,
+                edge_hop_limits=scaled_limits,
+                default_hops=min(policy.default_hops * effective_hops, 2),
+            )
 
         # --- Step 4: build output models ---------------------------------
         resolved_nodes = self._build_resolved_nodes(
@@ -315,6 +725,7 @@ class ContextBuilder:
             subgraph_edge_count = len(subgraph.edges),
             subgraph_summary    = subgraph_summary,
             llm_context         = llm_context,
+            traversal_strategy  = policy.name,
             raw_resolution      = resolution,
         )
 

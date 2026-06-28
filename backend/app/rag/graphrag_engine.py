@@ -426,6 +426,14 @@ class RetrievalMetadata(BaseModel):
     subgraph_node_count: int
     subgraph_edge_count: int
 
+    traversal_strategy: str = "default"
+    """
+    Name of the ``IntentExpansionPolicy`` that drove subgraph expansion for
+    this call.  Logged here so benchmark reports can confirm which policy
+    fired — e.g. "routing" for route-registration queries, "analysis" for
+    hierarchy questions, "default" for UNKNOWN intent.
+    """
+
     top_k: Optional[int] = None
     """
     The top_k value actually in effect for this call. ``None`` only if it
@@ -615,6 +623,7 @@ class GraphRAGEngine:
             resolved_node_count=len(package.resolved_nodes),
             subgraph_node_count=package.subgraph_node_count,
             subgraph_edge_count=package.subgraph_edge_count,
+            traversal_strategy=package.traversal_strategy,
             top_k=self._effective_param(top_k, "_top_k"),
             max_hops=self._effective_param(max_hops, "_max_hops"),
         )

@@ -1,11 +1,11 @@
 {
-  "generated": "2026-06-28T01:44:43.468390",
+  "generated": "2026-06-28T21:13:25.478840",
   "summary": {
     "total_questions": 15,
     "successful_questions": 15,
     "failed_questions": 0,
-    "average_retrieval_time_seconds": 0.0095,
-    "average_generation_time_seconds": 0.0022
+    "average_retrieval_time_seconds": 0.0078,
+    "average_generation_time_seconds": 0.0007
   },
   "repositories": [
     {
@@ -22,15 +22,15 @@
           "success": true,
           "error": null,
           "traceback": null,
-          "retrieval_time_seconds": 0.008580099907703698,
-          "generation_time_seconds": 0.005036000162363052,
-          "total_time_seconds": 0.01361610007006675,
+          "retrieval_time_seconds": 0.013330599991604686,
+          "generation_time_seconds": 0.0013401000760495663,
+          "total_time_seconds": 0.014670700067654252,
           "graph_nodes": 761,
           "graph_edges": 1837,
           "resolved_node_count": 5,
-          "subgraph_node_count": 11,
-          "subgraph_edge_count": 10,
-          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 5613 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
+          "subgraph_node_count": 9,
+          "subgraph_edge_count": 4,
+          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 5287 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
         },
         {
           "repository": "FastAPI",
@@ -38,15 +38,15 @@
           "success": true,
           "error": null,
           "traceback": null,
-          "retrieval_time_seconds": 0.004577199928462505,
-          "generation_time_seconds": 0.0012354000937193632,
-          "total_time_seconds": 0.0058126000221818686,
+          "retrieval_time_seconds": 0.004766599973663688,
+          "generation_time_seconds": 0.0,
+          "total_time_seconds": 0.004766599973663688,
           "graph_nodes": 761,
           "graph_edges": 1837,
           "resolved_node_count": 5,
-          "subgraph_node_count": 29,
-          "subgraph_edge_count": 60,
-          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 10366 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
+          "subgraph_node_count": 12,
+          "subgraph_edge_count": 14,
+          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 7772 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
         },
         {
           "repository": "FastAPI",
@@ -54,15 +54,15 @@
           "success": true,
           "error": null,
           "traceback": null,
-          "retrieval_time_seconds": 0.00712810002733022,
-          "generation_time_seconds": 0.0006689999718219042,
-          "total_time_seconds": 0.007797099999152124,
+          "retrieval_time_seconds": 0.012713100062683225,
+          "generation_time_seconds": 0.0,
+          "total_time_seconds": 0.012713100062683225,
           "graph_nodes": 761,
           "graph_edges": 1837,
           "resolved_node_count": 5,
-          "subgraph_node_count": 26,
-          "subgraph_edge_count": 43,
-          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 8514 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
+          "subgraph_node_count": 19,
+          "subgraph_edge_count": 22,
+          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 7267 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
         },
         {
           "repository": "FastAPI",
@@ -70,15 +70,15 @@
           "success": true,
           "error": null,
           "traceback": null,
-          "retrieval_time_seconds": 0.005070599960163236,
-          "generation_time_seconds": 0.0,
-          "total_time_seconds": 0.005070599960163236,
+          "retrieval_time_seconds": 0.006584900082089007,
+          "generation_time_seconds": 0.000995699898339808,
+          "total_time_seconds": 0.007580599980428815,
           "graph_nodes": 761,
           "graph_edges": 1837,
           "resolved_node_count": 5,
-          "subgraph_node_count": 26,
-          "subgraph_edge_count": 37,
-          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 6753 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
+          "subgraph_node_count": 14,
+          "subgraph_edge_count": 11,
+          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 5389 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
         },
         {
           "repository": "FastAPI",
@@ -86,15 +86,15 @@
           "success": true,
           "error": null,
           "traceback": null,
-          "retrieval_time_seconds": 0.008488300023600459,
+          "retrieval_time_seconds": 0.012145500048063695,
           "generation_time_seconds": 0.0,
-          "total_time_seconds": 0.008488300023600459,
+          "total_time_seconds": 0.012145500048063695,
           "graph_nodes": 761,
           "graph_edges": 1837,
           "resolved_node_count": 5,
-          "subgraph_node_count": 22,
-          "subgraph_edge_count": 27,
-          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 6330 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
+          "subgraph_node_count": 17,
+          "subgraph_edge_count": 16,
+          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 5674 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
         }
       ]
     },
@@ -112,15 +112,15 @@
           "success": true,
           "error": null,
           "traceback": null,
-          "retrieval_time_seconds": 0.010611600009724498,
-          "generation_time_seconds": 0.0,
-          "total_time_seconds": 0.010611600009724498,
+          "retrieval_time_seconds": 0.008872199920006096,
+          "generation_time_seconds": 0.0031453000847250223,
+          "total_time_seconds": 0.012017500004731119,
           "graph_nodes": 731,
           "graph_edges": 1678,
           "resolved_node_count": 5,
-          "subgraph_node_count": 13,
-          "subgraph_edge_count": 17,
-          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 6027 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
+          "subgraph_node_count": 10,
+          "subgraph_edge_count": 8,
+          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 5528 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
         },
         {
           "repository": "Typer",
@@ -128,15 +128,15 @@
           "success": true,
           "error": null,
           "traceback": null,
-          "retrieval_time_seconds": 0.015204800060018897,
+          "retrieval_time_seconds": 0.016177500016056,
           "generation_time_seconds": 0.0,
-          "total_time_seconds": 0.015204800060018897,
+          "total_time_seconds": 0.016177500016056,
           "graph_nodes": 731,
           "graph_edges": 1678,
           "resolved_node_count": 5,
-          "subgraph_node_count": 21,
-          "subgraph_edge_count": 22,
-          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 6516 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
+          "subgraph_node_count": 35,
+          "subgraph_edge_count": 43,
+          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 7456 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
         },
         {
           "repository": "Typer",
@@ -144,15 +144,15 @@
           "success": true,
           "error": null,
           "traceback": null,
-          "retrieval_time_seconds": 0.008949299925006926,
-          "generation_time_seconds": 0.022015800117515028,
-          "total_time_seconds": 0.030965100042521954,
+          "retrieval_time_seconds": 0.007427099975757301,
+          "generation_time_seconds": 0.0023951000766828656,
+          "total_time_seconds": 0.009822200052440166,
           "graph_nodes": 731,
           "graph_edges": 1678,
           "resolved_node_count": 5,
           "subgraph_node_count": 12,
-          "subgraph_edge_count": 17,
-          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 5887 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
+          "subgraph_edge_count": 16,
+          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 5857 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
         },
         {
           "repository": "Typer",
@@ -160,15 +160,15 @@
           "success": true,
           "error": null,
           "traceback": null,
-          "retrieval_time_seconds": 0.04073850007262081,
+          "retrieval_time_seconds": 0.005975099978968501,
           "generation_time_seconds": 0.0,
-          "total_time_seconds": 0.04073850007262081,
+          "total_time_seconds": 0.005975099978968501,
           "graph_nodes": 731,
           "graph_edges": 1678,
           "resolved_node_count": 5,
-          "subgraph_node_count": 17,
-          "subgraph_edge_count": 17,
-          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 6122 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
+          "subgraph_node_count": 9,
+          "subgraph_edge_count": 5,
+          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 5484 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
         },
         {
           "repository": "Typer",
@@ -176,15 +176,15 @@
           "success": true,
           "error": null,
           "traceback": null,
-          "retrieval_time_seconds": 0.011490700067952275,
-          "generation_time_seconds": 0.003911699866876006,
-          "total_time_seconds": 0.015402399934828281,
+          "retrieval_time_seconds": 0.008971999981440604,
+          "generation_time_seconds": 0.0,
+          "total_time_seconds": 0.008971999981440604,
           "graph_nodes": 731,
           "graph_edges": 1678,
           "resolved_node_count": 5,
-          "subgraph_node_count": 29,
-          "subgraph_edge_count": 47,
-          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 7847 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
+          "subgraph_node_count": 19,
+          "subgraph_edge_count": 18,
+          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 6517 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
         }
       ]
     },
@@ -202,15 +202,15 @@
           "success": true,
           "error": null,
           "traceback": null,
-          "retrieval_time_seconds": 0.00869389995932579,
-          "generation_time_seconds": 0.0,
-          "total_time_seconds": 0.00869389995932579,
+          "retrieval_time_seconds": 0.006081499974243343,
+          "generation_time_seconds": 0.002524100011214614,
+          "total_time_seconds": 0.008605599985457957,
           "graph_nodes": 358,
           "graph_edges": 760,
           "resolved_node_count": 5,
-          "subgraph_node_count": 21,
-          "subgraph_edge_count": 21,
-          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 6425 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
+          "subgraph_node_count": 13,
+          "subgraph_edge_count": 11,
+          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 5979 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
         },
         {
           "repository": "Requests",
@@ -218,15 +218,15 @@
           "success": true,
           "error": null,
           "traceback": null,
-          "retrieval_time_seconds": 0.005052599939517677,
-          "generation_time_seconds": 0.00038620014674961567,
-          "total_time_seconds": 0.0054388000862672925,
+          "retrieval_time_seconds": 0.005864799953997135,
+          "generation_time_seconds": 0.0,
+          "total_time_seconds": 0.005864799953997135,
           "graph_nodes": 358,
           "graph_edges": 760,
           "resolved_node_count": 5,
-          "subgraph_node_count": 14,
-          "subgraph_edge_count": 15,
-          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 5346 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
+          "subgraph_node_count": 8,
+          "subgraph_edge_count": 4,
+          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 4845 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
         },
         {
           "repository": "Requests",
@@ -234,9 +234,9 @@
           "success": true,
           "error": null,
           "traceback": null,
-          "retrieval_time_seconds": 0.0018045000033453107,
-          "generation_time_seconds": 0.00029879994690418243,
-          "total_time_seconds": 0.002103299950249493,
+          "retrieval_time_seconds": 0.0019621000392362475,
+          "generation_time_seconds": 0.0,
+          "total_time_seconds": 0.0019621000392362475,
           "graph_nodes": 358,
           "graph_edges": 760,
           "resolved_node_count": 5,
@@ -250,9 +250,9 @@
           "success": true,
           "error": null,
           "traceback": null,
-          "retrieval_time_seconds": 0.0027583999326452613,
-          "generation_time_seconds": 0.0001357001019641757,
-          "total_time_seconds": 0.002894100034609437,
+          "retrieval_time_seconds": 0.0033261000644415617,
+          "generation_time_seconds": 0.00043219991493970156,
+          "total_time_seconds": 0.0037582999793812633,
           "graph_nodes": 358,
           "graph_edges": 760,
           "resolved_node_count": 5,
@@ -266,15 +266,15 @@
           "success": true,
           "error": null,
           "traceback": null,
-          "retrieval_time_seconds": 0.003900500014424324,
+          "retrieval_time_seconds": 0.0029956999933347106,
           "generation_time_seconds": 0.0,
-          "total_time_seconds": 0.003900500014424324,
+          "total_time_seconds": 0.0029956999933347106,
           "graph_nodes": 358,
           "graph_edges": 760,
           "resolved_node_count": 5,
-          "subgraph_node_count": 15,
-          "subgraph_edge_count": 16,
-          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 5134 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
+          "subgraph_node_count": 16,
+          "subgraph_edge_count": 13,
+          "answer": "[EchoLLMProvider \u2014 no real LLM configured]\nsystem_prompt length: 496 chars\nuser_prompt length: 4893 chars\nReplace this provider with a real LLMProvider implementation (e.g. AnthropicLLMProvider) to get an actual answer."
         }
       ]
     }
