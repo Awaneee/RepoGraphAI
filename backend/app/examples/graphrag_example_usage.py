@@ -28,11 +28,13 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import time
 
 # Adjust this if your project layout differs — mirrors retrieval_benchmark.py's
 # own sys.path handling so this script can be dropped next to it.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..","..")))
 
+from app.cache.repository_cache import RepositoryCache
 from app.parsers.code_parser import CodeParser
 from app.graph.graph_builder import GraphBuilder
 from app.rag.graphrag_engine import (
@@ -44,12 +46,57 @@ from app.rag.graphrag_engine import (
 )
 
 
-def build_engine(repository_path: str, *, use_echo: bool, use_gemini: bool, model: str | None):
-    print(f"Parsing repository: {repository_path}")
-    parsed_repository = CodeParser().parse_repository(repository_path)
+def build_engine(
+    repository_path: str,
+    *,
+    use_echo: bool,
+    use_gemini: bool,
+    model: str | None,
+    no_cache: bool = False,
+):
+    startup_start = time.perf_counter()
 
-    print("Building knowledge graph...")
-    graph = GraphBuilder().build_graph(parsed_repository)
+    parsing_time = 0.0
+    graph_build_time = 0.0
+    cache_load_time = 0.0
+
+    cache = RepositoryCache(repository_path)
+    graph = None
+    fingerprint = None
+
+    if not no_cache:
+        fingerprint = cache.compute_fingerprint()
+        validation = cache.is_cache_valid(fingerprint)
+
+        if validation.is_valid:
+            t0 = time.perf_counter()
+            graph = cache.load()
+            cache_load_time = time.perf_counter() - t0
+            print("[Cache] Loaded repository graph.")
+
+    if graph is None:
+        print(f"Parsing repository: {repository_path}")
+        t0 = time.perf_counter()
+        parsed_repository = CodeParser().parse_repository(repository_path)
+        parsing_time = time.perf_counter() - t0
+
+        print("Building knowledge graph...")
+        t0 = time.perf_counter()
+        graph = GraphBuilder().build_graph(parsed_repository)
+        graph_build_time = time.perf_counter() - t0
+
+        if not no_cache:
+            cache.save(graph, fingerprint or cache.compute_fingerprint())
+            print("[Cache] Graph cached.")
+
+    total_startup_time = time.perf_counter() - startup_start
+
+    print("\n--- Startup Benchmark ---")
+    print(f"Repository parsing time: {parsing_time:.4f}s")
+    print(f"Graph build time: {graph_build_time:.4f}s")
+    print(f"Cache load time: {cache_load_time:.4f}s")
+    print(f"Total startup time: {total_startup_time:.4f}s")
+    print("-------------------------\n")
 
     if use_echo:
         print("Using EchoLLMProvider (no real LLM call, diagnostic mode).")
@@ -83,6 +130,11 @@ def main() -> None:
     parser.add_argument("--echo", action="store_true", help="Use EchoLLMProvider instead of a real LLM.")
     parser.add_argument("--gemini", action="store_true", help="Use GeminiLLMProvider instead of Anthropic.")
     parser.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Force re-parsing and rebuilding the graph, ignoring any cached graph.",
+    )
+    parser.add_argument(
         "--question",
         action="append",
         dest="questions",
@@ -101,6 +153,7 @@ def main() -> None:
         use_echo=args.echo,
         use_gemini=args.gemini,
         model=args.model,
+        no_cache=args.no_cache,
     )
 
     for question in questions:

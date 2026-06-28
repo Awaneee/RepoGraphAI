@@ -1,0 +1,182 @@
+{
+  "repository_path": "C:\\Users\\awane\\RepoGraphAI\\backend\\repos\\typer",
+  "file_count": 35,
+  "digest": "5761d9d486fa20e7eb1eeddbae8924984a2ac6925aa3464683a9a019a55994cd",
+  "entries": [
+    {
+      "path": "scripts/add_latest_release_date.py",
+      "mtime": 1781719012.6488178,
+      "size": 1055
+    },
+    {
+      "path": "scripts/deploy_docs_status.py",
+      "mtime": 1781719012.6488178,
+      "size": 3913
+    },
+    {
+      "path": "scripts/docs.py",
+      "mtime": 1781719012.6518126,
+      "size": 13833
+    },
+    {
+      "path": "scripts/prepare_release.py",
+      "mtime": 1781719012.6548164,
+      "size": 6844
+    },
+    {
+      "path": "typer/__init__.py",
+      "mtime": 1781719012.8928788,
+      "size": 1388
+    },
+    {
+      "path": "typer/__main__.py",
+      "mtime": 1781719012.8928788,
+      "size": 33
+    },
+    {
+      "path": "typer/_click/__init__.py",
+      "mtime": 1781719012.8986056,
+      "size": 403
+    },
+    {
+      "path": "typer/_click/_compat.py",
+      "mtime": 1781719012.8990848,
+      "size": 17504
+    },
+    {
+      "path": "typer/_click/_termui_impl.py",
+      "mtime": 1781719012.8990848,
+      "size": 17191
+    },
+    {
+      "path": "typer/_click/_textwrap.py",
+      "mtime": 1781719012.8990848,
+      "size": 1279
+    },
+    {
+      "path": "typer/_click/_winconsole.py",
+      "mtime": 1781719012.8990848,
+      "size": 8605
+    },
+    {
+      "path": "typer/_click/core.py",
+      "mtime": 1781719012.8990848,
+      "size": 40021
+    },
+    {
+      "path": "typer/_click/decorators.py",
+      "mtime": 1781719012.8990848,
+      "size": 1653
+    },
+    {
+      "path": "typer/_click/exceptions.py",
+      "mtime": 1781719012.8990848,
+      "size": 8311
+    },
+    {
+      "path": "typer/_click/formatting.py",
+      "mtime": 1781719012.8990848,
+      "size": 8744
+    },
+    {
+      "path": "typer/_click/globals.py",
+      "mtime": 1781719012.8990848,
+      "size": 1822
+    },
+    {
+      "path": "typer/_click/parser.py",
+      "mtime": 1781719012.8990848,
+      "size": 17104
+    },
+    {
+      "path": "typer/_click/shell_completion.py",
+      "mtime": 1781719012.8990848,
+      "size": 10324
+    },
+    {
+      "path": "typer/_click/termui.py",
+      "mtime": 1781719012.8990848,
+      "size": 14133
+    },
+    {
+      "path": "typer/_click/types.py",
+      "mtime": 1781719012.8990848,
+      "size": 22260
+    },
+    {
+      "path": "typer/_click/utils.py",
+      "mtime": 1781719012.8990848,
+      "size": 15041
+    },
+    {
+      "path": "typer/_completion_classes.py",
+      "mtime": 1781719012.8990848,
+      "size": 8065
+    },
+    {
+      "path": "typer/_completion_shared.py",
+      "mtime": 1781719012.8990848,
+      "size": 9442
+    },
+    {
+      "path": "typer/_types.py",
+      "mtime": 1781719012.8990848,
+      "size": 4547
+    },
+    {
+      "path": "typer/_typing.py",
+      "mtime": 1781719012.8990848,
+      "size": 1800
+    },
+    {
+      "path": "typer/cli.py",
+      "mtime": 1781719012.8990848,
+      "size": 10550
+    },
+    {
+      "path": "typer/colors.py",
+      "mtime": 1781719012.8990848,
+      "size": 450
+    },
+    {
+      "path": "typer/completion.py",
+      "mtime": 1781719012.8990848,
+      "size": 4970
+    },
+    {
+      "path": "typer/core.py",
+      "mtime": 1781719012.8990848,
+      "size": 43738
+    },
+    {
+      "path": "typer/main.py",
+      "mtime": 1781719012.9145153,
+      "size": 70753
+    },
+    {
+      "path": "typer/models.py",
+      "mtime": 1781719012.9155023,
+      "size": 23536
+    },
+    {
+      "path": "typer/params.py",
+      "mtime": 1781719012.9163895,
+      "size": 61481
+    },
+    {
+      "path": "typer/rich_utils.py",
+      "mtime": 1781719012.9163895,
+      "size": 26315
+    },
+    {
+      "path": "typer/testing.py",
+      "mtime": 1781719012.9189425,
+      "size": 11426
+    },
+    {
+      "path": "typer/utils.py",
+      "mtime": 1781719012.9189425,
+      "size": 7796
+    }
+  ]
+}

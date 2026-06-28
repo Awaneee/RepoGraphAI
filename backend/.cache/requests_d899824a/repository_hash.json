@@ -1,0 +1,107 @@
+{
+  "repository_path": "C:\\Users\\awane\\RepoGraphAI\\backend\\repos\\requests",
+  "file_count": 20,
+  "digest": "f11a37871c524fbc417a0d2f946f184d5e9aa37c78066f2ef7c66fdc5b3bd99c",
+  "entries": [
+    {
+      "path": "setup.py",
+      "mtime": 1781719021.4714952,
+      "size": 188
+    },
+    {
+      "path": "src/requests/__init__.py",
+      "mtime": 1781719021.473496,
+      "size": 5856
+    },
+    {
+      "path": "src/requests/__version__.py",
+      "mtime": 1781719021.473496,
+      "size": 449
+    },
+    {
+      "path": "src/requests/_internal_utils.py",
+      "mtime": 1781719021.4744945,
+      "size": 1593
+    },
+    {
+      "path": "src/requests/_types.py",
+      "mtime": 1781719021.4754934,
+      "size": 6229
+    },
+    {
+      "path": "src/requests/adapters.py",
+      "mtime": 1781719021.477494,
+      "size": 28740
+    },
+    {
+      "path": "src/requests/api.py",
+      "mtime": 1781719021.477494,
+      "size": 7332
+    },
+    {
+      "path": "src/requests/auth.py",
+      "mtime": 1781719021.4785023,
+      "size": 12461
+    },
+    {
+      "path": "src/requests/certs.py",
+      "mtime": 1781719021.4795027,
+      "size": 448
+    },
+    {
+      "path": "src/requests/compat.py",
+      "mtime": 1781719021.4795027,
+      "size": 2609
+    },
+    {
+      "path": "src/requests/cookies.py",
+      "mtime": 1781719021.4809458,
+      "size": 22129
+    },
+    {
+      "path": "src/requests/exceptions.py",
+      "mtime": 1781719021.4830093,
+      "size": 4726
+    },
+    {
+      "path": "src/requests/help.py",
+      "mtime": 1781719021.4830093,
+      "size": 4200
+    },
+    {
+      "path": "src/requests/hooks.py",
+      "mtime": 1781719021.4840162,
+      "size": 1186
+    },
+    {
+      "path": "src/requests/models.py",
+      "mtime": 1781719021.4850123,
+      "size": 42646
+    },
+    {
+      "path": "src/requests/packages.py",
+      "mtime": 1781719021.4860096,
+      "size": 927
+    },
+    {
+      "path": "src/requests/sessions.py",
+      "mtime": 1781719021.4880078,
+      "size": 34992
+    },
+    {
+      "path": "src/requests/status_codes.py",
+      "mtime": 1781719021.4890084,
+      "size": 4479
+    },
+    {
+      "path": "src/requests/structures.py",
+      "mtime": 1781719021.4900084,
+      "size": 4264
+    },
+    {
+      "path": "src/requests/utils.py",
+      "mtime": 1781719021.4910095,
+      "size": 37216
+    }
+  ]
+}

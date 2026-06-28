@@ -1,6 +1,6 @@
 # Cross Repository Benchmark
 
-Generated: 2026-06-28 21:13:23.623340
+Generated: 2026-06-28 22:33:24.115075
 
 # FastAPI
 
@@ -16,9 +16,9 @@ How are routes registered?
 
 ### Timing
 
-- Retrieval time: 0.0133s
-- Generation time: 0.0013s
-- Total time: 0.0147s
+- Retrieval time: 0.0114s
+- Generation time: 0.0047s
+- Total time: 0.0161s
 
 ### Retrieved Nodes
 
@@ -53,9 +53,9 @@ How does dependency injection work?
 
 ### Timing
 
-- Retrieval time: 0.0048s
-- Generation time: 0.0000s
-- Total time: 0.0048s
+- Retrieval time: 0.0046s
+- Generation time: 0.0009s
+- Total time: 0.0055s
 
 ### Retrieved Nodes
 
@@ -90,9 +90,9 @@ How are requests handled?
 
 ### Timing
 
-- Retrieval time: 0.0127s
-- Generation time: 0.0000s
-- Total time: 0.0127s
+- Retrieval time: 0.0101s
+- Generation time: 0.0021s
+- Total time: 0.0122s
 
 ### Retrieved Nodes
 
@@ -127,9 +127,9 @@ How are responses generated?
 
 ### Timing
 
-- Retrieval time: 0.0066s
-- Generation time: 0.0010s
-- Total time: 0.0076s
+- Retrieval time: 0.0075s
+- Generation time: 0.0000s
+- Total time: 0.0075s
 
 ### Retrieved Nodes
 
@@ -164,9 +164,9 @@ How are middleware components registered?
 
 ### Timing
 
-- Retrieval time: 0.0121s
-- Generation time: 0.0000s
-- Total time: 0.0121s
+- Retrieval time: 0.0089s
+- Generation time: 0.0024s
+- Total time: 0.0112s
 
 ### Retrieved Nodes
 
@@ -209,9 +209,9 @@ How are CLI commands registered?
 
 ### Timing
 
-- Retrieval time: 0.0089s
-- Generation time: 0.0031s
-- Total time: 0.0120s
+- Retrieval time: 0.0107s
+- Generation time: 0.0000s
+- Total time: 0.0107s
 
 ### Retrieved Nodes
 
@@ -246,9 +246,9 @@ How are command arguments parsed?
 
 ### Timing
 
-- Retrieval time: 0.0162s
+- Retrieval time: 0.0140s
 - Generation time: 0.0000s
-- Total time: 0.0162s
+- Total time: 0.0140s
 
 ### Retrieved Nodes
 
@@ -283,9 +283,9 @@ How are options defined?
 
 ### Timing
 
-- Retrieval time: 0.0074s
+- Retrieval time: 0.0072s
 - Generation time: 0.0024s
-- Total time: 0.0098s
+- Total time: 0.0095s
 
 ### Retrieved Nodes
 
@@ -320,9 +320,9 @@ How is help text generated?
 
 ### Timing
 
-- Retrieval time: 0.0060s
-- Generation time: 0.0000s
-- Total time: 0.0060s
+- Retrieval time: 0.0053s
+- Generation time: 0.0022s
+- Total time: 0.0075s
 
 ### Retrieved Nodes
 
@@ -357,9 +357,9 @@ How are callbacks executed?
 
 ### Timing
 
-- Retrieval time: 0.0090s
-- Generation time: 0.0000s
-- Total time: 0.0090s
+- Retrieval time: 0.0061s
+- Generation time: 0.0011s
+- Total time: 0.0072s
 
 ### Retrieved Nodes
 
@@ -402,9 +402,9 @@ How are HTTP requests executed?
 
 ### Timing
 
-- Retrieval time: 0.0061s
-- Generation time: 0.0025s
-- Total time: 0.0086s
+- Retrieval time: 0.0062s
+- Generation time: 0.0000s
+- Total time: 0.0062s
 
 ### Retrieved Nodes
 
@@ -439,9 +439,9 @@ How are sessions managed?
 
 ### Timing
 
-- Retrieval time: 0.0059s
-- Generation time: 0.0000s
-- Total time: 0.0059s
+- Retrieval time: 0.0036s
+- Generation time: 0.0004s
+- Total time: 0.0040s
 
 ### Retrieved Nodes
 
@@ -476,9 +476,9 @@ How are adapters used?
 
 ### Timing
 
-- Retrieval time: 0.0020s
+- Retrieval time: 0.0024s
 - Generation time: 0.0000s
-- Total time: 0.0020s
+- Total time: 0.0024s
 
 ### Retrieved Nodes
 
@@ -513,9 +513,9 @@ How are redirects handled?
 
 ### Timing
 
-- Retrieval time: 0.0033s
-- Generation time: 0.0004s
-- Total time: 0.0038s
+- Retrieval time: 0.0027s
+- Generation time: 0.0000s
+- Total time: 0.0027s
 
 ### Retrieved Nodes
 
@@ -550,9 +550,9 @@ How are responses processed?
 
 ### Timing
 
-- Retrieval time: 0.0030s
+- Retrieval time: 0.0025s
 - Generation time: 0.0000s
-- Total time: 0.0030s
+- Total time: 0.0025s
 
 ### Retrieved Nodes
 
@@ -586,5 +586,5 @@ Replace this provider with a real LLMProvider implementation (e.g. AnthropicLLMP
 - Total Questions: 15
 - Successful Questions: 15
 - Failed Questions: 0
-- Average Retrieval Time: 0.0078s
-- Average Generation Time: 0.0007s
+- Average Retrieval Time: 0.0069s
+- Average Generation Time: 0.0011s

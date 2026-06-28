@@ -62,6 +62,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import Optional
 
+from app.cache.repository_cache import RepositoryCache
 from app.parsers.code_parser import CodeParser
 from app.graph.graph_builder import GraphBuilder
 from app.rag.context_builder import build_context_builder
@@ -211,20 +212,71 @@ def clone_repo(name: str, url: str) -> Path:
 # behaves identically.
 # ------------------------------------------------------------------
 
-def build_engine(repo_path: str, use_gemini: bool):
-    logger.info("Parsing repository: %s", repo_path)
+@dataclass
+class _CachedRepoStats:
+    """
+    Minimal stand-in for a ``ParsedRepository`` on the cache-hit path,
+    where re-parsing was skipped entirely. Only ``total_python_files``
+    is read by callers (for the report's "Python Files" stat), so that
+    is all this carries.
+    """
+    total_python_files: int
 
-    parsed_repository = (
-        CodeParser()
-        .parse_repository(repo_path)
+
+def build_engine(repo_path: str, use_gemini: bool, no_cache: bool = False):
+    startup_start = time.perf_counter()
+
+    parsing_time = 0.0
+    graph_build_time = 0.0
+    cache_load_time = 0.0
+
+    cache = RepositoryCache(repo_path)
+    graph = None
+    fingerprint = None
+    parsed_repository = None
+
+    if not no_cache:
+        fingerprint = cache.compute_fingerprint()
+        validation = cache.is_cache_valid(fingerprint)
+
+        if validation.is_valid:
+            t0 = time.perf_counter()
+            graph = cache.load()
+            cache_load_time = time.perf_counter() - t0
+            logger.info("[Cache] Loaded repository graph.")
+            print("[Cache] Loaded repository graph.")
+            parsed_repository = _CachedRepoStats(
+                total_python_files=fingerprint["file_count"]
+            )
+
+    if graph is None:
+        logger.info("Parsing repository: %s", repo_path)
+
+        t0 = time.perf_counter()
+        parsed_repository = CodeParser().parse_repository(repo_path)
+        parsing_time = time.perf_counter() - t0
+
+        logger.info("Building graph...")
+
+        t0 = time.perf_counter()
+        graph = GraphBuilder().build_graph(parsed_repository)
+        graph_build_time = time.perf_counter() - t0
+
+        if not no_cache:
+            cache.save(graph, fingerprint or cache.compute_fingerprint())
+            logger.info("[Cache] Graph cached.")
+            print("[Cache] Graph cached.")
+
+    total_startup_time = time.perf_counter() - startup_start
+
+    logger.info(
+        "Startup benchmark for %s — parsing=%.4fs build=%.4fs cache_load=%.4fs total=%.4fs",
+        repo_path, parsing_time, graph_build_time, cache_load_time, total_startup_time,
     )
-
-    logger.info("Building graph...")
-
-    graph = (
-        GraphBuilder()
-        .build_graph(parsed_repository)
-    )
+    print(f"Repository parsing time: {parsing_time:.4f}s")
+    print(f"Graph build time: {graph_build_time:.4f}s")
+    print(f"Cache load time: {cache_load_time:.4f}s")
+    print(f"Total startup time: {total_startup_time:.4f}s")
 
     provider = (
         GeminiLLMProvider()
@@ -383,6 +435,7 @@ def run_benchmark(
     *,
     report_path: Path = REPORT_PATH,
     json_report_path: Path = JSON_REPORT_PATH,
+    no_cache: bool = False,
 ) -> list[RepositoryResult]:
 
     report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -415,7 +468,7 @@ def run_benchmark(
         try:
             repo_path = clone_repo(repo_name, repo_url)
             engine, context_builder, graph, parsed_repo = build_engine(
-                str(repo_path), use_gemini
+                str(repo_path), use_gemini, no_cache
             )
         except Exception:
             tb = traceback.format_exc()
@@ -586,6 +639,11 @@ def main():
         default=JSON_REPORT_PATH,
         help="Path to write the JSON report (default: tests/cross_repo_report.json)",
     )
+    parser.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Force re-parsing and rebuilding each repository's graph, ignoring any cached graph.",
+    )
 
     args = parser.parse_args()
 
@@ -596,6 +654,7 @@ def main():
             use_gemini=args.gemini,
             report_path=args.report,
             json_report_path=args.json_report,
+            no_cache=args.no_cache,
         )
     except Exception:
         # Last-resort safety net: even a bug in the benchmark harness itself

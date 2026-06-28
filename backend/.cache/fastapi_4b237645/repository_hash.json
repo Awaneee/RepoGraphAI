@@ -1,0 +1,372 @@
+{
+  "repository_path": "C:\\Users\\awane\\RepoGraphAI\\backend\\repos\\fastapi",
+  "file_count": 73,
+  "digest": "034f6bfeef47cae73c665aa052904dc48a102ec39d5e38a1083618f1da4196a2",
+  "entries": [
+    {
+      "path": "fastapi/__init__.py",
+      "mtime": 1781715090.2133179,
+      "size": 1106
+    },
+    {
+      "path": "fastapi/__main__.py",
+      "mtime": 1781715090.2143173,
+      "size": 40
+    },
+    {
+      "path": "fastapi/_compat/__init__.py",
+      "mtime": 1781715090.2166874,
+      "size": 2135
+    },
+    {
+      "path": "fastapi/_compat/shared.py",
+      "mtime": 1781715090.2184474,
+      "size": 7332
+    },
+    {
+      "path": "fastapi/_compat/v2.py",
+      "mtime": 1781715090.2184474,
+      "size": 18094
+    },
+    {
+      "path": "fastapi/applications.py",
+      "mtime": 1781715090.2242236,
+      "size": 186202
+    },
+    {
+      "path": "fastapi/background.py",
+      "mtime": 1781715090.2242236,
+      "size": 1881
+    },
+    {
+      "path": "fastapi/cli.py",
+      "mtime": 1781715090.226243,
+      "size": 431
+    },
+    {
+      "path": "fastapi/concurrency.py",
+      "mtime": 1781715090.2278497,
+      "size": 1530
+    },
+    {
+      "path": "fastapi/datastructures.py",
+      "mtime": 1781715090.2288485,
+      "size": 5507
+    },
+    {
+      "path": "fastapi/dependencies/__init__.py",
+      "mtime": 1781715090.2298925,
+      "size": 0
+    },
+    {
+      "path": "fastapi/dependencies/models.py",
+      "mtime": 1781715090.2322545,
+      "size": 7443
+    },
+    {
+      "path": "fastapi/dependencies/utils.py",
+      "mtime": 1781715090.2344522,
+      "size": 40789
+    },
+    {
+      "path": "fastapi/encoders.py",
+      "mtime": 1781715090.2354548,
+      "size": 11967
+    },
+    {
+      "path": "fastapi/exception_handlers.py",
+      "mtime": 1781715090.2369711,
+      "size": 1309
+    },
+    {
+      "path": "fastapi/exceptions.py",
+      "mtime": 1781715090.2384617,
+      "size": 7709
+    },
+    {
+      "path": "fastapi/logger.py",
+      "mtime": 1781715090.2404797,
+      "size": 57
+    },
+    {
+      "path": "fastapi/middleware/__init__.py",
+      "mtime": 1781715090.2414756,
+      "size": 59
+    },
+    {
+      "path": "fastapi/middleware/asyncexitstack.py",
+      "mtime": 1781715090.2434542,
+      "size": 655
+    },
+    {
+      "path": "fastapi/middleware/cors.py",
+      "mtime": 1781715090.2446508,
+      "size": 80
+    },
+    {
+      "path": "fastapi/middleware/gzip.py",
+      "mtime": 1781715090.245645,
+      "size": 80
+    },
+    {
+      "path": "fastapi/middleware/httpsredirect.py",
+      "mtime": 1781715090.246824,
+      "size": 118
+    },
+    {
+      "path": "fastapi/middleware/trustedhost.py",
+      "mtime": 1781715090.247845,
+      "size": 112
+    },
+    {
+      "path": "fastapi/middleware/wsgi.py",
+      "mtime": 1781715090.249897,
+      "size": 110
+    },
+    {
+      "path": "fastapi/openapi/__init__.py",
+      "mtime": 1781715090.2520962,
+      "size": 0
+    },
+    {
+      "path": "fastapi/openapi/constants.py",
+      "mtime": 1781715090.2540958,
+      "size": 156
+    },
+    {
+      "path": "fastapi/openapi/docs.py",
+      "mtime": 1781715090.2550948,
+      "size": 12814
+    },
+    {
+      "path": "fastapi/openapi/models.py",
+      "mtime": 1781715090.2570913,
+      "size": 15043
+    },
+    {
+      "path": "fastapi/openapi/utils.py",
+      "mtime": 1781715090.2594447,
+      "size": 27704
+    },
+    {
+      "path": "fastapi/param_functions.py",
+      "mtime": 1781715090.261182,
+      "size": 72056
+    },
+    {
+      "path": "fastapi/params.py",
+      "mtime": 1781715090.2639458,
+      "size": 26959
+    },
+    {
+      "path": "fastapi/requests.py",
+      "mtime": 1781715090.2653637,
+      "size": 144
+    },
+    {
+      "path": "fastapi/responses.py",
+      "mtime": 1781715090.2673793,
+      "size": 4242
+    },
+    {
+      "path": "fastapi/routing.py",
+      "mtime": 1781715090.270762,
+      "size": 230153
+    },
+    {
+      "path": "fastapi/security/__init__.py",
+      "mtime": 1781715090.271323,
+      "size": 896
+    },
+    {
+      "path": "fastapi/security/api_key.py",
+      "mtime": 1781715090.2741184,
+      "size": 10113
+    },
+    {
+      "path": "fastapi/security/base.py",
+      "mtime": 1781715090.2765357,
+      "size": 147
+    },
+    {
+      "path": "fastapi/security/http.py",
+      "mtime": 1781715090.2779624,
+      "size": 13827
+    },
+    {
+      "path": "fastapi/security/oauth2.py",
+      "mtime": 1781715090.2787523,
+      "size": 24871
+    },
+    {
+      "path": "fastapi/security/open_id_connect_url.py",
+      "mtime": 1781715090.2807767,
+      "size": 3230
+    },
+    {
+      "path": "fastapi/security/utils.py",
+      "mtime": 1781715090.2835145,
+      "size": 268
+    },
+    {
+      "path": "fastapi/sse.py",
+      "mtime": 1781715090.2855296,
+      "size": 7083
+    },
+    {
+      "path": "fastapi/staticfiles.py",
+      "mtime": 1781715090.287293,
+      "size": 70
+    },
+    {
+      "path": "fastapi/templating.py",
+      "mtime": 1781715090.2878718,
+      "size": 77
+    },
+    {
+      "path": "fastapi/testclient.py",
+      "mtime": 1781715090.2890463,
+      "size": 67
+    },
+    {
+      "path": "fastapi/types.py",
+      "mtime": 1781715090.2910464,
+      "size": 450
+    },
+    {
+      "path": "fastapi/utils.py",
+      "mtime": 1781715090.2924228,
+      "size": 4477
+    },
+    {
+      "path": "fastapi/websockets.py",
+      "mtime": 1781715090.2935274,
+      "size": 225
+    },
+    {
+      "path": "scripts/add_latest_release_date.py",
+      "mtime": 1781715090.297169,
+      "size": 1063
+    },
+    {
+      "path": "scripts/contributors.py",
+      "mtime": 1781715090.2977664,
+      "size": 9155
+    },
+    {
+      "path": "scripts/deploy_docs_status.py",
+      "mtime": 1781715090.2993858,
+      "size": 4733
+    },
+    {
+      "path": "scripts/doc_parsing_utils.py",
+      "mtime": 1781715090.3001225,
+      "size": 24854
+    },
+    {
+      "path": "scripts/docs.py",
+      "mtime": 1781715090.3001225,
+      "size": 31186
+    },
+    {
+      "path": "scripts/label_approved.py",
+      "mtime": 1781715090.306853,
+      "size": 2337
+    },
+    {
+      "path": "scripts/notify_translations.py",
+      "mtime": 1781715090.309727,
+      "size": 13426
+    },
+    {
+      "path": "scripts/people.py",
+      "mtime": 1781715090.3106763,
+      "size": 15897
+    },
+    {
+      "path": "scripts/playwright/cookie_param_models/image01.py",
+      "mtime": 1781715090.3139472,
+      "size": 1232
+    },
+    {
+      "path": "scripts/playwright/header_param_models/image01.py",
+      "mtime": 1781715090.316104,
+      "size": 1213
+    },
+    {
+      "path": "scripts/playwright/json_base64_bytes/image01.py",
+      "mtime": 1781715090.3181598,
+      "size": 1154
+    },
+    {
+      "path": "scripts/playwright/query_param_models/image01.py",
+      "mtime": 1781715090.3201742,
+      "size": 1363
+    },
+    {
+      "path": "scripts/playwright/request_form_models/image01.py",
+      "mtime": 1781715090.3228924,
+      "size": 1209
+    },
+    {
+      "path": "scripts/playwright/separate_openapi_schemas/image01.py",
+      "mtime": 1781715090.3244698,
+      "size": 1006
+    },
+    {
+      "path": "scripts/playwright/separate_openapi_schemas/image02.py",
+      "mtime": 1781715090.3251443,
+      "size": 1061
+    },
+    {
+      "path": "scripts/playwright/separate_openapi_schemas/image03.py",
+      "mtime": 1781715090.3251443,
+      "size": 1080
+    },
+    {
+      "path": "scripts/playwright/separate_openapi_schemas/image04.py",
+      "mtime": 1781715090.3276725,
+      "size": 1068
+    },
+    {
+      "path": "scripts/playwright/separate_openapi_schemas/image05.py",
+      "mtime": 1781715090.32947,
+      "size": 1016
+    },
+    {
+      "path": "scripts/playwright/sql_databases/image01.py",
+      "mtime": 1781715090.32947,
+      "size": 1120
+    },
+    {
+      "path": "scripts/playwright/sql_databases/image02.py",
+      "mtime": 1781715090.3319194,
+      "size": 1120
+    },
+    {
+      "path": "scripts/prepare_release.py",
+      "mtime": 1781715090.3319194,
+      "size": 6883
+    },
+    {
+      "path": "scripts/sponsors.py",
+      "mtime": 1781715090.3352113,
+      "size": 6501
+    },
+    {
+      "path": "scripts/topic_repos.py",
+      "mtime": 1781715090.3976605,
+      "size": 2916
+    },
+    {
+      "path": "scripts/translate.py",
+      "mtime": 1781715090.3993819,
+      "size": 17737
+    },
+    {
+      "path": "scripts/translation_fixer.py",
+      "mtime": 1781715090.4012356,
+      "size": 3444
+    }
+  ]
+}

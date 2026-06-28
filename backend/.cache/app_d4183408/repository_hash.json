@@ -1,0 +1,162 @@
+{
+  "repository_path": "C:\\Users\\awane\\RepoGraphAI\\backend\\app",
+  "file_count": 31,
+  "digest": "926b7ce1ecbe655c2d8204c9af7b9556b85f87e25b0c453f8b617a4431364c5f",
+  "entries": [
+    {
+      "path": "__init__.py",
+      "mtime": 1780255015.5383372,
+      "size": 0
+    },
+    {
+      "path": "agents/__init__.py",
+      "mtime": 1780255015.6052997,
+      "size": 0
+    },
+    {
+      "path": "agents/code_agent.py",
+      "mtime": 1780255029.71959,
+      "size": 0
+    },
+    {
+      "path": "api/__init__.py",
+      "mtime": 1780255015.613915,
+      "size": 0
+    },
+    {
+      "path": "api/endpoints.py",
+      "mtime": 1780604949.4438293,
+      "size": 1188
+    },
+    {
+      "path": "cache/__init__.py",
+      "mtime": 1782665962.5010905,
+      "size": 0
+    },
+    {
+      "path": "cache/repository_cache.py",
+      "mtime": 1782665864.1897318,
+      "size": 8719
+    },
+    {
+      "path": "core/__init__.py",
+      "mtime": 1780255015.613915,
+      "size": 0
+    },
+    {
+      "path": "core/config.py",
+      "mtime": 1780255029.836346,
+      "size": 0
+    },
+    {
+      "path": "embeddings/__init__.py",
+      "mtime": 1780255015.6396208,
+      "size": 0
+    },
+    {
+      "path": "embeddings/embedding_model.py",
+      "mtime": 1780255029.6103992,
+      "size": 0
+    },
+    {
+      "path": "evaluation/__init__.py",
+      "mtime": 1780255015.6518812,
+      "size": 0
+    },
+    {
+      "path": "evaluation/evaluator.py",
+      "mtime": 1780255029.749419,
+      "size": 0
+    },
+    {
+      "path": "graph/__init__.py",
+      "mtime": 1780255015.6642268,
+      "size": 0
+    },
+    {
+      "path": "graph/graph_builder.py",
+      "mtime": 1780942913.0455873,
+      "size": 38928
+    },
+    {
+      "path": "graph/graph_visualizer.py",
+      "mtime": 1780943070.5698004,
+      "size": 14565
+    },
+    {
+      "path": "main.py",
+      "mtime": 1782666155.0669787,
+      "size": 272
+    },
+    {
+      "path": "models/__init__.py",
+      "mtime": 1780255015.670956,
+      "size": 0
+    },
+    {
+      "path": "models/pydantic_models.py",
+      "mtime": 1780778482.8213358,
+      "size": 10942
+    },
+    {
+      "path": "parsers/__init__.py",
+      "mtime": 1780255015.6803157,
+      "size": 0
+    },
+    {
+      "path": "parsers/code_parser.py",
+      "mtime": 1780777027.2373083,
+      "size": 11874
+    },
+    {
+      "path": "rag/__init__.py",
+      "mtime": 1780255015.6992004,
+      "size": 0
+    },
+    {
+      "path": "rag/context_builder.py",
+      "mtime": 1782661120.2026708,
+      "size": 37153
+    },
+    {
+      "path": "rag/graphrag_engine.py",
+      "mtime": 1782661170.394253,
+      "size": 24495
+    },
+    {
+      "path": "rag/rag_pipeline.py",
+      "mtime": 1780255029.6808128,
+      "size": 0
+    },
+    {
+      "path": "retrievers/__init__.py",
+      "mtime": 1780255015.7160048,
+      "size": 0
+    },
+    {
+      "path": "retrievers/code_retriever.py",
+      "mtime": 1782661073.2882078,
+      "size": 32260
+    },
+    {
+      "path": "retrievers/query_resolver.py",
+      "mtime": 1782591277.9233298,
+      "size": 80157
+    },
+    {
+      "path": "services/__init__.py",
+      "mtime": 1780255015.7321758,
+      "size": 0
+    },
+    {
+      "path": "services/graph_services.py",
+      "mtime": 1780604824.2139738,
+      "size": 550
+    },
+    {
+      "path": "services/repository_service.py",
+      "mtime": 1780520032.4158459,
+      "size": 11275
+    }
+  ]
+}
