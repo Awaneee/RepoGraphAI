@@ -945,7 +945,7 @@ def _is_graph_infrastructure(node: GraphNode) -> bool:
     return False
 
 
-def _looks_like_dto(node: GraphNode, graph: RepositoryGraph) -> bool:
+def _looks_like_dto(node: GraphNode, graph: RepositoryGraph, dto_fixes: bool = False) -> bool:
     """
     Return True when *node* appears to be a data-container (DTO, schema,
     model, result object) rather than an implementation symbol.
@@ -976,11 +976,15 @@ def _looks_like_dto(node: GraphNode, graph: RepositoryGraph) -> bool:
     label = node.label
 
     # ------------------------------------------------------------------
-    # Signal 1: name pattern
+    # Signal 1: name pattern — CLASS nodes only.
+    # IMPORTANT: suffix patterns like 'args', 'response', 'options' must not
+    # match FUNCTION/METHOD nodes (e.g. parse_args, iter_content, parse_options)
+    # since those are execution callables, not data containers.
     # ------------------------------------------------------------------
-    for pattern in _DTO_NAME_PATTERNS:
-        if pattern.search(label):
-            return True
+    if node.type == NodeType.CLASS:
+        for pattern in _DTO_NAME_PATTERNS:
+            if pattern.search(label):
+                return True
 
     # ------------------------------------------------------------------
     # Signal 2: DTO-like decorator on this node (via DECORATES edges)
@@ -1033,6 +1037,7 @@ def _looks_like_dto(node: GraphNode, graph: RepositoryGraph) -> bool:
 
         if has_no_implementation_outgoing and has_no_callers and has_no_instantiators:
             return True
+        
 
     return False
 
@@ -1193,9 +1198,30 @@ class QueryResolver:
         self,
         graph: RepositoryGraph,
         default_top_k: int = 10,
+        ablation_toggles: Optional[dict[str, bool]] = None,
     ) -> None:
         self._graph = graph
         self._default_top_k = default_top_k
+        if ablation_toggles is None:
+            # Production defaults — only tweaks validated to improve (or not harm) metrics.
+            # dto_fixes: DISABLED — ablation showed Top-1 -3.4% regression (DTO propagation
+            #   incorrectly penalises execution methods like parse_args and iter_content).
+            # generate_build: DISABLED — no isolated gain; with generic-penalty, build_graph
+            #   only gets 'build' as an expansion hit and is suppressed, causing Top-5 regression.
+            self.ablation_toggles = {
+                "dto_fixes": False,
+                "private_penalties": True,
+                "dunder_penalties": True,
+                "generate_build": False,
+                "resolution_resolve": True,
+                "retrieval_synonyms": True,
+                "symbol_candidate": True,
+                "file_module_penalty": True,
+                "visualization_penalty": True,
+                "verb_lexicon_cleanup": True,
+            }
+        else:
+            self.ablation_toggles = ablation_toggles
 
         self._nodes: dict[str, GraphNode] = {
             node.id: node for node in graph.nodes
@@ -1208,9 +1234,21 @@ class QueryResolver:
 
         # Pre-compute DTO status for every node — O(N·E) but done once.
         self._is_dto: dict[str, bool] = {
-            node_id: _looks_like_dto(node, graph)
+            node_id: _looks_like_dto(node, graph, dto_fixes=self.ablation_toggles.get("dto_fixes", False))
             for node_id, node in self._nodes.items()
         }
+
+        # Propagation of DTO penalty to methods of DTO classes
+        if self.ablation_toggles.get("dto_fixes", False):
+            for edge in graph.edges:
+                if (
+                    edge.relationship == RelationshipType.CONTAINS
+                    and edge.source in self._is_dto
+                    and self._is_dto[edge.source]
+                    and edge.target in self._nodes
+                    and self._nodes[edge.target].type == NodeType.METHOD
+                ):
+                    self._is_dto[edge.target] = True
 
         # Pre-compute label components for every node — used by verb-label
         # boost.  Combines snake_case parts and camelCase splits.
@@ -1407,12 +1445,27 @@ class QueryResolver:
                 seen.add(term)
                 result.append(term)
 
+        # Get local expansion dict
+        local_expansion = dict(_QUERY_EXPANSION)
+        if self.ablation_toggles.get("generate_build", False):
+            local_expansion["generate"] = list(set(local_expansion.get("generate", []) + ["build"]))
+            local_expansion["generat"] = list(set(local_expansion.get("generat", []) + ["build"]))
+        if self.ablation_toggles.get("resolution_resolve", False):
+            local_expansion["resolution"] = list(set(local_expansion.get("resolution", []) + ["resolve"]))
+            local_expansion["resolu"] = list(set(local_expansion.get("resolu", []) + ["resolve"]))
+        if self.ablation_toggles.get("retrieval_synonyms", False):
+            local_expansion["retrieval"] = list(set(local_expansion.get("retrieval", []) + ["retriever", "retrieve"]))
+            local_expansion["retriever"] = list(set(local_expansion.get("retriever", []) + ["retrieval", "retrieve"]))
+        if self.ablation_toggles.get("symbol_candidate", False):
+            local_expansion["symbol"] = list(set(local_expansion.get("symbol", []) + ["candidate"]))
+            local_expansion["symbols"] = list(set(local_expansion.get("symbols", []) + ["candidate"]))
+
         for kw in base_keywords:
-            for expanded in _QUERY_EXPANSION.get(kw, []):
+            for expanded in local_expansion.get(kw, []):
                 _try_add(expanded)
             s = _stem(kw)
             if s:
-                for expanded in _QUERY_EXPANSION.get(s, []):
+                for expanded in local_expansion.get(s, []):
                     _try_add(expanded)
 
         return result
@@ -1493,6 +1546,8 @@ class QueryResolver:
         for cat in intent.categories:
             vset = _INTENT_VERB_COMPONENTS.get(cat)
             if vset:
+                if self.ablation_toggles.get("verb_lexicon_cleanup", False) and cat == IntentCategory.AUTHENTICATION:
+                    vset = frozenset(vset - {"session"})
                 active_verb_sets.append(vset)
 
         # ----------------------------------------------------------------
@@ -1566,17 +1621,52 @@ class QueryResolver:
                     f"code-node type={node.type.value} +{_W_NODE_TYPE_BASE:.0f}"
                 )
 
-            # v5.2: File/module penalty for implementation queries.
-            # Module and file nodes match on path strings (e.g. starlette.responses
-            # matches 'respons') but are not implementation symbols.  For any
-            # implementation-oriented query, penalise non-code nodes so callables
-            # always rank above module/file path matches.
-            if (
-                intent.is_implementation_query
-                and node.type in (NodeType.FILE, NodeType.MODULE)
-            ):
-                scores[node_id] -= 8.0
-                reasons[node_id].append("file/module-penalty (impl query) -8")
+            # File/module penalty
+            if self.ablation_toggles.get("file_module_penalty", False):
+                if node.type in (NodeType.FILE, NodeType.MODULE):
+                    file_keywords = {"file", "files", "module", "modules", "path", "paths", "folder", "directory"}
+                    if not (base_kws_set & file_keywords):
+                        non_file_intents = {
+                            IntentCategory.PARSING, IntentCategory.GENERATION, IntentCategory.RETRIEVAL,
+                            IntentCategory.EXECUTION, IntentCategory.AUTHENTICATION, IntentCategory.ROUTING,
+                            IntentCategory.VALIDATION, IntentCategory.TRANSFORMATION, IntentCategory.GRAPH_TRAVERSAL,
+                            IntentCategory.STATISTICS, IntentCategory.AGGREGATION, IntentCategory.ANALYSIS,
+                            IntentCategory.UNKNOWN,  # also penalise when intent not detected
+                        }
+                        if any(c in non_file_intents for c in intent.categories):
+                            scores[node_id] -= 12.0
+                            reasons[node_id].append("file/module-penalty (intent-aware) -12")
+            else:
+                if (
+                    intent.is_implementation_query
+                    and node.type in (NodeType.FILE, NodeType.MODULE)
+                ):
+                    scores[node_id] -= 8.0
+                    reasons[node_id].append("file/module-penalty (impl query) -8")
+
+            # Intent-aware visualization penalty
+            if self.ablation_toggles.get("visualization_penalty", False):
+                if not (intent.categories and intent.categories[0] == IntentCategory.VISUALIZATION):
+                    vis_lexicon = {"visualize", "visualis", "plot", "chart", "draw", "diagram", "visualizer", "visualiser"}
+                    node_label_parts_lower = {p.lower() for p in self._label_parts.get(node_id, frozenset())}
+                    if node_label_parts_lower & vis_lexicon:
+                        scores[node_id] -= 4.0
+                        reasons[node_id].append("visualization-demotion-penalty -4")
+
+            # Dunder and Private penalties
+            if self.ablation_toggles.get("dunder_penalties", False):
+                if node.label.startswith("__") and node.label.endswith("__"):
+                    scores[node_id] -= 15.0
+                    reasons[node_id].append("dunder-penalty -15")
+            if self.ablation_toggles.get("private_penalties", False):
+                if node.label.startswith("_") and not node.label.startswith("__"):
+                    scores[node_id] -= 4.0
+                    reasons[node_id].append("private-penalty -4")
+                elif "." in node_id:
+                    parts = node_id.split(".")
+                    if any(part.startswith("_") and not part.startswith("__") for part in parts[:-1]):
+                        scores[node_id] -= 4.0
+                        reasons[node_id].append("private-class-method-penalty -4")
 
             # Intent-type boost
             if preferred_types and node.type in preferred_types:
@@ -1737,6 +1827,26 @@ class QueryResolver:
         """Return only node IDs ready to pass to RepositoryRetriever."""
         result = self.resolve_query(question, top_k=top_k)
         return result.top_node_ids()
+
+    def get_ranking_diagnostics(self, match: QueryMatch) -> str:
+        """
+        Return a clean, multi-line diagnostic breakdown of the scoring
+        reasons for a single candidate node match.
+        """
+        lines = []
+        lines.append(match.node_id)
+        lines.append(f"Final Score = {match.score}")
+        if match.reason:
+            parts = [p.strip() for p in match.reason.split(";")]
+            for part in parts:
+                match_sign = re.search(r"([-+]\d+(?:\.\d+)?)$", part)
+                if match_sign:
+                    val = match_sign.group(1)
+                    desc = part[:match_sign.start()].strip()
+                    lines.append(f"{val:>4} {desc}")
+                else:
+                    lines.append(f"     {part}")
+        return "\n".join(lines)
 
 
 # ===========================================================================

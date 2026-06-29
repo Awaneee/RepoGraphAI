@@ -407,6 +407,7 @@ class QuestionMetrics:
     retrieved_ids:    list[str]   # top-5 node IDs in rank order
     retrieved_labels: list[str]   # matching labels
     retrieved_scores: list[float]
+    retrieved_reasons: list[str] = field(default_factory=list)
 
     # metric fields (populated after compute_metrics)
     top_1:       bool  = False
@@ -465,6 +466,7 @@ def _evaluate_questions(
             retrieved_ids=[],
             retrieved_labels=[],
             retrieved_scores=[],
+            retrieved_reasons=[],
         )
 
         try:
@@ -472,9 +474,10 @@ def _evaluate_questions(
             qm.retrieval_time = elapsed
 
             # Collect retrieved info
-            qm.retrieved_ids    = [rn.node_id for rn in resolved_nodes]
-            qm.retrieved_labels = [rn.label   for rn in resolved_nodes]
-            qm.retrieved_scores = [rn.score   for rn in resolved_nodes]
+            qm.retrieved_ids     = [rn.node_id for rn in resolved_nodes]
+            qm.retrieved_labels  = [rn.label   for rn in resolved_nodes]
+            qm.retrieved_scores  = [rn.score   for rn in resolved_nodes]
+            qm.retrieved_reasons = [rn.reason  for rn in resolved_nodes]
 
             # Compute metrics
             m = compute_metrics(qm.retrieved_ids, expected_symbols, k=5)
@@ -497,11 +500,32 @@ def _evaluate_questions(
         results.append(qm)
     return results
 
+def _inject_ablation_toggles(context_builder, graph, ablation_toggles):
+    from app.retrievers.query_resolver import _looks_like_dto
+    from app.models.pydantic_models import RelationshipType, NodeType
+    if ablation_toggles is not None:
+        context_builder._resolver.ablation_toggles = ablation_toggles
+        # Re-precompute DTO status
+        context_builder._resolver._is_dto = {
+            node_id: _looks_like_dto(node, graph, dto_fixes=ablation_toggles.get("dto_fixes", False))
+            for node_id, node in context_builder._resolver._nodes.items()
+        }
+        if ablation_toggles.get("dto_fixes", False):
+            for edge in graph.edges:
+                if (
+                    edge.relationship == RelationshipType.CONTAINS
+                    and edge.source in context_builder._resolver._is_dto
+                    and context_builder._resolver._is_dto[edge.source]
+                    and edge.target in context_builder._resolver._nodes
+                    and context_builder._resolver._nodes[edge.target].type == NodeType.METHOD
+                ):
+                    context_builder._resolver._is_dto[edge.target] = True
+
 # ---------------------------------------------------------------------------
 # MODE 1 — Internal benchmark
 # ---------------------------------------------------------------------------
 
-def run_internal_benchmark() -> list[QuestionMetrics]:
+def run_internal_benchmark(ablation_toggles: Optional[dict[str, bool]] = None) -> list[QuestionMetrics]:
     repo_path = str(PROJECT_ROOT / "app")
     logger.info("=" * 70)
     logger.info("MODE 1 — Internal benchmark: %s", repo_path)
@@ -512,6 +536,7 @@ def run_internal_benchmark() -> list[QuestionMetrics]:
     logger.info("Building graph...")
     graph = GraphBuilder().build_graph(parsed)
     context_builder = build_context_builder(graph)
+    _inject_ablation_toggles(context_builder, graph, ablation_toggles)
     logger.info("Pipeline ready. Running %d questions...", len(INTERNAL_QUESTIONS))
 
     results = _evaluate_questions(context_builder, INTERNAL_QUESTIONS, "internal")
@@ -536,7 +561,7 @@ def _clone_repo(name: str, url: str) -> Path:
     return repo_path
 
 
-def run_cross_repo_benchmark() -> dict[str, list[QuestionMetrics]]:
+def run_cross_repo_benchmark(ablation_toggles: Optional[dict[str, bool]] = None) -> dict[str, list[QuestionMetrics]]:
     REPOS_DIR.mkdir(parents=True, exist_ok=True)
     all_results: dict[str, list[QuestionMetrics]] = {}
 
@@ -552,6 +577,7 @@ def run_cross_repo_benchmark() -> dict[str, list[QuestionMetrics]]:
             logger.info("  Building graph...")
             graph = GraphBuilder().build_graph(parsed)
             context_builder = build_context_builder(graph, top_k=5, max_hops=1)
+            _inject_ablation_toggles(context_builder, graph, ablation_toggles)
             logger.info("  Pipeline ready. Running %d questions...",
                         len(CROSS_REPO_QUESTIONS[repo_name]))
         except Exception:
@@ -862,11 +888,193 @@ def print_console_summary(
     print(f"  JSON   : {JSON_REPORT_PATH}")
     print("=" * 60 + "\n")
 
+    # Expected vs Actual Diagnostics for Failed Top-1 Cases
+    failed_top1 = [qm for qm in valid if not qm.top_1]
+    if failed_top1:
+        print("=" * 60)
+        print("  EXPECTED VS ACTUAL DIAGNOSTICS FOR FAILED TOP-1 CASES")
+        print("=" * 60)
+        import re
+        for qm in failed_top1:
+            print(f"\nQuestion : {qm.question}  ({qm.repository})")
+            print(f"Expected : {qm.expected_symbols}")
+            
+            # Print actual top-1 retrieved symbol
+            if qm.retrieved_ids:
+                actual_top1_id = qm.retrieved_ids[0]
+                actual_top1_score = qm.retrieved_scores[0]
+                actual_top1_reason = qm.retrieved_reasons[0]
+                print(f"Actual Top-1: {actual_top1_id} (Score: {actual_top1_score})")
+                print("Breakdown:")
+                parts = [p.strip() for p in actual_top1_reason.split(";")]
+                for part in parts:
+                    match_sign = re.search(r"([-+]\d+(?:\.\d+)?)$", part)
+                    if match_sign:
+                        val = match_sign.group(1)
+                        desc = part[:match_sign.start()].strip()
+                        print(f"  {val:>4} {desc}")
+                    else:
+                        print(f"       {part}")
+            else:
+                print("Actual Top-1: (None retrieved)")
+
+            # Find the expected symbol in the retrieved list (if present)
+            found_expected = False
+            for exp in qm.expected_symbols:
+                if exp in qm.retrieved_ids:
+                    idx = qm.retrieved_ids.index(exp)
+                    score = qm.retrieved_scores[idx]
+                    reason = qm.retrieved_reasons[idx]
+                    print(f"\nExpected symbol: {exp} (Rank: {idx + 1}, Score: {score})")
+                    print("Breakdown:")
+                    parts = [p.strip() for p in reason.split(";")]
+                    for part in parts:
+                        match_sign = re.search(r"([-+]\d+(?:\.\d+)?)$", part)
+                        if match_sign:
+                            val = match_sign.group(1)
+                            desc = part[:match_sign.start()].strip()
+                            print(f"  {val:>4} {desc}")
+                        else:
+                            print(f"       {part}")
+                    found_expected = True
+                    break
+            if not found_expected:
+                print("\nExpected symbol: (Not in top-5 retrieved list)")
+            print("-" * 60)
+
 # ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
 
 def main() -> None:
+    logger.info("RepoGraphAI — Retrieval Metrics  (Milestone 4)")
+    logger.info("=" * 70)
+
+    # Step 1 & 2: parse + build graphs, run retrieval for both modes
+    internal_results  = run_internal_benchmark()
+    cross_repo_results = run_cross_repo_benchmark()
+
+    # Steps 3 & 4: already done inside the runners above (metrics computed
+    # inline via compute_metrics after each pipeline call).
+
+    # Step 5: console summary
+    print_console_summary(internal_results, cross_repo_results)
+
+    # Step 6: write Markdown report
+    report_text = build_report(internal_results, cross_repo_results)
+    REPORT_PATH.write_text(report_text, encoding="utf-8")
+    logger.info("Markdown report written to: %s", REPORT_PATH)
+
+    json_data = build_json(internal_results, cross_repo_results)
+    JSON_REPORT_PATH.write_text(
+        json.dumps(json_data, indent=2, default=str),
+        encoding="utf-8",
+    )
+    logger.info("JSON report written to: %s", JSON_REPORT_PATH)
+
+def _run_ablation_runs():
+    TWEAKS = [
+        ("dto_fixes", "Restricts Signal 1 DTO check to Class & propagates DTO"),
+        ("private_penalties", "Penalizes private methods/classes by -4"),
+        ("dunder_penalties", "Penalizes dunder methods by -15"),
+        ("generate_build", "Adds generate/generat -> build synonyms"),
+        ("resolution_resolve", "Adds resolution/resolu -> resolve synonyms"),
+        ("retrieval_synonyms", "Adds retrieval/retriever synonyms"),
+        ("symbol_candidate", "Adds symbol -> candidate synonyms"),
+        ("file_module_penalty", "Intent-aware file/module penalty (-12)"),
+        ("visualization_penalty", "Intent-aware visualization penalty (-4)"),
+        ("verb_lexicon_cleanup", "Removes session from authentication verbs"),
+    ]
+
+    logger.info("==================================================")
+    print("  PRE-BUILDING CODES AND GRAPHS FOR ABLATION RUNS")
+    logger.info("==================================================")
+
+    # 1. APP (Internal)
+    logger.info("Parsing internal repository...")
+    internal_parsed = CodeParser().parse_repository(str(PROJECT_ROOT / "app"))
+    logger.info("Building internal graph...")
+    internal_graph = GraphBuilder().build_graph(internal_parsed)
+
+    # 2. Cross-repo
+    REPOS_DIR.mkdir(parents=True, exist_ok=True)
+    repo_graphs = {}
+    for repo_name, repo_url in REPOSITORIES.items():
+        try:
+            repo_path = _clone_repo(repo_name, repo_url)
+            logger.info("Parsing %s...", repo_name)
+            parsed = CodeParser().parse_repository(str(repo_path))
+            logger.info("Building graph for %s...", repo_name)
+            graph = GraphBuilder().build_graph(parsed)
+            repo_graphs[repo_name] = graph
+        except Exception:
+            logger.exception("Failed to build graph for %s", repo_name)
+
+    # Run ablation configurations
+    configs = []
+    
+    # Baseline (all False)
+    configs.append(("Baseline (All False)", {t[0]: False for t in TWEAKS}))
+    
+    # Individual Tweaks
+    for tweak_name, desc in TWEAKS:
+        toggles = {t[0]: False for t in TWEAKS}
+        toggles[tweak_name] = True
+        configs.append((f"Tweak: {tweak_name}", toggles))
+        
+    # Combined (All True)
+    configs.append(("Combined (All True)", {t[0]: True for t in TWEAKS}))
+
+    results = []
+    for label, toggles in configs:
+        # Evaluate internal
+        cb_internal = build_context_builder(internal_graph)
+        _inject_ablation_toggles(cb_internal, internal_graph, toggles)
+        metrics_internal = _evaluate_questions(cb_internal, INTERNAL_QUESTIONS, "internal")
+
+        # Evaluate cross-repo
+        metrics_cross = []
+        for repo_name, graph in repo_graphs.items():
+            cb_cross = build_context_builder(graph, top_k=5, max_hops=1)
+            _inject_ablation_toggles(cb_cross, graph, toggles)
+            metrics_cross.extend(_evaluate_questions(cb_cross, CROSS_REPO_QUESTIONS[repo_name], repo_name))
+
+        # Aggregate metrics
+        all_qm = metrics_internal + metrics_cross
+        valid = [qm for qm in all_qm if not qm.error]
+        
+        all_metrics = [
+            {k: getattr(qm, k) for k in ["top_1", "top_3", "top_5", "mrr"]}
+            for qm in valid
+        ]
+        agg = aggregate_metrics(all_metrics)
+        results.append((label, agg))
+
+    # Print markdown table
+    print("\n" + "=" * 60)
+    print("  ABLATION STUDY RESULTS")
+    print("=" * 60)
+    print("| Configuration | Top-1 | Top-3 | Top-5 | MRR |")
+    print("|---|---|---|---|---|")
+    for label, agg in results:
+        print(f"| {label:<35} | {agg.get('top_1', 0)*100:>5.1f}% | {agg.get('top_3', 0)*100:>5.1f}% | {agg.get('top_5', 0)*100:>5.1f}% | {agg.get('mrr', 0):>5.3f} |")
+    print("=" * 60 + "\n")
+
+
+# ---------------------------------------------------------------------------
+# Main entry point
+# ---------------------------------------------------------------------------
+
+def main() -> None:
+    import argparse
+    parser = argparse.ArgumentParser(description="RepoGraphAI Retrieval Metrics & Ablation Runner")
+    parser.add_argument("--ablation", action="store_true", help="Run ablation study across all tweaks")
+    args = parser.parse_args()
+
+    if args.ablation:
+        _run_ablation_runs()
+        return
+
     logger.info("RepoGraphAI — Retrieval Metrics  (Milestone 4)")
     logger.info("=" * 70)
 

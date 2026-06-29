@@ -1,30 +1,30 @@
 {
-  "generated": "2026-06-28T21:47:15.474165",
+  "generated": "2026-06-29T21:13:54.624728",
   "overall": {
-    "top_1": 0.6667,
-    "top_3": 0.9,
+    "top_1": 0.8333,
+    "top_3": 0.9333,
     "top_5": 0.9667,
-    "recall_1": 0.4,
+    "recall_1": 0.5222,
     "recall_3": 0.7556,
-    "recall_5": 0.9111,
-    "precision_1": 0.6667,
-    "precision_3": 0.4889,
-    "precision_5": 0.36,
-    "mrr": 0.7872
+    "recall_5": 0.9,
+    "precision_1": 0.8333,
+    "precision_3": 0.4667,
+    "precision_5": 0.3533,
+    "mrr": 0.8789
   },
   "per_dataset": {
     "internal": {
       "aggregate": {
-        "top_1": 0.5333,
-        "top_3": 0.8,
+        "top_1": 0.7333,
+        "top_3": 0.8667,
         "top_5": 0.9333,
-        "recall_1": 0.5333,
-        "recall_3": 0.8,
+        "recall_1": 0.7333,
+        "recall_3": 0.8667,
         "recall_5": 0.9333,
-        "precision_1": 0.5333,
-        "precision_3": 0.2667,
+        "precision_1": 0.7333,
+        "precision_3": 0.2889,
         "precision_5": 0.1867,
-        "mrr": 0.6744
+        "mrr": 0.8022
       },
       "questions": [
         {
@@ -36,28 +36,28 @@
           ],
           "retrieved_ids": [
             "CodeParser.parse_file",
-            "CodeParser._extract_class",
             "CodeParser.extract_function",
+            "CodeParser._extract_class",
             "_file_id",
             "CodeParser._extract_decorator"
           ],
           "retrieved_labels": [
             "parse_file",
-            "_extract_class",
             "extract_function",
+            "_extract_class",
             "_file_id",
             "_extract_decorator"
           ],
           "retrieved_scores": [
             47.0,
-            30.0,
             29.0,
-            29.0,
-            28.0
+            26.0,
+            25.0,
+            24.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0042,
+          "retrieval_time": 0.0023,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -81,28 +81,28 @@
           ],
           "retrieved_ids": [
             "CodeParser._extract_imports",
-            "CodeParser._extract_class",
             "CodeParser.extract_function",
-            "CodeParser._extract_decorator",
-            "QueryResolver.extract_keywords"
+            "QueryResolver.extract_keywords",
+            "GraphBuilder.build_import_graph",
+            "CodeParser._extract_class"
           ],
           "retrieved_labels": [
             "_extract_imports",
-            "_extract_class",
             "extract_function",
-            "_extract_decorator",
-            "extract_keywords"
+            "extract_keywords",
+            "build_import_graph",
+            "_extract_class"
           ],
           "retrieved_scores": [
-            56.0,
-            28.0,
+            52.0,
             27.0,
             26.0,
-            26.0
+            25.0,
+            24.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0023,
+          "retrieval_time": 0.0038,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -126,28 +126,28 @@
           ],
           "retrieved_ids": [
             "CodeParser._extract_class",
-            "_class_id",
+            "RepositoryService.classify_repository_type",
             "RepositoryRetriever.get_class_context",
             "GraphVisualizer.save_class_graph",
             "GraphBuilder.build_class_graph"
           ],
           "retrieved_labels": [
             "_extract_class",
-            "_class_id",
+            "classify_repository_type",
             "get_class_context",
             "save_class_graph",
             "build_class_graph"
           ],
           "retrieved_scores": [
-            53.0,
-            32.0,
+            49.0,
+            34.0,
             31.0,
             30.0,
             29.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0027,
+          "retrieval_time": 0.0031,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -174,25 +174,25 @@
             "GraphService.generate_graph",
             "GraphBuilder.build_graph",
             "GraphBuilder.generate_statistics",
-            "_render_graph"
+            "build_graphrag_engine"
           ],
           "retrieved_labels": [
             "generate_graph",
             "generate_graph",
             "build_graph",
             "generate_statistics",
-            "_render_graph"
+            "build_graphrag_engine"
           ],
           "retrieved_scores": [
             56.0,
             55.0,
             39.0,
             38.0,
-            36.0
+            34.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 3,
-          "retrieval_time": 0.0047,
+          "retrieval_time": 0.0032,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -215,41 +215,41 @@
             "GraphBuilder.build_graph"
           ],
           "retrieved_ids": [
+            "GraphBuilder.build_graph",
             "GraphRAGEngine._build_source_nodes",
             "ContextBuilder._build_resolved_nodes",
-            "GraphBuilder.build_graph",
-            "_emit_nodes",
-            "build_graphrag_engine"
+            "build_graphrag_engine",
+            "_emit_nodes"
           ],
           "retrieved_labels": [
+            "build_graph",
             "_build_source_nodes",
             "_build_resolved_nodes",
-            "build_graph",
-            "_emit_nodes",
-            "build_graphrag_engine"
+            "build_graphrag_engine",
+            "_emit_nodes"
           ],
           "retrieved_scores": [
-            52.0,
-            51.0,
             48.0,
-            44.0,
-            43.0
+            48.0,
+            47.0,
+            43.0,
+            40.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 3,
-          "retrieval_time": 0.0045,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0055,
           "error": null,
           "metrics": {
-            "top_1": false,
+            "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
+            "recall_1": 1.0,
             "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
+            "precision_1": 1.0,
             "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.3333
+            "mrr": 1.0
           }
         },
         {
@@ -262,27 +262,27 @@
           "retrieved_ids": [
             "GraphBuilder.build_graph",
             "build_graphrag_engine",
-            "RepositoryRetriever._group_edges",
+            "RetrievalResult.edges_of_type",
             "GraphBuilder.build_architecture_graph",
             "GraphBuilder.build_call_graph"
           ],
           "retrieved_labels": [
             "build_graph",
             "build_graphrag_engine",
-            "_group_edges",
+            "edges_of_type",
             "build_architecture_graph",
             "build_call_graph"
           ],
           "retrieved_scores": [
             48.0,
             43.0,
-            40.0,
+            39.0,
             38.0,
             38.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0039,
+          "retrieval_time": 0.0059,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -321,13 +321,13 @@
           "retrieved_scores": [
             33.0,
             32.0,
-            20.0,
-            -1.0,
-            -1.0
+            16.0,
+            -5.0,
+            -5.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 2,
-          "retrieval_time": 0.0024,
+          "retrieval_time": 0.0026,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -351,22 +351,25 @@
           ],
           "retrieved_ids": [
             "GraphBuilder.generate_statistics",
+            "RepositoryCache.compute_fingerprint",
             "GraphStatistics",
             "NodeDegree"
           ],
           "retrieved_labels": [
             "generate_statistics",
+            "compute_fingerprint",
             "GraphStatistics",
             "NodeDegree"
           ],
           "retrieved_scores": [
             35.0,
+            21.0,
             19.0,
             13.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0019,
+          "retrieval_time": 0.0021,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -393,25 +396,25 @@
             "GraphStatistics",
             "generate_graph",
             "GraphService.generate_graph",
-            "_render_graph"
+            "GraphBuilder.build_graph"
           ],
           "retrieved_labels": [
             "generate_statistics",
             "GraphStatistics",
             "generate_graph",
             "generate_graph",
-            "_render_graph"
+            "build_graph"
           ],
           "retrieved_scores": [
             62.0,
             51.0,
             49.0,
             48.0,
-            36.0
+            32.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0077,
+          "retrieval_time": 0.0046,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -436,27 +439,27 @@
           "retrieved_ids": [
             "ContextBuilder._collect_retrieval_results",
             "RepositoryRetriever.search_by_label",
+            "RepositoryRetriever",
             "RetrievalMetadata",
-            "RetrievalResult.__repr__",
-            "RetrievalResult.neighbour_ids"
+            "RetrievalResult.edges_of_type"
           ],
           "retrieved_labels": [
             "_collect_retrieval_results",
             "search_by_label",
+            "RepositoryRetriever",
             "RetrievalMetadata",
-            "__repr__",
-            "neighbour_ids"
+            "edges_of_type"
           ],
           "retrieved_scores": [
-            31.0,
+            27.0,
+            24.0,
             22.0,
-            21.0,
             21.0,
             21.0
           ],
           "pass_fail": "FAIL",
           "first_hit_rank": null,
-          "retrieval_time": 0.0016,
+          "retrieval_time": 0.0019,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -482,26 +485,26 @@
             "RepositoryRetriever._collect_neighbours",
             "RetrievalResult.neighbour_ids",
             "RepositoryRetriever.search_by_label",
-            "ContextBuilder._collect_retrieval_results",
-            "RepositoryRetriever.build_llm_context"
+            "RepositoryRetriever.build_llm_context",
+            "RepositoryRetriever.get_node_context"
           ],
           "retrieved_labels": [
             "_collect_neighbours",
             "neighbour_ids",
             "search_by_label",
-            "_collect_retrieval_results",
-            "build_llm_context"
+            "build_llm_context",
+            "get_node_context"
           ],
           "retrieved_scores": [
-            41.0,
+            37.0,
             35.0,
             26.0,
-            24.0,
+            21.0,
             21.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0022,
+          "retrieval_time": 0.0042,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -527,26 +530,26 @@
             "RepositoryRetriever.get_subgraph",
             "RepositoryRetriever.get_subgraph_for_intent",
             "_build_subgraph_summary",
-            "CodeParser._extract_class",
-            "CodeParser.extract_function"
+            "CodeParser.extract_function",
+            "QueryResolver.extract_keywords"
           ],
           "retrieved_labels": [
             "get_subgraph",
             "get_subgraph_for_intent",
             "_build_subgraph_summary",
-            "_extract_class",
-            "extract_function"
+            "extract_function",
+            "extract_keywords"
           ],
           "retrieved_scores": [
             50.0,
             47.0,
-            31.0,
-            28.0,
-            27.0
+            42.0,
+            27.0,
+            26.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.003,
+          "retrieval_time": 0.0037,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -569,41 +572,41 @@
             "QueryResolver.resolve_query"
           ],
           "retrieved_ids": [
-            "QueryResolutionResult",
-            "QueryResolutionResult.__repr__",
-            "QueryResolutionResult.top_node_ids",
             "QueryResolver.resolve_query",
-            "GraphBuilder._filter_graph"
+            "QueryResolutionResult",
+            "QueryResolutionResult.top_node_ids",
+            "QueryResolver.resolve_to_node_ids",
+            "QueryResolver"
           ],
           "retrieved_labels": [
-            "QueryResolutionResult",
-            "__repr__",
-            "top_node_ids",
             "resolve_query",
-            "_filter_graph"
+            "QueryResolutionResult",
+            "top_node_ids",
+            "resolve_to_node_ids",
+            "QueryResolver"
           ],
           "retrieved_scores": [
-            30.0,
+            37.0,
             30.0,
             30.0,
             28.0,
-            22.0
+            26.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 4,
-          "retrieval_time": 0.0019,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0024,
           "error": null,
           "metrics": {
-            "top_1": false,
-            "top_3": false,
+            "top_1": true,
+            "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
-            "recall_3": 0.0,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
-            "precision_3": 0.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.25
+            "mrr": 1.0
           }
         },
         {
@@ -614,41 +617,41 @@
             "QueryResolver.rank_candidates"
           ],
           "retrieved_ids": [
-            "_SymbolRegistry.is_repo_symbol",
             "QueryResolver.rank_candidates",
+            "_SymbolRegistry.is_repo_symbol",
             "_SymbolRegistry",
-            "_SymbolRegistry.__init__",
-            "_SymbolRegistry.build"
+            "QueryResolver.get_ranking_diagnostics",
+            "ContextPackage.top_node_ids"
           ],
           "retrieved_labels": [
-            "is_repo_symbol",
             "rank_candidates",
+            "is_repo_symbol",
             "_SymbolRegistry",
-            "__init__",
-            "build"
+            "get_ranking_diagnostics",
+            "top_node_ids"
           ],
           "retrieved_scores": [
-            31.0,
-            28.0,
+            34.0,
             27.0,
+            23.0,
             21.0,
-            21.0
+            20.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 2,
-          "retrieval_time": 0.0032,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0024,
           "error": null,
           "metrics": {
-            "top_1": false,
+            "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
+            "recall_1": 1.0,
             "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
+            "precision_1": 1.0,
             "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.5
+            "mrr": 1.0
           }
         },
         {
@@ -659,29 +662,29 @@
             "ContextBuilder.build"
           ],
           "retrieved_ids": [
-            "ContextBuilder._build_llm_context_text",
             "RepositoryRetriever.build_llm_context",
+            "ContextBuilder._build_llm_context_text",
             "build_context_builder",
             "RepositoryRetriever.get_node_context",
             "ContextBuilder.build"
           ],
           "retrieved_labels": [
-            "_build_llm_context_text",
             "build_llm_context",
+            "_build_llm_context_text",
             "build_context_builder",
             "get_node_context",
             "build"
           ],
           "retrieved_scores": [
             69.0,
-            69.0,
+            65.0,
             48.0,
             36.0,
             35.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 5,
-          "retrieval_time": 0.0032,
+          "retrieval_time": 0.003,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -704,11 +707,11 @@
         "top_3": 1.0,
         "top_5": 1.0,
         "recall_1": 0.3333,
-        "recall_3": 0.6667,
-        "recall_5": 0.8667,
+        "recall_3": 0.6,
+        "recall_5": 0.9333,
         "precision_1": 1.0,
-        "precision_3": 0.6667,
-        "precision_5": 0.52,
+        "precision_3": 0.6,
+        "precision_5": 0.56,
         "mrr": 1.0
       },
       "questions": [
@@ -744,7 +747,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0201,
+          "retrieval_time": 0.014,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -791,7 +794,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0057,
+          "retrieval_time": 0.005,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -838,7 +841,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0143,
+          "retrieval_time": 0.008,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -863,40 +866,40 @@
             "serialize_response"
           ],
           "retrieved_ids": [
+            "serialize_response",
+            "get_graphql_response",
+            "request_response",
             "ORJSONResponse.render",
-            "UJSONResponse.render",
-            "generate_lang_path",
-            "ResponseValidationError",
-            "create_model_field"
+            "UJSONResponse.render"
           ],
           "retrieved_labels": [
+            "serialize_response",
+            "get_graphql_response",
+            "request_response",
             "render",
-            "render",
-            "generate_lang_path",
-            "ResponseValidationError",
-            "create_model_field"
+            "render"
           ],
           "retrieved_scores": [
+            33.0,
+            29.0,
+            28.0,
             26.0,
-            26.0,
-            25.0,
-            24.0,
-            24.0
+            26.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0095,
+          "retrieval_time": 0.0056,
           "error": null,
           "metrics": {
             "top_1": true,
             "top_3": true,
             "top_5": true,
             "recall_1": 0.3333,
-            "recall_3": 0.6667,
-            "recall_5": 0.6667,
+            "recall_3": 0.3333,
+            "recall_5": 1.0,
             "precision_1": 1.0,
-            "precision_3": 0.6667,
-            "precision_5": 0.4,
+            "precision_3": 0.3333,
+            "precision_5": 0.6,
             "mrr": 1.0
           }
         },
@@ -932,7 +935,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0092,
+          "retrieval_time": 0.0102,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -951,16 +954,16 @@
     },
     "Typer": {
       "aggregate": {
-        "top_1": 0.8,
+        "top_1": 1.0,
         "top_3": 1.0,
         "top_5": 1.0,
-        "recall_1": 0.2667,
-        "recall_3": 0.8667,
-        "recall_5": 1.0,
-        "precision_1": 0.8,
-        "precision_3": 0.8667,
-        "precision_5": 0.6,
-        "mrr": 0.9
+        "recall_1": 0.3333,
+        "recall_3": 0.7333,
+        "recall_5": 0.8667,
+        "precision_1": 1.0,
+        "precision_3": 0.7333,
+        "precision_5": 0.52,
+        "mrr": 1.0
       },
       "questions": [
         {
@@ -974,39 +977,39 @@
           ],
           "retrieved_ids": [
             "TyperCLIGroup.list_commands",
-            "TyperGroup._click_resolve_command",
             "TyperGroup.format_commands",
             "TyperCLIGroup.get_command",
-            "_complete_visible_commands"
+            "TyperGroup.list_commands",
+            "maybe_add_run_to_cli"
           ],
           "retrieved_labels": [
             "list_commands",
-            "_click_resolve_command",
             "format_commands",
             "get_command",
-            "_complete_visible_commands"
+            "list_commands",
+            "maybe_add_run_to_cli"
           ],
           "retrieved_scores": [
             44.0,
             43.0,
-            43.0,
             41.0,
-            41.0
+            40.0,
+            40.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0095,
+          "retrieval_time": 0.0107,
           "error": null,
           "metrics": {
             "top_1": true,
             "top_3": true,
             "top_5": true,
             "recall_1": 0.3333,
-            "recall_3": 1.0,
-            "recall_5": 1.0,
+            "recall_3": 0.6667,
+            "recall_5": 0.6667,
             "precision_1": 1.0,
-            "precision_3": 1.0,
-            "precision_5": 0.6,
+            "precision_3": 0.6667,
+            "precision_5": 0.4,
             "mrr": 1.0
           }
         },
@@ -1020,41 +1023,41 @@
             "_OptionParser.add_argument"
           ],
           "retrieved_ids": [
-            "get_install_completion_arguments",
-            "_OptionParser.add_argument",
             "Command.parse_args",
-            "Argument",
-            "TyperArgument._parse_decls"
+            "get_install_completion_arguments",
+            "_OptionParser._process_args_for_options",
+            "_OptionParser.add_argument",
+            "Argument"
           ],
           "retrieved_labels": [
-            "get_install_completion_arguments",
-            "add_argument",
             "parse_args",
-            "Argument",
-            "_parse_decls"
+            "get_install_completion_arguments",
+            "_process_args_for_options",
+            "add_argument",
+            "Argument"
           ],
           "retrieved_scores": [
+            55.0,
             48.0,
             44.0,
             40.0,
-            39.0,
             39.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 2,
-          "retrieval_time": 0.0153,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0161,
           "error": null,
           "metrics": {
-            "top_1": false,
+            "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
-            "recall_3": 0.6667,
-            "recall_5": 1.0,
-            "precision_1": 0.0,
-            "precision_3": 0.6667,
-            "precision_5": 0.6,
-            "mrr": 0.5
+            "recall_1": 0.3333,
+            "recall_3": 0.3333,
+            "recall_5": 0.6667,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.4,
+            "mrr": 1.0
           }
         },
         {
@@ -1070,26 +1073,26 @@
             "Command.format_options",
             "TyperGroup.format_options",
             "TyperCommand.format_options",
-            "_print_options_panel",
-            "_typer_format_options"
+            "join_options",
+            "_print_options_panel"
           ],
           "retrieved_labels": [
             "format_options",
             "format_options",
             "format_options",
-            "_print_options_panel",
-            "_typer_format_options"
+            "join_options",
+            "_print_options_panel"
           ],
           "retrieved_scores": [
             37.0,
             37.0,
             36.0,
             36.0,
-            36.0
+            32.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0084,
+          "retrieval_time": 0.0078,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1129,14 +1132,14 @@
           ],
           "retrieved_scores": [
             49.0,
-            48.0,
-            46.0,
+            44.0,
+            42.0,
             39.0,
             37.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.007,
+          "retrieval_time": 0.0066,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1183,7 +1186,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0071,
+          "retrieval_time": 0.0075,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1202,16 +1205,16 @@
     },
     "Requests": {
       "aggregate": {
-        "top_1": 0.6,
+        "top_1": 0.8,
         "top_3": 1.0,
         "top_5": 1.0,
-        "recall_1": 0.2,
+        "recall_1": 0.2667,
         "recall_3": 0.6,
         "recall_5": 0.8,
-        "precision_1": 0.6,
+        "precision_1": 0.8,
         "precision_3": 0.6,
         "precision_5": 0.48,
-        "mrr": 0.8
+        "mrr": 0.8667
       },
       "questions": [
         {
@@ -1225,28 +1228,28 @@
           ],
           "retrieved_ids": [
             "HTTPAdapter.send",
-            "HTTPDigestAuth.__call__",
             "HTTPAdapter.request_url",
-            "HTTPBasicAuth.__call__",
-            "HTTPProxyAuth.__call__"
+            "RequestsCookieJar",
+            "HTTPAdapter.get_connection",
+            "HTTPAdapter.get_connection_with_tls_context"
           ],
           "retrieved_labels": [
             "send",
-            "__call__",
             "request_url",
-            "__call__",
-            "__call__"
+            "RequestsCookieJar",
+            "get_connection",
+            "get_connection_with_tls_context"
           ],
           "retrieved_scores": [
             39.0,
-            38.0,
             37.0,
-            37.0,
-            36.0
+            35.0,
+            34.0,
+            34.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0081,
+          "retrieval_time": 0.0079,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1271,41 +1274,41 @@
             "session"
           ],
           "retrieved_ids": [
-            "HTTPAdapter.init_poolmanager",
             "Session.send",
-            "HTTPAdapter.build_connection_pool_key_attributes",
             "SessionRedirectMixin.send",
-            "HTTPAdapter.proxy_manager_for"
+            "HTTPAdapter.init_poolmanager",
+            "HTTPAdapter.build_connection_pool_key_attributes",
+            "session"
           ],
           "retrieved_labels": [
+            "send",
+            "send",
             "init_poolmanager",
-            "send",
             "build_connection_pool_key_attributes",
-            "send",
-            "proxy_manager_for"
+            "session"
           ],
           "retrieved_scores": [
-            31.0,
+            35.0,
+            32.0,
             31.0,
             30.0,
-            28.0,
-            27.0
+            30.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 2,
-          "retrieval_time": 0.0035,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.004,
           "error": null,
           "metrics": {
-            "top_1": false,
+            "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
+            "recall_1": 0.3333,
             "recall_3": 0.3333,
-            "recall_5": 0.3333,
-            "precision_1": 0.0,
+            "recall_5": 0.6667,
+            "precision_1": 1.0,
             "precision_3": 0.3333,
-            "precision_5": 0.2,
-            "mrr": 0.5
+            "precision_5": 0.4,
+            "mrr": 1.0
           }
         },
         {
@@ -1318,41 +1321,41 @@
             "Session.get_adapter"
           ],
           "retrieved_ids": [
-            "C:\\Users\\awane\\RepoGraphAI\\backend\\repos\\requests\\src\\requests\\adapters.py",
             "Session.get_adapter",
             "BaseAdapter",
             "HTTPAdapter",
+            "C:\\Users\\awane\\RepoGraphAI\\backend\\repos\\requests\\src\\requests\\adapters.py",
             "HTTPAdapter.build_response"
           ],
           "retrieved_labels": [
-            "adapters.py",
             "get_adapter",
             "BaseAdapter",
             "HTTPAdapter",
+            "adapters.py",
             "build_response"
           ],
           "retrieved_scores": [
-            22.0,
             15.0,
             14.0,
             14.0,
+            10.0,
             10.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 2,
-          "retrieval_time": 0.0016,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.002,
           "error": null,
           "metrics": {
-            "top_1": false,
+            "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
-            "recall_3": 0.6667,
+            "recall_1": 0.3333,
+            "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
-            "precision_3": 0.6667,
+            "precision_1": 1.0,
+            "precision_3": 1.0,
             "precision_5": 0.6,
-            "mrr": 0.5
+            "mrr": 1.0
           }
         },
         {
@@ -1387,7 +1390,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.003,
+          "retrieval_time": 0.0044,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1412,41 +1415,41 @@
             "stream_decode_response_unicode"
           ],
           "retrieved_ids": [
+            "HTTPAdapter.build_response",
+            "get_unicode_from_response",
             "stream_decode_response_unicode",
             "Response.iter_content",
-            "Response.links",
-            "Response.__init__",
-            "Response.content"
+            "Response.links"
           ],
           "retrieved_labels": [
+            "build_response",
+            "get_unicode_from_response",
             "stream_decode_response_unicode",
             "iter_content",
-            "links",
-            "__init__",
-            "content"
+            "links"
           ],
           "retrieved_scores": [
+            29.0,
+            26.0,
             26.0,
             25.0,
-            24.0,
-            23.0,
-            23.0
+            24.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 1,
-          "retrieval_time": 0.0026,
+          "first_hit_rank": 3,
+          "retrieval_time": 0.0046,
           "error": null,
           "metrics": {
-            "top_1": true,
+            "top_1": false,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.3333,
-            "recall_3": 0.6667,
-            "recall_5": 1.0,
-            "precision_1": 1.0,
-            "precision_3": 0.6667,
-            "precision_5": 0.6,
-            "mrr": 1.0
+            "recall_1": 0.0,
+            "recall_3": 0.3333,
+            "recall_5": 0.6667,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.4,
+            "mrr": 0.3333
           }
         }
       ]
