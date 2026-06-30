@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-29T21:13:54.624728",
+  "generated": "2026-06-30T23:45:08.754801",
   "overall": {
     "top_1": 0.8333,
     "top_3": 0.9333,
@@ -57,7 +57,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0023,
+          "retrieval_time": 0.0049,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -102,7 +102,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0038,
+          "retrieval_time": 0.0022,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -147,7 +147,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0031,
+          "retrieval_time": 0.0024,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -192,7 +192,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 3,
-          "retrieval_time": 0.0032,
+          "retrieval_time": 0.0026,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -237,7 +237,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0055,
+          "retrieval_time": 0.0034,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -282,7 +282,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0059,
+          "retrieval_time": 0.0055,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -327,7 +327,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 2,
-          "retrieval_time": 0.0026,
+          "retrieval_time": 0.0022,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -369,7 +369,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0021,
+          "retrieval_time": 0.0019,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -414,7 +414,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0046,
+          "retrieval_time": 0.0037,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -459,7 +459,7 @@
           ],
           "pass_fail": "FAIL",
           "first_hit_rank": null,
-          "retrieval_time": 0.0019,
+          "retrieval_time": 0.0016,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -504,7 +504,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0042,
+          "retrieval_time": 0.0021,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -549,7 +549,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0037,
+          "retrieval_time": 0.0039,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -594,7 +594,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0024,
+          "retrieval_time": 0.0031,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -639,7 +639,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0024,
+          "retrieval_time": 0.002,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -684,7 +684,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 5,
-          "retrieval_time": 0.003,
+          "retrieval_time": 0.0026,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -747,7 +747,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.014,
+          "retrieval_time": 0.0109,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -794,7 +794,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.005,
+          "retrieval_time": 0.0053,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -841,7 +841,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.008,
+          "retrieval_time": 0.0064,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -888,7 +888,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0056,
+          "retrieval_time": 0.0046,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -935,7 +935,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0102,
+          "retrieval_time": 0.0081,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -998,7 +998,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0107,
+          "retrieval_time": 0.0071,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1045,7 +1045,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0161,
+          "retrieval_time": 0.0106,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1092,7 +1092,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0078,
+          "retrieval_time": 0.0084,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1139,7 +1139,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0066,
+          "retrieval_time": 0.0051,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1186,7 +1186,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0075,
+          "retrieval_time": 0.0054,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1249,7 +1249,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0079,
+          "retrieval_time": 0.0054,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1296,7 +1296,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.004,
+          "retrieval_time": 0.003,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1343,7 +1343,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.002,
+          "retrieval_time": 0.0014,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1390,7 +1390,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0044,
+          "retrieval_time": 0.0037,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1437,7 +1437,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 3,
-          "retrieval_time": 0.0046,
+          "retrieval_time": 0.0053,
           "error": null,
           "metrics": {
             "top_1": false,

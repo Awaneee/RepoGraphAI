@@ -1,6 +1,6 @@
 # RepoGraphAI — Retrieval Metrics Report
 
-Generated: 2026-06-29 21:13:54
+Generated: 2026-06-30 23:45:08
 
 ============================================================
 
@@ -32,7 +32,7 @@ Generated: 2026-06-29 21:13:54
 **Category:** Parsing  
 **Repository:** internal  
 **Result:** PASS  
-**Retrieval time:** 0.0023s
+**Retrieval time:** 0.0049s
 
 **Expected symbols:**
 - `CodeParser.parse_file`
@@ -57,7 +57,7 @@ First hit rank: **1**
 **Category:** Parsing  
 **Repository:** internal  
 **Result:** PASS  
-**Retrieval time:** 0.0038s
+**Retrieval time:** 0.0022s
 
 **Expected symbols:**
 - `CodeParser._extract_imports`
@@ -82,7 +82,7 @@ First hit rank: **1**
 **Category:** Parsing  
 **Repository:** internal  
 **Result:** PASS  
-**Retrieval time:** 0.0031s
+**Retrieval time:** 0.0024s
 
 **Expected symbols:**
 - `CodeParser._extract_class`
@@ -107,7 +107,7 @@ First hit rank: **1**
 **Category:** Graph Construction  
 **Repository:** internal  
 **Result:** PASS  
-**Retrieval time:** 0.0032s
+**Retrieval time:** 0.0026s
 
 **Expected symbols:**
 - `GraphBuilder.build_graph`
@@ -132,7 +132,7 @@ First hit rank: **3**
 **Category:** Graph Construction  
 **Repository:** internal  
 **Result:** PASS  
-**Retrieval time:** 0.0055s
+**Retrieval time:** 0.0034s
 
 **Expected symbols:**
 - `GraphBuilder.build_graph`
@@ -157,7 +157,7 @@ First hit rank: **1**
 **Category:** Graph Construction  
 **Repository:** internal  
 **Result:** PASS  
-**Retrieval time:** 0.0059s
+**Retrieval time:** 0.0055s
 
 **Expected symbols:**
 - `GraphBuilder.build_graph`
@@ -182,7 +182,7 @@ First hit rank: **1**
 **Category:** Graph Construction  
 **Repository:** internal  
 **Result:** PASS  
-**Retrieval time:** 0.0026s
+**Retrieval time:** 0.0022s
 
 **Expected symbols:**
 - `GraphBuilder.build_class_graph`
@@ -207,7 +207,7 @@ First hit rank: **2**
 **Category:** Analytics  
 **Repository:** internal  
 **Result:** PASS  
-**Retrieval time:** 0.0021s
+**Retrieval time:** 0.0019s
 
 **Expected symbols:**
 - `GraphBuilder.generate_statistics`
@@ -231,7 +231,7 @@ First hit rank: **1**
 **Category:** Analytics  
 **Repository:** internal  
 **Result:** PASS  
-**Retrieval time:** 0.0046s
+**Retrieval time:** 0.0037s
 
 **Expected symbols:**
 - `GraphBuilder.generate_statistics`
@@ -256,7 +256,7 @@ First hit rank: **1**
 **Category:** Retrieval  
 **Repository:** internal  
 **Result:** FAIL  
-**Retrieval time:** 0.0019s
+**Retrieval time:** 0.0016s
 
 **Expected symbols:**
 - `RepositoryRetriever.get_node_context`
@@ -281,7 +281,7 @@ First hit rank: **—**
 **Category:** Retrieval  
 **Repository:** internal  
 **Result:** PASS  
-**Retrieval time:** 0.0042s
+**Retrieval time:** 0.0021s
 
 **Expected symbols:**
 - `RepositoryRetriever._collect_neighbours`
@@ -306,7 +306,7 @@ First hit rank: **1**
 **Category:** Retrieval  
 **Repository:** internal  
 **Result:** PASS  
-**Retrieval time:** 0.0037s
+**Retrieval time:** 0.0039s
 
 **Expected symbols:**
 - `RepositoryRetriever.get_subgraph`
@@ -331,7 +331,7 @@ First hit rank: **1**
 **Category:** Query Resolution  
 **Repository:** internal  
 **Result:** PASS  
-**Retrieval time:** 0.0024s
+**Retrieval time:** 0.0031s
 
 **Expected symbols:**
 - `QueryResolver.resolve_query`
@@ -356,7 +356,7 @@ First hit rank: **1**
 **Category:** Query Resolution  
 **Repository:** internal  
 **Result:** PASS  
-**Retrieval time:** 0.0024s
+**Retrieval time:** 0.0020s
 
 **Expected symbols:**
 - `QueryResolver.rank_candidates`
@@ -381,7 +381,7 @@ First hit rank: **1**
 **Category:** Context Building  
 **Repository:** internal  
 **Result:** PASS  
-**Retrieval time:** 0.0030s
+**Retrieval time:** 0.0026s
 
 **Expected symbols:**
 - `ContextBuilder.build`
@@ -416,7 +416,7 @@ First hit rank: **5**
 **Category:**   
 **Repository:** FastAPI  
 **Result:** PASS  
-**Retrieval time:** 0.0140s
+**Retrieval time:** 0.0109s
 
 **Expected symbols:**
 - `APIRouter.add_api_route`
@@ -443,7 +443,7 @@ First hit rank: **1**
 **Category:**   
 **Repository:** FastAPI  
 **Result:** PASS  
-**Retrieval time:** 0.0050s
+**Retrieval time:** 0.0053s
 
 **Expected symbols:**
 - `get_dependant`
@@ -470,7 +470,7 @@ First hit rank: **1**
 **Category:**   
 **Repository:** FastAPI  
 **Result:** PASS  
-**Retrieval time:** 0.0080s
+**Retrieval time:** 0.0064s
 
 **Expected symbols:**
 - `get_request_handler`
@@ -497,7 +497,7 @@ First hit rank: **1**
 **Category:**   
 **Repository:** FastAPI  
 **Result:** PASS  
-**Retrieval time:** 0.0056s
+**Retrieval time:** 0.0046s
 
 **Expected symbols:**
 - `ORJSONResponse.render`
@@ -524,7 +524,7 @@ First hit rank: **1**
 **Category:**   
 **Repository:** FastAPI  
 **Result:** PASS  
-**Retrieval time:** 0.0102s
+**Retrieval time:** 0.0081s
 
 **Expected symbols:**
 - `FastAPI.middleware`
@@ -554,7 +554,7 @@ First hit rank: **1**
 **Category:**   
 **Repository:** Typer  
 **Result:** PASS  
-**Retrieval time:** 0.0107s
+**Retrieval time:** 0.0071s
 
 **Expected symbols:**
 - `TyperCLIGroup.list_commands`
@@ -581,7 +581,7 @@ First hit rank: **1**
 **Category:**   
 **Repository:** Typer  
 **Result:** PASS  
-**Retrieval time:** 0.0161s
+**Retrieval time:** 0.0106s
 
 **Expected symbols:**
 - `Command.parse_args`
@@ -608,7 +608,7 @@ First hit rank: **1**
 **Category:**   
 **Repository:** Typer  
 **Result:** PASS  
-**Retrieval time:** 0.0078s
+**Retrieval time:** 0.0084s
 
 **Expected symbols:**
 - `Command.format_options`
@@ -635,7 +635,7 @@ First hit rank: **1**
 **Category:**   
 **Repository:** Typer  
 **Result:** PASS  
-**Retrieval time:** 0.0066s
+**Retrieval time:** 0.0051s
 
 **Expected symbols:**
 - `Command.format_help_text`
@@ -662,7 +662,7 @@ First hit rank: **1**
 **Category:**   
 **Repository:** Typer  
 **Result:** PASS  
-**Retrieval time:** 0.0075s
+**Retrieval time:** 0.0054s
 
 **Expected symbols:**
 - `get_callback`
@@ -692,7 +692,7 @@ First hit rank: **1**
 **Category:**   
 **Repository:** Requests  
 **Result:** PASS  
-**Retrieval time:** 0.0079s
+**Retrieval time:** 0.0054s
 
 **Expected symbols:**
 - `HTTPAdapter.send`
@@ -719,7 +719,7 @@ First hit rank: **1**
 **Category:**   
 **Repository:** Requests  
 **Result:** PASS  
-**Retrieval time:** 0.0040s
+**Retrieval time:** 0.0030s
 
 **Expected symbols:**
 - `Session.send`
@@ -746,7 +746,7 @@ First hit rank: **1**
 **Category:**   
 **Repository:** Requests  
 **Result:** PASS  
-**Retrieval time:** 0.0020s
+**Retrieval time:** 0.0014s
 
 **Expected symbols:**
 - `HTTPAdapter`
@@ -773,7 +773,7 @@ First hit rank: **1**
 **Category:**   
 **Repository:** Requests  
 **Result:** PASS  
-**Retrieval time:** 0.0044s
+**Retrieval time:** 0.0037s
 
 **Expected symbols:**
 - `SessionRedirectMixin.resolve_redirects`
@@ -800,7 +800,7 @@ First hit rank: **1**
 **Category:**   
 **Repository:** Requests  
 **Result:** PASS  
-**Retrieval time:** 0.0046s
+**Retrieval time:** 0.0053s
 
 **Expected symbols:**
 - `Response.iter_content`
