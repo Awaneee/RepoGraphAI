@@ -1,0 +1,9 @@
+{
+  "benchmark_version": "v1_manual",
+  "metrics": {
+    "top_1": 0.8333,
+    "top_3": 0.9333,
+    "top_5": 0.9667,
+    "mrr": 0.879
+  }
+}

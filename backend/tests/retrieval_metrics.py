@@ -525,7 +525,7 @@ def _inject_ablation_toggles(context_builder, graph, ablation_toggles):
 # MODE 1 — Internal benchmark
 # ---------------------------------------------------------------------------
 
-def run_internal_benchmark(ablation_toggles: Optional[dict[str, bool]] = None) -> list[QuestionMetrics]:
+def run_internal_benchmark(ablation_toggles: Optional[dict[str, bool]] = None, custom_questions: Optional[list[dict]] = None) -> list[QuestionMetrics]:
     repo_path = str(PROJECT_ROOT / "app")
     logger.info("=" * 70)
     logger.info("MODE 1 — Internal benchmark: %s", repo_path)
@@ -537,9 +537,11 @@ def run_internal_benchmark(ablation_toggles: Optional[dict[str, bool]] = None) -
     graph = GraphBuilder().build_graph(parsed)
     context_builder = build_context_builder(graph)
     _inject_ablation_toggles(context_builder, graph, ablation_toggles)
-    logger.info("Pipeline ready. Running %d questions...", len(INTERNAL_QUESTIONS))
+    
+    questions = custom_questions if custom_questions is not None else INTERNAL_QUESTIONS
+    logger.info("Pipeline ready. Running %d questions...", len(questions))
 
-    results = _evaluate_questions(context_builder, INTERNAL_QUESTIONS, "internal")
+    results = _evaluate_questions(context_builder, questions, "internal")
     for qm in results:
         status = "✓" if qm.top_5 else "✗"
         logger.info("  [%s] %s  (rank=%s, MRR=%.2f)",
@@ -561,7 +563,7 @@ def _clone_repo(name: str, url: str) -> Path:
     return repo_path
 
 
-def run_cross_repo_benchmark(ablation_toggles: Optional[dict[str, bool]] = None) -> dict[str, list[QuestionMetrics]]:
+def run_cross_repo_benchmark(ablation_toggles: Optional[dict[str, bool]] = None, custom_questions: Optional[dict[str, list[dict]]] = None) -> dict[str, list[QuestionMetrics]]:
     REPOS_DIR.mkdir(parents=True, exist_ok=True)
     all_results: dict[str, list[QuestionMetrics]] = {}
 
@@ -569,6 +571,14 @@ def run_cross_repo_benchmark(ablation_toggles: Optional[dict[str, bool]] = None)
         logger.info("=" * 70)
         logger.info("MODE 2 — Repository: %s", repo_name)
         logger.info("=" * 70)
+
+        if custom_questions is not None:
+            questions = custom_questions.get(repo_name, [])
+            if not questions:
+                logger.info("  No questions for %s — skipping.", repo_name)
+                continue
+        else:
+            questions = CROSS_REPO_QUESTIONS.get(repo_name, [])
 
         try:
             repo_path = _clone_repo(repo_name, repo_url)
@@ -579,15 +589,15 @@ def run_cross_repo_benchmark(ablation_toggles: Optional[dict[str, bool]] = None)
             context_builder = build_context_builder(graph, top_k=5, max_hops=1)
             _inject_ablation_toggles(context_builder, graph, ablation_toggles)
             logger.info("  Pipeline ready. Running %d questions...",
-                        len(CROSS_REPO_QUESTIONS[repo_name]))
+                        len(questions))
         except Exception:
             logger.exception("  Setup failed for %s — skipping.", repo_name)
             # Record all questions as failed
             failed: list[QuestionMetrics] = []
-            for q in CROSS_REPO_QUESTIONS.get(repo_name, []):
+            for q in questions:
                 failed.append(QuestionMetrics(
                     repository=repo_name,
-                    category="",
+                    category=q.get("category", ""),
                     question=q["question"],
                     expected_symbols=q["expected_symbols"],
                     retrieved_ids=[],
@@ -600,7 +610,7 @@ def run_cross_repo_benchmark(ablation_toggles: Optional[dict[str, bool]] = None)
 
         results = _evaluate_questions(
             context_builder,
-            CROSS_REPO_QUESTIONS[repo_name],
+            questions,
             repo_name,
         )
         for qm in results:
@@ -1069,6 +1079,7 @@ def main() -> None:
     import argparse
     parser = argparse.ArgumentParser(description="RepoGraphAI Retrieval Metrics & Ablation Runner")
     parser.add_argument("--ablation", action="store_true", help="Run ablation study across all tweaks")
+    parser.add_argument("--benchmark", type=str, default=None, help="Path to custom benchmark JSON file")
     args = parser.parse_args()
 
     if args.ablation:
@@ -1078,12 +1089,37 @@ def main() -> None:
     logger.info("RepoGraphAI — Retrieval Metrics  (Milestone 4)")
     logger.info("=" * 70)
 
-    # Step 1 & 2: parse + build graphs, run retrieval for both modes
-    internal_results  = run_internal_benchmark()
-    cross_repo_results = run_cross_repo_benchmark()
+    custom_internal = None
+    custom_cross = None
 
-    # Steps 3 & 4: already done inside the runners above (metrics computed
-    # inline via compute_metrics after each pipeline call).
+    if args.benchmark:
+        benchmark_path = Path(args.benchmark)
+        if not benchmark_path.exists():
+            logger.error("Benchmark file not found: %s", benchmark_path)
+            sys.exit(1)
+        
+        with open(benchmark_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            
+        logger.info("Loaded %d questions from custom benchmark %s", len(data), benchmark_path)
+        
+        custom_internal = []
+        custom_cross = {}
+        for item in data:
+            q_mapped = {
+                "question": item["question"],
+                "expected_symbols": [item["expected_symbol"]],
+                "category": item["category"]
+            }
+            repo = item["repository"]
+            if repo in ("RepoGraphAI", "internal"):
+                custom_internal.append(q_mapped)
+            else:
+                custom_cross.setdefault(repo, []).append(q_mapped)
+
+    # Step 1 & 2: parse + build graphs, run retrieval for both modes
+    internal_results  = run_internal_benchmark(custom_questions=custom_internal)
+    cross_repo_results = run_cross_repo_benchmark(custom_questions=custom_cross)
 
     # Step 5: console summary
     print_console_summary(internal_results, cross_repo_results)

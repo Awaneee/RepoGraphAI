@@ -1,108 +1,63 @@
 {
-  "generated": "2026-06-30T23:45:08.754801",
+  "generated": "2026-07-01T22:32:16.564712",
   "overall": {
-    "top_1": 0.8333,
-    "top_3": 0.9333,
-    "top_5": 0.9667,
-    "recall_1": 0.5222,
-    "recall_3": 0.7556,
-    "recall_5": 0.9,
-    "precision_1": 0.8333,
-    "precision_3": 0.4667,
-    "precision_5": 0.3533,
-    "mrr": 0.8789
+    "top_1": 0.6628,
+    "top_3": 0.8488,
+    "top_5": 0.9419,
+    "recall_1": 0.6628,
+    "recall_3": 0.8488,
+    "recall_5": 0.9419,
+    "precision_1": 0.6628,
+    "precision_3": 0.2829,
+    "precision_5": 0.1884,
+    "mrr": 0.7715
   },
   "per_dataset": {
     "internal": {
       "aggregate": {
-        "top_1": 0.7333,
-        "top_3": 0.8667,
-        "top_5": 0.9333,
-        "recall_1": 0.7333,
-        "recall_3": 0.8667,
-        "recall_5": 0.9333,
-        "precision_1": 0.7333,
-        "precision_3": 0.2889,
-        "precision_5": 0.1867,
-        "mrr": 0.8022
+        "top_1": 0.4737,
+        "top_3": 0.7368,
+        "top_5": 0.9474,
+        "recall_1": 0.4737,
+        "recall_3": 0.7368,
+        "recall_5": 0.9474,
+        "precision_1": 0.4737,
+        "precision_3": 0.2456,
+        "precision_5": 0.1895,
+        "mrr": 0.6377
       },
       "questions": [
         {
           "repository": "internal",
-          "category": "Parsing",
-          "question": "How are files parsed?",
+          "category": "Graph Construction",
+          "question": "How is levenshtein distance represented in the graph?",
           "expected_symbols": [
-            "CodeParser.parse_file"
+            "levenshtein_distance"
           ],
           "retrieved_ids": [
-            "CodeParser.parse_file",
-            "CodeParser.extract_function",
-            "CodeParser._extract_class",
-            "_file_id",
-            "CodeParser._extract_decorator"
+            "levenshtein_distance",
+            "GraphBuilder.build_graph",
+            "_is_graph_infrastructure",
+            "generate_graph",
+            "GraphService.generate_graph"
           ],
           "retrieved_labels": [
-            "parse_file",
-            "extract_function",
-            "_extract_class",
-            "_file_id",
-            "_extract_decorator"
+            "levenshtein_distance",
+            "build_graph",
+            "_is_graph_infrastructure",
+            "generate_graph",
+            "generate_graph"
           ],
           "retrieved_scores": [
-            47.0,
-            29.0,
-            26.0,
-            25.0,
-            24.0
-          ],
-          "pass_fail": "PASS",
-          "first_hit_rank": 1,
-          "retrieval_time": 0.0049,
-          "error": null,
-          "metrics": {
-            "top_1": true,
-            "top_3": true,
-            "top_5": true,
-            "recall_1": 1.0,
-            "recall_3": 1.0,
-            "recall_5": 1.0,
-            "precision_1": 1.0,
-            "precision_3": 0.3333,
-            "precision_5": 0.2,
-            "mrr": 1.0
-          }
-        },
-        {
-          "repository": "internal",
-          "category": "Parsing",
-          "question": "How are imports extracted?",
-          "expected_symbols": [
-            "CodeParser._extract_imports"
-          ],
-          "retrieved_ids": [
-            "CodeParser._extract_imports",
-            "CodeParser.extract_function",
-            "QueryResolver.extract_keywords",
-            "GraphBuilder.build_import_graph",
-            "CodeParser._extract_class"
-          ],
-          "retrieved_labels": [
-            "_extract_imports",
-            "extract_function",
-            "extract_keywords",
-            "build_import_graph",
-            "_extract_class"
-          ],
-          "retrieved_scores": [
-            52.0,
+            43.0,
             27.0,
             26.0,
-            25.0,
-            24.0
+            26.0,
+            25.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0022,
+          "retrieval_time": 0.0033,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -119,31 +74,31 @@
         },
         {
           "repository": "internal",
-          "category": "Parsing",
-          "question": "How are classes extracted?",
+          "category": "Graph Construction",
+          "question": "How are levenshtein distance relationships created?",
           "expected_symbols": [
-            "CodeParser._extract_class"
+            "levenshtein_distance"
           ],
           "retrieved_ids": [
-            "CodeParser._extract_class",
-            "RepositoryService.classify_repository_type",
-            "RepositoryRetriever.get_class_context",
-            "GraphVisualizer.save_class_graph",
-            "GraphBuilder.build_class_graph"
+            "levenshtein_distance",
+            "ContextBuilder.build",
+            "GraphBuilder.build_graph",
+            "RepositoryRetriever.build_llm_context",
+            "build_context_builder"
           ],
           "retrieved_labels": [
-            "_extract_class",
-            "classify_repository_type",
-            "get_class_context",
-            "save_class_graph",
-            "build_class_graph"
+            "levenshtein_distance",
+            "build",
+            "build_graph",
+            "build_llm_context",
+            "build_context_builder"
           ],
           "retrieved_scores": [
-            49.0,
-            34.0,
-            31.0,
-            30.0,
-            29.0
+            33.0,
+            14.0,
+            13.0,
+            13.0,
+            13.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
@@ -165,34 +120,34 @@
         {
           "repository": "internal",
           "category": "Graph Construction",
-          "question": "How is the graph generated?",
+          "question": "What is the purpose of the llm provider?",
           "expected_symbols": [
-            "GraphBuilder.build_graph"
+            "LLMProvider"
           ],
           "retrieved_ids": [
-            "generate_graph",
-            "GraphService.generate_graph",
-            "GraphBuilder.build_graph",
-            "GraphBuilder.generate_statistics",
-            "build_graphrag_engine"
+            "AnthropicLLMProvider",
+            "GeminiLLMProvider",
+            "LLMProvider",
+            "RetryingLLMProvider",
+            "CallableLLMProvider"
           ],
           "retrieved_labels": [
-            "generate_graph",
-            "generate_graph",
-            "build_graph",
-            "generate_statistics",
-            "build_graphrag_engine"
+            "AnthropicLLMProvider",
+            "GeminiLLMProvider",
+            "LLMProvider",
+            "RetryingLLMProvider",
+            "CallableLLMProvider"
           ],
           "retrieved_scores": [
-            56.0,
-            55.0,
-            39.0,
-            38.0,
-            34.0
+            31.0,
+            31.0,
+            31.0,
+            31.0,
+            30.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 3,
-          "retrieval_time": 0.0026,
+          "retrieval_time": 0.0023,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -209,167 +164,80 @@
         },
         {
           "repository": "internal",
-          "category": "Graph Construction",
-          "question": "How are graph nodes created?",
+          "category": "Parsing",
+          "question": "What is the purpose of the code parser?",
           "expected_symbols": [
-            "GraphBuilder.build_graph"
+            "CodeParser"
           ],
           "retrieved_ids": [
-            "GraphBuilder.build_graph",
-            "GraphRAGEngine._build_source_nodes",
-            "ContextBuilder._build_resolved_nodes",
-            "build_graphrag_engine",
-            "_emit_nodes"
+            "CodeParser.extract_function",
+            "CodeParser._extract_class",
+            "CodeParser.parse_file",
+            "CodeParser",
+            "CodeParser._extract_decorator"
           ],
           "retrieved_labels": [
-            "build_graph",
-            "_build_source_nodes",
-            "_build_resolved_nodes",
-            "build_graphrag_engine",
-            "_emit_nodes"
+            "extract_function",
+            "_extract_class",
+            "parse_file",
+            "CodeParser",
+            "_extract_decorator"
           ],
           "retrieved_scores": [
-            48.0,
-            48.0,
-            47.0,
+            46.0,
             43.0,
-            40.0
+            42.0,
+            41.0,
+            41.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 1,
-          "retrieval_time": 0.0034,
-          "error": null,
-          "metrics": {
-            "top_1": true,
-            "top_3": true,
-            "top_5": true,
-            "recall_1": 1.0,
-            "recall_3": 1.0,
-            "recall_5": 1.0,
-            "precision_1": 1.0,
-            "precision_3": 0.3333,
-            "precision_5": 0.2,
-            "mrr": 1.0
-          }
-        },
-        {
-          "repository": "internal",
-          "category": "Graph Construction",
-          "question": "How are graph edges created?",
-          "expected_symbols": [
-            "GraphBuilder.build_graph"
-          ],
-          "retrieved_ids": [
-            "GraphBuilder.build_graph",
-            "build_graphrag_engine",
-            "RetrievalResult.edges_of_type",
-            "GraphBuilder.build_architecture_graph",
-            "GraphBuilder.build_call_graph"
-          ],
-          "retrieved_labels": [
-            "build_graph",
-            "build_graphrag_engine",
-            "edges_of_type",
-            "build_architecture_graph",
-            "build_call_graph"
-          ],
-          "retrieved_scores": [
-            48.0,
-            43.0,
-            39.0,
-            38.0,
-            38.0
-          ],
-          "pass_fail": "PASS",
-          "first_hit_rank": 1,
-          "retrieval_time": 0.0055,
-          "error": null,
-          "metrics": {
-            "top_1": true,
-            "top_3": true,
-            "top_5": true,
-            "recall_1": 1.0,
-            "recall_3": 1.0,
-            "recall_5": 1.0,
-            "precision_1": 1.0,
-            "precision_3": 0.3333,
-            "precision_5": 0.2,
-            "mrr": 1.0
-          }
-        },
-        {
-          "repository": "internal",
-          "category": "Graph Construction",
-          "question": "How is inheritance represented?",
-          "expected_symbols": [
-            "GraphBuilder.build_class_graph"
-          ],
-          "retrieved_ids": [
-            "GraphVisualizer.save_class_graph",
-            "GraphBuilder.build_class_graph",
-            "_SymbolRegistry.parent_defines_method",
-            "C:\\Users\\awane\\RepoGraphAI\\backend\\app\\models\\pydantic_models.py",
-            "app.models.pydantic_models"
-          ],
-          "retrieved_labels": [
-            "save_class_graph",
-            "build_class_graph",
-            "parent_defines_method",
-            "pydantic_models.py",
-            "pydantic_models"
-          ],
-          "retrieved_scores": [
-            33.0,
-            32.0,
-            16.0,
-            -5.0,
-            -5.0
-          ],
-          "pass_fail": "PASS",
-          "first_hit_rank": 2,
-          "retrieval_time": 0.0022,
+          "first_hit_rank": 4,
+          "retrieval_time": 0.002,
           "error": null,
           "metrics": {
             "top_1": false,
-            "top_3": true,
+            "top_3": false,
             "top_5": true,
             "recall_1": 0.0,
-            "recall_3": 1.0,
+            "recall_3": 0.0,
             "recall_5": 1.0,
             "precision_1": 0.0,
-            "precision_3": 0.3333,
+            "precision_3": 0.0,
             "precision_5": 0.2,
-            "mrr": 0.5
+            "mrr": 0.25
           }
         },
         {
           "repository": "internal",
-          "category": "Analytics",
-          "question": "How are hotspots calculated?",
+          "category": "Parsing",
+          "question": "How is code parsed by the CodeParser?",
           "expected_symbols": [
-            "GraphBuilder.generate_statistics"
+            "CodeParser"
           ],
           "retrieved_ids": [
-            "GraphBuilder.generate_statistics",
-            "RepositoryCache.compute_fingerprint",
-            "GraphStatistics",
-            "NodeDegree"
+            "CodeParser",
+            "CodeParser.extract_function",
+            "CodeParser._extract_class",
+            "CodeParser.parse_file",
+            "CodeParser._extract_decorator"
           ],
           "retrieved_labels": [
-            "generate_statistics",
-            "compute_fingerprint",
-            "GraphStatistics",
-            "NodeDegree"
+            "CodeParser",
+            "extract_function",
+            "_extract_class",
+            "parse_file",
+            "_extract_decorator"
           ],
           "retrieved_scores": [
-            35.0,
-            21.0,
-            19.0,
-            13.0
+            51.0,
+            48.0,
+            45.0,
+            44.0,
+            43.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0019,
+          "retrieval_time": 0.0023,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -386,35 +254,80 @@
         },
         {
           "repository": "internal",
-          "category": "Analytics",
-          "question": "How are graph statistics generated?",
+          "category": "Parsing",
+          "question": "How is verb noun extraction implemented?",
           "expected_symbols": [
-            "GraphBuilder.generate_statistics"
+            "extract_verb_noun"
           ],
           "retrieved_ids": [
-            "GraphBuilder.generate_statistics",
-            "GraphStatistics",
-            "generate_graph",
-            "GraphService.generate_graph",
-            "GraphBuilder.build_graph"
+            "extract_verb_noun",
+            "CodeParser.extract_function",
+            "QueryResolver.extract_keywords",
+            "extract_query_keywords",
+            "CodeParser._extract_class"
           ],
           "retrieved_labels": [
-            "generate_statistics",
-            "GraphStatistics",
-            "generate_graph",
-            "generate_graph",
-            "build_graph"
+            "extract_verb_noun",
+            "extract_function",
+            "extract_keywords",
+            "extract_query_keywords",
+            "_extract_class"
           ],
           "retrieved_scores": [
-            62.0,
-            51.0,
-            49.0,
-            48.0,
-            32.0
+            39.0,
+            13.0,
+            12.0,
+            11.0,
+            10.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0037,
+          "retrieval_time": 0.0015,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Parsing",
+          "question": "How are verb nouns extracted?",
+          "expected_symbols": [
+            "extract_verb_noun"
+          ],
+          "retrieved_ids": [
+            "extract_verb_noun",
+            "CodeParser.extract_function",
+            "QueryResolver.extract_keywords",
+            "extract_query_keywords",
+            "CodeParser._extract_class"
+          ],
+          "retrieved_labels": [
+            "extract_verb_noun",
+            "extract_function",
+            "extract_keywords",
+            "extract_query_keywords",
+            "_extract_class"
+          ],
+          "retrieved_scores": [
+            61.0,
+            27.0,
+            26.0,
+            25.0,
+            24.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.003,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -432,34 +345,214 @@
         {
           "repository": "internal",
           "category": "Retrieval",
-          "question": "How does retrieval work?",
+          "question": "What is the purpose of the repository retriever?",
           "expected_symbols": [
-            "RepositoryRetriever.get_node_context"
+            "RepositoryRetriever"
+          ],
+          "retrieved_ids": [
+            "RepositoryRetriever",
+            "RepositoryRetriever.search_by_label",
+            "RepositoryRetriever.get_node_context",
+            "RepositoryRetriever.get_callable_context",
+            "RepositoryRetriever.get_class_context"
+          ],
+          "retrieved_labels": [
+            "RepositoryRetriever",
+            "search_by_label",
+            "get_node_context",
+            "get_callable_context",
+            "get_class_context"
+          ],
+          "retrieved_scores": [
+            53.0,
+            47.0,
+            42.0,
+            39.0,
+            39.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0038,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Retrieval",
+          "question": "How is retrieval performed using RepositoryRetriever?",
+          "expected_symbols": [
+            "RepositoryRetriever"
+          ],
+          "retrieved_ids": [
+            "RepositoryRetriever",
+            "RepositoryRetriever.search_by_label",
+            "RepositoryRetriever.get_node_context",
+            "RepositoryRetriever.get_callable_context",
+            "RepositoryRetriever.get_class_context"
+          ],
+          "retrieved_labels": [
+            "RepositoryRetriever",
+            "search_by_label",
+            "get_node_context",
+            "get_callable_context",
+            "get_class_context"
+          ],
+          "retrieved_scores": [
+            63.0,
+            49.0,
+            44.0,
+            41.0,
+            41.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0066,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Retrieval",
+          "question": "What is the purpose of the query resolver?",
+          "expected_symbols": [
+            "QueryResolver"
+          ],
+          "retrieved_ids": [
+            "QueryResolver.resolve_query",
+            "QueryResolver",
+            "QueryResolver.resolve_to_node_ids",
+            "QueryResolver.get_ranking_diagnostics",
+            "QueryResolver.rank_candidates"
+          ],
+          "retrieved_labels": [
+            "resolve_query",
+            "QueryResolver",
+            "resolve_to_node_ids",
+            "get_ranking_diagnostics",
+            "rank_candidates"
+          ],
+          "retrieved_scores": [
+            52.0,
+            45.0,
+            40.0,
+            34.0,
+            34.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0054,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.5
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Retrieval",
+          "question": "How is retrieval performed using QueryResolver?",
+          "expected_symbols": [
+            "QueryResolver"
+          ],
+          "retrieved_ids": [
+            "QueryResolver",
+            "QueryResolver.resolve_query",
+            "QueryResolver.resolve_to_node_ids",
+            "QueryResolver.get_ranking_diagnostics",
+            "QueryResolver.rank_candidates"
+          ],
+          "retrieved_labels": [
+            "QueryResolver",
+            "resolve_query",
+            "resolve_to_node_ids",
+            "get_ranking_diagnostics",
+            "rank_candidates"
+          ],
+          "retrieved_scores": [
+            49.0,
+            48.0,
+            36.0,
+            34.0,
+            34.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.006,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Retrieval",
+          "question": "What is the purpose of the retrieval result?",
+          "expected_symbols": [
+            "RetrievalResult"
           ],
           "retrieved_ids": [
             "ContextBuilder._collect_retrieval_results",
-            "RepositoryRetriever.search_by_label",
-            "RepositoryRetriever",
-            "RetrievalMetadata",
-            "RetrievalResult.edges_of_type"
+            "RetrievalResult.edges_of_type",
+            "RetrievalResult.neighbour_ids",
+            "aggregate_results",
+            "_format_result_line"
           ],
           "retrieved_labels": [
             "_collect_retrieval_results",
-            "search_by_label",
-            "RepositoryRetriever",
-            "RetrievalMetadata",
-            "edges_of_type"
+            "edges_of_type",
+            "neighbour_ids",
+            "aggregate_results",
+            "_format_result_line"
           ],
           "retrieved_scores": [
+            38.0,
+            28.0,
+            28.0,
             27.0,
-            24.0,
-            22.0,
-            21.0,
-            21.0
+            25.0
           ],
           "pass_fail": "FAIL",
           "first_hit_rank": null,
-          "retrieval_time": 0.0016,
+          "retrieval_time": 0.0023,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -477,30 +570,406 @@
         {
           "repository": "internal",
           "category": "Retrieval",
-          "question": "How are neighbours retrieved?",
+          "question": "How is retrieval performed using RetrievalResult?",
           "expected_symbols": [
-            "RepositoryRetriever._collect_neighbours"
+            "RetrievalResult"
           ],
           "retrieved_ids": [
-            "RepositoryRetriever._collect_neighbours",
+            "RetrievalResult.edges_of_type",
             "RetrievalResult.neighbour_ids",
+            "ContextBuilder._collect_retrieval_results",
             "RepositoryRetriever.search_by_label",
-            "RepositoryRetriever.build_llm_context",
-            "RepositoryRetriever.get_node_context"
+            "RetrievalResult"
           ],
           "retrieved_labels": [
-            "_collect_neighbours",
+            "edges_of_type",
             "neighbour_ids",
+            "_collect_retrieval_results",
             "search_by_label",
-            "build_llm_context",
-            "get_node_context"
+            "RetrievalResult"
+          ],
+          "retrieved_scores": [
+            28.0,
+            28.0,
+            27.0,
+            24.0,
+            24.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 5,
+          "retrieval_time": 0.0024,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": false,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 0.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.0,
+            "precision_5": 0.2,
+            "mrr": 0.2
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Retrieval",
+          "question": "What is the purpose of the query resolution result?",
+          "expected_symbols": [
+            "QueryResolutionResult"
+          ],
+          "retrieved_ids": [
+            "QueryResolver.resolve_query",
+            "QueryResolutionResult",
+            "QueryResolutionResult.top_node_ids",
+            "QueryResolver.resolve_to_node_ids",
+            "aggregate_results"
+          ],
+          "retrieved_labels": [
+            "resolve_query",
+            "QueryResolutionResult",
+            "top_node_ids",
+            "resolve_to_node_ids",
+            "aggregate_results"
           ],
           "retrieved_scores": [
             37.0,
-            35.0,
+            36.0,
+            32.0,
+            28.0,
+            27.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0042,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.5
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Retrieval",
+          "question": "How is retrieval performed using QueryResolutionResult?",
+          "expected_symbols": [
+            "QueryResolutionResult"
+          ],
+          "retrieved_ids": [
+            "QueryResolver.resolve_query",
+            "QueryResolutionResult",
+            "QueryResolutionResult.top_node_ids",
+            "QueryResolver.resolve_to_node_ids",
+            "ContextBuilder._collect_retrieval_results"
+          ],
+          "retrieved_labels": [
+            "resolve_query",
+            "QueryResolutionResult",
+            "top_node_ids",
+            "resolve_to_node_ids",
+            "_collect_retrieval_results"
+          ],
+          "retrieved_scores": [
+            37.0,
+            34.0,
+            30.0,
+            28.0,
+            27.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0056,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.5
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Retrieval",
+          "question": "What is the purpose of the query match?",
+          "expected_symbols": [
+            "QueryMatch"
+          ],
+          "retrieved_ids": [
+            "get_matching_nodes_count",
+            "QueryResolver.resolve_query",
+            "extract_query_keywords",
+            "QueryMatch",
+            "RepositoryRetriever.search_by_label"
+          ],
+          "retrieved_labels": [
+            "get_matching_nodes_count",
+            "resolve_query",
+            "extract_query_keywords",
+            "QueryMatch",
+            "search_by_label"
+          ],
+          "retrieved_scores": [
+            30.0,
+            28.0,
+            25.0,
+            23.0,
+            22.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 4,
+          "retrieval_time": 0.0023,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": false,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 0.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.0,
+            "precision_5": 0.2,
+            "mrr": 0.25
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Retrieval",
+          "question": "How is retrieval performed using QueryMatch?",
+          "expected_symbols": [
+            "QueryMatch"
+          ],
+          "retrieved_ids": [
+            "QueryResolver.resolve_query",
+            "ContextBuilder._collect_retrieval_results",
+            "QueryMatch",
+            "extract_query_keywords",
+            "RepositoryRetriever.search_by_label"
+          ],
+          "retrieved_labels": [
+            "resolve_query",
+            "_collect_retrieval_results",
+            "QueryMatch",
+            "extract_query_keywords",
+            "search_by_label"
+          ],
+          "retrieved_scores": [
+            28.0,
+            27.0,
+            27.0,
+            25.0,
+            24.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 3,
+          "retrieval_time": 0.0027,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.3333
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Retrieval",
+          "question": "How does the query match work?",
+          "expected_symbols": [
+            "QueryMatch"
+          ],
+          "retrieved_ids": [
+            "get_matching_nodes_count",
+            "QueryResolver.resolve_query",
+            "extract_query_keywords",
+            "QueryMatch",
+            "RepositoryRetriever.search_by_label"
+          ],
+          "retrieved_labels": [
+            "get_matching_nodes_count",
+            "resolve_query",
+            "extract_query_keywords",
+            "QueryMatch",
+            "search_by_label"
+          ],
+          "retrieved_scores": [
+            30.0,
+            28.0,
+            25.0,
+            23.0,
+            22.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 4,
+          "retrieval_time": 0.002,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": false,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 0.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.0,
+            "precision_5": 0.2,
+            "mrr": 0.25
+          }
+        },
+        {
+          "repository": "internal",
+          "category": "Retrieval",
+          "question": "How is rank candidates retrieved?",
+          "expected_symbols": [
+            "QueryResolver.rank_candidates"
+          ],
+          "retrieved_ids": [
+            "QueryResolver.rank_candidates",
+            "RepositoryRetriever.search_by_label",
+            "compute_pagerank",
+            "QueryResolver.get_ranking_diagnostics",
+            "RepositoryRetriever.build_llm_context"
+          ],
+          "retrieved_labels": [
+            "rank_candidates",
+            "search_by_label",
+            "compute_pagerank",
+            "get_ranking_diagnostics",
+            "build_llm_context"
+          ],
+          "retrieved_scores": [
+            59.0,
             26.0,
+            22.0,
             21.0,
             21.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0028,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        }
+      ]
+    },
+    "FastAPI": {
+      "aggregate": {
+        "top_1": 0.625,
+        "top_3": 0.7917,
+        "top_5": 0.875,
+        "recall_1": 0.625,
+        "recall_3": 0.7917,
+        "recall_5": 0.875,
+        "precision_1": 0.625,
+        "precision_3": 0.2639,
+        "precision_5": 0.175,
+        "mrr": 0.7201
+      },
+      "questions": [
+        {
+          "repository": "FastAPI",
+          "category": "Graph Construction",
+          "question": "What is the purpose of the html link attribute?",
+          "expected_symbols": [
+            "HTMLLinkAttribute"
+          ],
+          "retrieved_ids": [
+            "HTMLLinkAttribute",
+            "extract_html_links",
+            "_construct_html_link",
+            "replace_html_links",
+            "HtmlLinkInfo"
+          ],
+          "retrieved_labels": [
+            "HTMLLinkAttribute",
+            "extract_html_links",
+            "_construct_html_link",
+            "replace_html_links",
+            "HtmlLinkInfo"
+          ],
+          "retrieved_scores": [
+            29.0,
+            27.0,
+            26.0,
+            26.0,
+            22.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0027,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "Graph Construction",
+          "question": "How does the html link attribute work?",
+          "expected_symbols": [
+            "HTMLLinkAttribute"
+          ],
+          "retrieved_ids": [
+            "HTMLLinkAttribute",
+            "extract_html_links",
+            "_construct_html_link",
+            "replace_html_links",
+            "HtmlLinkInfo"
+          ],
+          "retrieved_labels": [
+            "HTMLLinkAttribute",
+            "extract_html_links",
+            "_construct_html_link",
+            "replace_html_links",
+            "HtmlLinkInfo"
+          ],
+          "retrieved_scores": [
+            29.0,
+            27.0,
+            26.0,
+            26.0,
+            22.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
@@ -520,36 +989,36 @@
           }
         },
         {
-          "repository": "internal",
-          "category": "Retrieval",
-          "question": "How is a subgraph extracted?",
+          "repository": "FastAPI",
+          "category": "Graph Construction",
+          "question": "How is remove header permalinks represented in the graph?",
           "expected_symbols": [
-            "RepositoryRetriever.get_subgraph"
+            "remove_header_permalinks"
           ],
           "retrieved_ids": [
-            "RepositoryRetriever.get_subgraph",
-            "RepositoryRetriever.get_subgraph_for_intent",
-            "_build_subgraph_summary",
-            "CodeParser.extract_function",
-            "QueryResolver.extract_keywords"
+            "remove_header_permalinks",
+            "extract_header_permalinks",
+            "replace_header_permalinks",
+            "Header",
+            "HeaderPermalinkInfo"
           ],
           "retrieved_labels": [
-            "get_subgraph",
-            "get_subgraph_for_intent",
-            "_build_subgraph_summary",
-            "extract_function",
-            "extract_keywords"
+            "remove_header_permalinks",
+            "extract_header_permalinks",
+            "replace_header_permalinks",
+            "Header",
+            "HeaderPermalinkInfo"
           ],
           "retrieved_scores": [
+            63.0,
+            51.0,
             50.0,
-            47.0,
-            42.0,
-            27.0,
-            26.0
+            39.0,
+            38.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0039,
+          "retrieval_time": 0.0095,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -565,126 +1034,711 @@
           }
         },
         {
-          "repository": "internal",
-          "category": "Query Resolution",
-          "question": "How does query resolution work?",
+          "repository": "FastAPI",
+          "category": "Parsing",
+          "question": "What is the purpose of the base model with config?",
           "expected_symbols": [
-            "QueryResolver.resolve_query"
+            "BaseModelWithConfig"
           ],
           "retrieved_ids": [
-            "QueryResolver.resolve_query",
-            "QueryResolutionResult",
-            "QueryResolutionResult.top_node_ids",
-            "QueryResolver.resolve_to_node_ids",
-            "QueryResolver"
+            "BaseModelWithConfig",
+            "is_union_of_base_models",
+            "get_en_config",
+            "create_model_field",
+            "get_cached_model_fields"
           ],
           "retrieved_labels": [
-            "resolve_query",
-            "QueryResolutionResult",
-            "top_node_ids",
-            "resolve_to_node_ids",
-            "QueryResolver"
+            "BaseModelWithConfig",
+            "is_union_of_base_models",
+            "get_en_config",
+            "create_model_field",
+            "get_cached_model_fields"
           ],
           "retrieved_scores": [
-            37.0,
-            30.0,
-            30.0,
-            28.0,
-            26.0
-          ],
-          "pass_fail": "PASS",
-          "first_hit_rank": 1,
-          "retrieval_time": 0.0031,
-          "error": null,
-          "metrics": {
-            "top_1": true,
-            "top_3": true,
-            "top_5": true,
-            "recall_1": 1.0,
-            "recall_3": 1.0,
-            "recall_5": 1.0,
-            "precision_1": 1.0,
-            "precision_3": 0.3333,
-            "precision_5": 0.2,
-            "mrr": 1.0
-          }
-        },
-        {
-          "repository": "internal",
-          "category": "Query Resolution",
-          "question": "How are symbols ranked?",
-          "expected_symbols": [
-            "QueryResolver.rank_candidates"
-          ],
-          "retrieved_ids": [
-            "QueryResolver.rank_candidates",
-            "_SymbolRegistry.is_repo_symbol",
-            "_SymbolRegistry",
-            "QueryResolver.get_ranking_diagnostics",
-            "ContextPackage.top_node_ids"
-          ],
-          "retrieved_labels": [
-            "rank_candidates",
-            "is_repo_symbol",
-            "_SymbolRegistry",
-            "get_ranking_diagnostics",
-            "top_node_ids"
-          ],
-          "retrieved_scores": [
-            34.0,
-            27.0,
-            23.0,
-            21.0,
-            20.0
-          ],
-          "pass_fail": "PASS",
-          "first_hit_rank": 1,
-          "retrieval_time": 0.002,
-          "error": null,
-          "metrics": {
-            "top_1": true,
-            "top_3": true,
-            "top_5": true,
-            "recall_1": 1.0,
-            "recall_3": 1.0,
-            "recall_5": 1.0,
-            "precision_1": 1.0,
-            "precision_3": 0.3333,
-            "precision_5": 0.2,
-            "mrr": 1.0
-          }
-        },
-        {
-          "repository": "internal",
-          "category": "Context Building",
-          "question": "How is LLM context built?",
-          "expected_symbols": [
-            "ContextBuilder.build"
-          ],
-          "retrieved_ids": [
-            "RepositoryRetriever.build_llm_context",
-            "ContextBuilder._build_llm_context_text",
-            "build_context_builder",
-            "RepositoryRetriever.get_node_context",
-            "ContextBuilder.build"
-          ],
-          "retrieved_labels": [
-            "build_llm_context",
-            "_build_llm_context_text",
-            "build_context_builder",
-            "get_node_context",
-            "build"
-          ],
-          "retrieved_scores": [
-            69.0,
-            65.0,
-            48.0,
+            41.0,
             36.0,
+            28.0,
+            27.0,
+            27.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0033,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "Parsing",
+          "question": "How does the base model with config work?",
+          "expected_symbols": [
+            "BaseModelWithConfig"
+          ],
+          "retrieved_ids": [
+            "BaseModelWithConfig",
+            "is_union_of_base_models",
+            "get_en_config",
+            "create_model_field",
+            "get_cached_model_fields"
+          ],
+          "retrieved_labels": [
+            "BaseModelWithConfig",
+            "is_union_of_base_models",
+            "get_en_config",
+            "create_model_field",
+            "get_cached_model_fields"
+          ],
+          "retrieved_scores": [
+            41.0,
+            36.0,
+            28.0,
+            27.0,
+            27.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0028,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "Parsing",
+          "question": "How is the parsing of lenient issubclass handled?",
+          "expected_symbols": [
+            "lenient_issubclass"
+          ],
+          "retrieved_ids": [
+            "lenient_issubclass",
+            "APIRoute.handle",
+            "get_request_handler",
+            "APIRoute.get_route_handler",
+            "APIRouter.handle"
+          ],
+          "retrieved_labels": [
+            "lenient_issubclass",
+            "handle",
+            "get_request_handler",
+            "get_route_handler",
+            "handle"
+          ],
+          "retrieved_scores": [
+            55.0,
+            29.0,
+            29.0,
+            27.0,
+            27.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0065,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "Utilities",
+          "question": "How is a dependant retrieved?",
+          "expected_symbols": [
+            "get_dependant"
+          ],
+          "retrieved_ids": [
+            "get_dependant",
+            "get_flat_dependant",
+            "get_parameterless_sub_dependant",
+            "Dependant.is_async_gen_callable",
+            "Dependant.is_coroutine_callable"
+          ],
+          "retrieved_labels": [
+            "get_dependant",
+            "get_flat_dependant",
+            "get_parameterless_sub_dependant",
+            "is_async_gen_callable",
+            "is_coroutine_callable"
+          ],
+          "retrieved_scores": [
+            39.0,
+            36.0,
+            35.0,
+            24.0,
+            24.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0065,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "Utilities",
+          "question": "How are dependants fetched?",
+          "expected_symbols": [
+            "get_dependant"
+          ],
+          "retrieved_ids": [
+            "get_dependant",
+            "get_flat_dependant",
+            "get_parameterless_sub_dependant",
+            "Dependant.is_async_gen_callable",
+            "Dependant.is_coroutine_callable"
+          ],
+          "retrieved_labels": [
+            "get_dependant",
+            "get_flat_dependant",
+            "get_parameterless_sub_dependant",
+            "is_async_gen_callable",
+            "is_coroutine_callable"
+          ],
+          "retrieved_scores": [
+            39.0,
+            36.0,
+            35.0,
+            24.0,
+            24.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0038,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "Utilities",
+          "question": "How are dependants collected?",
+          "expected_symbols": [
+            "get_dependant"
+          ],
+          "retrieved_ids": [
+            "get_dependant",
+            "Dependant",
+            "get_flat_dependant",
+            "get_parameterless_sub_dependant",
+            "Dependant.is_async_gen_callable"
+          ],
+          "retrieved_labels": [
+            "get_dependant",
+            "Dependant",
+            "get_flat_dependant",
+            "get_parameterless_sub_dependant",
+            "is_async_gen_callable"
+          ],
+          "retrieved_scores": [
+            20.0,
+            18.0,
+            17.0,
+            16.0,
+            9.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0026,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "Utilities",
+          "question": "How is a authorization scheme param retrieved?",
+          "expected_symbols": [
+            "get_authorization_scheme_param"
+          ],
+          "retrieved_ids": [
+            "get_authorization_scheme_param",
+            "OAuthFlowAuthorizationCode",
+            "HTTPAuthorizationCredentials",
+            "OAuth2AuthorizationCodeBearer",
+            "get_flat_params"
+          ],
+          "retrieved_labels": [
+            "get_authorization_scheme_param",
+            "OAuthFlowAuthorizationCode",
+            "HTTPAuthorizationCredentials",
+            "OAuth2AuthorizationCodeBearer",
+            "get_flat_params"
+          ],
+          "retrieved_scores": [
+            68.0,
+            36.0,
+            34.0,
+            34.0,
+            33.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0054,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "HTTP",
+          "question": "How is request response implemented?",
+          "expected_symbols": [
+            "request_response"
+          ],
+          "retrieved_ids": [
+            "request_response",
+            "get_graphql_response",
+            "get_request_handler",
+            "request_body_to_args",
+            "request_params_to_args"
+          ],
+          "retrieved_labels": [
+            "request_response",
+            "get_graphql_response",
+            "get_request_handler",
+            "request_body_to_args",
+            "request_params_to_args"
+          ],
+          "retrieved_scores": [
+            48.0,
+            32.0,
+            32.0,
+            32.0,
+            32.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0074,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "HTTP",
+          "question": "How is request response handled?",
+          "expected_symbols": [
+            "request_response"
+          ],
+          "retrieved_ids": [
+            "request_response",
+            "get_request_handler",
+            "request_validation_exception_handler",
+            "websocket_request_validation_exception_handler",
+            "http_exception_handler"
+          ],
+          "retrieved_labels": [
+            "request_response",
+            "get_request_handler",
+            "request_validation_exception_handler",
+            "websocket_request_validation_exception_handler",
+            "http_exception_handler"
+          ],
+          "retrieved_scores": [
+            48.0,
+            46.0,
+            40.0,
+            40.0,
+            36.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0076,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "Routing",
+          "question": "How are routes registered for effective candidates?",
+          "expected_symbols": [
+            "_IncludedRouter.effective_candidates"
+          ],
+          "retrieved_ids": [
+            "_iter_included_route_candidates",
+            "_IncludedRouter.effective_candidates",
+            "_IncludedRouter.effective_route_contexts",
+            "APIRouter.add_api_route",
+            "_get_scope_effective_route_context"
+          ],
+          "retrieved_labels": [
+            "_iter_included_route_candidates",
+            "effective_candidates",
+            "effective_route_contexts",
+            "add_api_route",
+            "_get_scope_effective_route_context"
+          ],
+          "retrieved_scores": [
+            61.0,
+            57.0,
+            52.0,
+            50.0,
+            50.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0101,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.5
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "Routing",
+          "question": "How is the router inclusion context constructed for_include?",
+          "expected_symbols": [
+            "_RouterIncludeContext.for_include"
+          ],
+          "retrieved_ids": [
+            "APIRouter.include_router",
+            "FastAPI.include_router",
+            "_RouterIncludeContext.for_include",
+            "_IncludedRouter.effective_route_contexts",
+            "_IncludedRouter._build_effective_context"
+          ],
+          "retrieved_labels": [
+            "include_router",
+            "include_router",
+            "for_include",
+            "effective_route_contexts",
+            "_build_effective_context"
+          ],
+          "retrieved_scores": [
+            65.0,
+            63.0,
+            57.0,
+            51.0,
+            50.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 3,
+          "retrieval_time": 0.0096,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.3333
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "Routing",
+          "question": "How does _RouterIncludeContext combine routing configurations?",
+          "expected_symbols": [
+            "_RouterIncludeContext.combine"
+          ],
+          "retrieved_ids": [
+            "APIRouter.include_router",
+            "FastAPI.include_router",
+            "_RouterIncludeContext",
+            "_RouterIncludeContext.for_include",
+            "_get_scope_effective_route_context"
+          ],
+          "retrieved_labels": [
+            "include_router",
+            "include_router",
+            "_RouterIncludeContext",
+            "for_include",
+            "_get_scope_effective_route_context"
+          ],
+          "retrieved_scores": [
+            62.0,
+            60.0,
+            60.0,
+            51.0,
+            50.0
+          ],
+          "pass_fail": "FAIL",
+          "first_hit_rank": null,
+          "retrieval_time": 0.0094,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": false,
+            "top_5": false,
+            "recall_1": 0.0,
+            "recall_3": 0.0,
+            "recall_5": 0.0,
+            "precision_1": 0.0,
+            "precision_3": 0.0,
+            "precision_5": 0.0,
+            "mrr": 0.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "Routing",
+          "question": "How are routes registered for effective route contexts?",
+          "expected_symbols": [
+            "_IncludedRouter.effective_route_contexts"
+          ],
+          "retrieved_ids": [
+            "_IncludedRouter.effective_route_contexts",
+            "_get_scope_effective_route_context",
+            "_IncludedRouter._build_effective_context",
+            "APIRouter.add_api_route",
+            "APIRoute.get_route_handler"
+          ],
+          "retrieved_labels": [
+            "effective_route_contexts",
+            "_get_scope_effective_route_context",
+            "_build_effective_context",
+            "add_api_route",
+            "get_route_handler"
+          ],
+          "retrieved_scores": [
+            70.0,
+            62.0,
+            57.0,
+            55.0,
+            54.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0152,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "Routing",
+          "question": "How is a websocket route registered?",
+          "expected_symbols": [
+            "APIRouter.add_websocket_route"
+          ],
+          "retrieved_ids": [
+            "APIRouter.add_api_websocket_route",
+            "APIRouter.add_websocket_route",
+            "FastAPI.add_api_websocket_route",
+            "APIRouter.websocket_route",
+            "FastAPI.websocket_route"
+          ],
+          "retrieved_labels": [
+            "add_api_websocket_route",
+            "add_websocket_route",
+            "add_api_websocket_route",
+            "websocket_route",
+            "websocket_route"
+          ],
+          "retrieved_scores": [
+            57.0,
+            57.0,
+            56.0,
+            50.0,
+            50.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0104,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.5
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "Routing",
+          "question": "How are websocket routes registered?",
+          "expected_symbols": [
+            "APIRouter.add_websocket_route"
+          ],
+          "retrieved_ids": [
+            "APIRouter.add_api_websocket_route",
+            "APIRouter.add_websocket_route",
+            "FastAPI.add_api_websocket_route",
+            "APIRouter.websocket_route",
+            "FastAPI.websocket_route"
+          ],
+          "retrieved_labels": [
+            "add_api_websocket_route",
+            "add_websocket_route",
+            "add_api_websocket_route",
+            "websocket_route",
+            "websocket_route"
+          ],
+          "retrieved_scores": [
+            63.0,
+            63.0,
+            62.0,
+            56.0,
+            56.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0104,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.5
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "Routing",
+          "question": "How is a route registered?",
+          "expected_symbols": [
+            "APIRouter.add_route"
+          ],
+          "retrieved_ids": [
+            "APIRouter.add_api_route",
+            "APIRoute.get_route_handler",
+            "APIRouter.add_api_websocket_route",
+            "APIRouter.add_event_handler",
+            "APIRouter.add_route"
+          ],
+          "retrieved_labels": [
+            "add_api_route",
+            "get_route_handler",
+            "add_api_websocket_route",
+            "add_event_handler",
+            "add_route"
+          ],
+          "retrieved_scores": [
+            36.0,
+            35.0,
+            35.0,
+            35.0,
             35.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 5,
-          "retrieval_time": 0.0026,
+          "retrieval_time": 0.0111,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -698,31 +1752,13 @@
             "precision_5": 0.2,
             "mrr": 0.2
           }
-        }
-      ]
-    },
-    "FastAPI": {
-      "aggregate": {
-        "top_1": 1.0,
-        "top_3": 1.0,
-        "top_5": 1.0,
-        "recall_1": 0.3333,
-        "recall_3": 0.6,
-        "recall_5": 0.9333,
-        "precision_1": 1.0,
-        "precision_3": 0.6,
-        "precision_5": 0.56,
-        "mrr": 1.0
-      },
-      "questions": [
+        },
         {
           "repository": "FastAPI",
-          "category": "",
+          "category": "Routing",
           "question": "How are routes registered?",
           "expected_symbols": [
-            "APIRouter.add_api_route",
-            "APIRouter.add_route",
-            "APIRouter.add_api_websocket_route"
+            "APIRouter.add_route"
           ],
           "retrieved_ids": [
             "APIRouter.add_api_route",
@@ -746,207 +1782,199 @@
             49.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 1,
+          "first_hit_rank": 4,
+          "retrieval_time": 0.0119,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": false,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 0.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.0,
+            "precision_5": 0.2,
+            "mrr": 0.25
+          }
+        },
+        {
+          "repository": "FastAPI",
+          "category": "Routing",
+          "question": "How does the route decorator register a route in APIRouter?",
+          "expected_symbols": [
+            "APIRouter.route"
+          ],
+          "retrieved_ids": [
+            "APIRouter.add_api_route",
+            "APIRouter.add_api_websocket_route",
+            "FastAPI.add_api_route",
+            "FastAPI.add_api_websocket_route",
+            "APIRouter.api_route"
+          ],
+          "retrieved_labels": [
+            "add_api_route",
+            "add_api_websocket_route",
+            "add_api_route",
+            "add_api_websocket_route",
+            "api_route"
+          ],
+          "retrieved_scores": [
+            62.0,
+            61.0,
+            57.0,
+            56.0,
+            55.0
+          ],
+          "pass_fail": "FAIL",
+          "first_hit_rank": null,
           "retrieval_time": 0.0109,
           "error": null,
           "metrics": {
-            "top_1": true,
-            "top_3": true,
-            "top_5": true,
-            "recall_1": 0.3333,
-            "recall_3": 0.6667,
-            "recall_5": 1.0,
-            "precision_1": 1.0,
-            "precision_3": 0.6667,
-            "precision_5": 0.6,
-            "mrr": 1.0
+            "top_1": false,
+            "top_3": false,
+            "top_5": false,
+            "recall_1": 0.0,
+            "recall_3": 0.0,
+            "recall_5": 0.0,
+            "precision_1": 0.0,
+            "precision_3": 0.0,
+            "precision_5": 0.0,
+            "mrr": 0.0
           }
         },
         {
           "repository": "FastAPI",
-          "category": "",
-          "question": "How does dependency injection work?",
+          "category": "Routing",
+          "question": "How is a route path resolved in _RouterIncludeContext?",
           "expected_symbols": [
-            "get_dependant",
-            "solve_dependencies",
-            "add_non_field_param_to_dependency"
+            "_RouterIncludeContext.path_for"
           ],
           "retrieved_ids": [
-            "add_non_field_param_to_dependency",
-            "DependencyScopeError",
-            "get_dependant",
-            "get_flat_dependant",
-            "solve_dependencies"
+            "APIRouter.include_router",
+            "FastAPI.include_router",
+            "_RouterIncludeContext",
+            "_RouterIncludeContext.for_include",
+            "_IncludedRouter.url_path_for"
           ],
           "retrieved_labels": [
-            "add_non_field_param_to_dependency",
-            "DependencyScopeError",
-            "get_dependant",
-            "get_flat_dependant",
-            "solve_dependencies"
+            "include_router",
+            "include_router",
+            "_RouterIncludeContext",
+            "for_include",
+            "url_path_for"
           ],
           "retrieved_scores": [
-            36.0,
-            28.0,
-            21.0,
-            21.0,
-            21.0
+            56.0,
+            54.0,
+            48.0,
+            47.0,
+            44.0
           ],
-          "pass_fail": "PASS",
-          "first_hit_rank": 1,
-          "retrieval_time": 0.0053,
+          "pass_fail": "FAIL",
+          "first_hit_rank": null,
+          "retrieval_time": 0.0091,
           "error": null,
           "metrics": {
-            "top_1": true,
-            "top_3": true,
-            "top_5": true,
-            "recall_1": 0.3333,
-            "recall_3": 0.6667,
-            "recall_5": 1.0,
-            "precision_1": 1.0,
-            "precision_3": 0.6667,
-            "precision_5": 0.6,
-            "mrr": 1.0
+            "top_1": false,
+            "top_3": false,
+            "top_5": false,
+            "recall_1": 0.0,
+            "recall_3": 0.0,
+            "recall_5": 0.0,
+            "precision_1": 0.0,
+            "precision_3": 0.0,
+            "precision_5": 0.0,
+            "mrr": 0.0
           }
         },
         {
           "repository": "FastAPI",
-          "category": "",
-          "question": "How are requests handled?",
+          "category": "Routing",
+          "question": "How is a event handler registered?",
           "expected_symbols": [
+            "APIRouter.add_event_handler"
+          ],
+          "retrieved_ids": [
+            "APIRouter.add_event_handler",
+            "APIRoute.get_route_handler",
             "get_request_handler",
-            "APIRoute.handle",
+            "http_exception_handler",
             "request_validation_exception_handler"
           ],
-          "retrieved_ids": [
-            "get_request_handler",
-            "request_validation_exception_handler",
-            "websocket_request_validation_exception_handler",
-            "http_exception_handler",
-            "APIRoute.handle"
-          ],
           "retrieved_labels": [
+            "add_event_handler",
+            "get_route_handler",
             "get_request_handler",
-            "request_validation_exception_handler",
-            "websocket_request_validation_exception_handler",
             "http_exception_handler",
-            "handle"
+            "request_validation_exception_handler"
           ],
           "retrieved_scores": [
-            46.0,
-            40.0,
-            40.0,
-            36.0,
-            33.0
+            57.0,
+            45.0,
+            43.0,
+            41.0,
+            40.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0064,
+          "retrieval_time": 0.0076,
           "error": null,
           "metrics": {
             "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.3333,
-            "recall_3": 0.6667,
-            "recall_5": 1.0,
-            "precision_1": 1.0,
-            "precision_3": 0.6667,
-            "precision_5": 0.6,
-            "mrr": 1.0
-          }
-        },
-        {
-          "repository": "FastAPI",
-          "category": "",
-          "question": "How are responses generated?",
-          "expected_symbols": [
-            "ORJSONResponse.render",
-            "UJSONResponse.render",
-            "serialize_response"
-          ],
-          "retrieved_ids": [
-            "serialize_response",
-            "get_graphql_response",
-            "request_response",
-            "ORJSONResponse.render",
-            "UJSONResponse.render"
-          ],
-          "retrieved_labels": [
-            "serialize_response",
-            "get_graphql_response",
-            "request_response",
-            "render",
-            "render"
-          ],
-          "retrieved_scores": [
-            33.0,
-            29.0,
-            28.0,
-            26.0,
-            26.0
-          ],
-          "pass_fail": "PASS",
-          "first_hit_rank": 1,
-          "retrieval_time": 0.0046,
-          "error": null,
-          "metrics": {
-            "top_1": true,
-            "top_3": true,
-            "top_5": true,
-            "recall_1": 0.3333,
-            "recall_3": 0.3333,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
             "recall_5": 1.0,
             "precision_1": 1.0,
             "precision_3": 0.3333,
-            "precision_5": 0.6,
+            "precision_5": 0.2,
             "mrr": 1.0
           }
         },
         {
           "repository": "FastAPI",
-          "category": "",
-          "question": "How are middleware components registered?",
+          "category": "Routing",
+          "question": "How are event handlers registered?",
           "expected_symbols": [
-            "FastAPI.middleware",
-            "FastAPI.build_middleware_stack",
-            "AsyncExitStackMiddleware.__call__"
+            "APIRouter.add_event_handler"
           ],
           "retrieved_ids": [
-            "FastAPI.middleware",
-            "FastAPI.build_middleware_stack",
-            "APIRouter.include_router",
-            "add_missing",
-            "add_permalinks_page"
+            "APIRouter.add_event_handler",
+            "APIRoute.handle",
+            "APIRouter.on_event",
+            "FastAPI.on_event",
+            "APIRoute.get_route_handler"
           ],
           "retrieved_labels": [
-            "middleware",
-            "build_middleware_stack",
-            "include_router",
-            "add_missing",
-            "add_permalinks_page"
+            "add_event_handler",
+            "handle",
+            "on_event",
+            "on_event",
+            "get_route_handler"
           ],
           "retrieved_scores": [
-            29.0,
-            28.0,
-            24.0,
-            24.0,
-            24.0
+            48.0,
+            33.0,
+            33.0,
+            33.0,
+            31.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0081,
+          "retrieval_time": 0.0096,
           "error": null,
           "metrics": {
             "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.3333,
-            "recall_3": 0.6667,
-            "recall_5": 0.6667,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
             "precision_1": 1.0,
-            "precision_3": 0.6667,
-            "precision_5": 0.4,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
             "mrr": 1.0
           }
         }
@@ -954,345 +1982,630 @@
     },
     "Typer": {
       "aggregate": {
-        "top_1": 1.0,
-        "top_3": 1.0,
+        "top_1": 0.7143,
+        "top_3": 0.9524,
         "top_5": 1.0,
-        "recall_1": 0.3333,
-        "recall_3": 0.7333,
-        "recall_5": 0.8667,
-        "precision_1": 1.0,
-        "precision_3": 0.7333,
-        "precision_5": 0.52,
-        "mrr": 1.0
+        "recall_1": 0.7143,
+        "recall_3": 0.9524,
+        "recall_5": 1.0,
+        "precision_1": 0.7143,
+        "precision_3": 0.3175,
+        "precision_5": 0.2,
+        "mrr": 0.8452
       },
       "questions": [
         {
           "repository": "Typer",
-          "category": "",
-          "question": "How are CLI commands registered?",
+          "category": "Graph Construction",
+          "question": "What is the purpose of the context?",
           "expected_symbols": [
-            "TyperCLIGroup.list_commands",
-            "TyperGroup.format_commands",
-            "TyperGroup._click_resolve_command"
+            "Context"
           ],
           "retrieved_ids": [
-            "TyperCLIGroup.list_commands",
-            "TyperGroup.format_commands",
-            "TyperCLIGroup.get_command",
-            "TyperGroup.list_commands",
-            "maybe_add_run_to_cli"
+            "Command.make_context",
+            "Context",
+            "_build_prompt",
+            "get_current_context",
+            "pop_context"
           ],
           "retrieved_labels": [
-            "list_commands",
-            "format_commands",
-            "get_command",
-            "list_commands",
-            "maybe_add_run_to_cli"
+            "make_context",
+            "Context",
+            "_build_prompt",
+            "get_current_context",
+            "pop_context"
           ],
           "retrieved_scores": [
-            44.0,
-            43.0,
-            41.0,
-            40.0,
-            40.0
+            18.0,
+            18.0,
+            17.0,
+            17.0,
+            14.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 1,
-          "retrieval_time": 0.0071,
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0038,
           "error": null,
           "metrics": {
-            "top_1": true,
+            "top_1": false,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.3333,
-            "recall_3": 0.6667,
-            "recall_5": 0.6667,
-            "precision_1": 1.0,
-            "precision_3": 0.6667,
-            "precision_5": 0.4,
-            "mrr": 1.0
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.5
           }
         },
         {
           "repository": "Typer",
-          "category": "",
-          "question": "How are command arguments parsed?",
+          "category": "Graph Construction",
+          "question": "How is default represented in the graph?",
           "expected_symbols": [
-            "Command.parse_args",
-            "TyperArgument._parse_decls",
-            "_OptionParser.add_argument"
+            "Default"
           ],
           "retrieved_ids": [
-            "Command.parse_args",
-            "get_install_completion_arguments",
-            "_OptionParser._process_args_for_options",
-            "_OptionParser.add_argument",
-            "Argument"
+            "Default",
+            "Parameter.get_default",
+            "resolve_color_default",
+            "Context.lookup_default",
+            "make_default_short_help"
           ],
           "retrieved_labels": [
-            "parse_args",
-            "get_install_completion_arguments",
-            "_process_args_for_options",
-            "add_argument",
-            "Argument"
+            "Default",
+            "get_default",
+            "resolve_color_default",
+            "lookup_default",
+            "make_default_short_help"
           ],
           "retrieved_scores": [
-            55.0,
-            48.0,
-            44.0,
-            40.0,
-            39.0
+            28.0,
+            28.0,
+            27.0,
+            24.0,
+            24.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0106,
+          "retrieval_time": 0.0055,
           "error": null,
           "metrics": {
             "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.3333,
-            "recall_3": 0.3333,
-            "recall_5": 0.6667,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
             "precision_1": 1.0,
             "precision_3": 0.3333,
-            "precision_5": 0.4,
+            "precision_5": 0.2,
             "mrr": 1.0
           }
         },
         {
           "repository": "Typer",
-          "category": "",
-          "question": "How are options defined?",
+          "category": "Graph Construction",
+          "question": "How are default relationships created?",
           "expected_symbols": [
-            "Command.format_options",
-            "TyperCommand.format_options",
-            "TyperGroup.format_options"
+            "Default"
           ],
           "retrieved_ids": [
-            "Command.format_options",
-            "TyperGroup.format_options",
-            "TyperCommand.format_options",
-            "join_options",
-            "_print_options_panel"
+            "Default",
+            "Parameter.get_default",
+            "resolve_color_default",
+            "Context.lookup_default",
+            "make_default_short_help"
           ],
           "retrieved_labels": [
-            "format_options",
-            "format_options",
-            "format_options",
-            "join_options",
-            "_print_options_panel"
+            "Default",
+            "get_default",
+            "resolve_color_default",
+            "lookup_default",
+            "make_default_short_help"
           ],
           "retrieved_scores": [
-            37.0,
-            37.0,
-            36.0,
-            36.0,
+            18.0,
+            18.0,
+            17.0,
+            14.0,
+            14.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0044,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "Parsing",
+          "question": "How is version parsing implemented?",
+          "expected_symbols": [
+            "parse_version"
+          ],
+          "retrieved_ids": [
+            "parse_version",
+            "_ParsingState",
+            "current_version",
+            "get_current_version",
+            "update_version_file"
+          ],
+          "retrieved_labels": [
+            "parse_version",
+            "_ParsingState",
+            "current_version",
+            "get_current_version",
+            "update_version_file"
+          ],
+          "retrieved_scores": [
+            48.0,
+            32.0,
+            32.0,
+            32.0,
+            31.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0062,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "Parsing",
+          "question": "How are versions parsed?",
+          "expected_symbols": [
+            "parse_version"
+          ],
+          "retrieved_ids": [
+            "parse_version",
+            "generate_docs_src_versions_for_file",
+            "generate_docs_src_versions",
+            "current_version",
+            "get_current_version"
+          ],
+          "retrieved_labels": [
+            "parse_version",
+            "generate_docs_src_versions_for_file",
+            "generate_docs_src_versions",
+            "current_version",
+            "get_current_version"
+          ],
+          "retrieved_scores": [
+            48.0,
+            42.0,
+            41.0,
+            32.0,
             32.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0084,
+          "retrieval_time": 0.0044,
           "error": null,
           "metrics": {
             "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.3333,
+            "recall_1": 1.0,
             "recall_3": 1.0,
             "recall_5": 1.0,
             "precision_1": 1.0,
-            "precision_3": 1.0,
-            "precision_5": 0.6,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
             "mrr": 1.0
           }
         },
         {
           "repository": "Typer",
-          "category": "",
-          "question": "How is help text generated?",
+          "category": "Utilities",
+          "question": "How is a params from function retrieved?",
           "expected_symbols": [
-            "Command.format_help_text",
-            "_get_help_text",
-            "_sanitize_help_text"
+            "get_params_from_function"
           ],
           "retrieved_ids": [
-            "Command.format_help_text",
-            "_get_help_text",
-            "_sanitize_help_text",
-            "Context.get_help",
-            "HelpFormatter.write_text"
+            "get_params_convertors_ctx_param_name_from_function",
+            "get_params_from_function",
+            "Command.get_params",
+            "iter_params_for_processing",
+            "_install_completion_no_auto_placeholder_function"
           ],
           "retrieved_labels": [
-            "format_help_text",
-            "_get_help_text",
-            "_sanitize_help_text",
-            "get_help",
-            "write_text"
+            "get_params_convertors_ctx_param_name_from_function",
+            "get_params_from_function",
+            "get_params",
+            "iter_params_for_processing",
+            "_install_completion_no_auto_placeholder_function"
           ],
           "retrieved_scores": [
-            49.0,
-            44.0,
-            42.0,
-            39.0,
-            37.0
+            65.0,
+            65.0,
+            47.0,
+            40.0,
+            36.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 1,
-          "retrieval_time": 0.0051,
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0076,
           "error": null,
           "metrics": {
-            "top_1": true,
+            "top_1": false,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.3333,
+            "recall_1": 0.0,
             "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 1.0,
-            "precision_3": 1.0,
-            "precision_5": 0.6,
-            "mrr": 1.0
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.5
           }
         },
         {
           "repository": "Typer",
-          "category": "",
-          "question": "How are callbacks executed?",
+          "category": "Utilities",
+          "question": "How are params from functions fetched?",
           "expected_symbols": [
-            "get_callback",
-            "Typer.callback",
-            "get_param_callback"
+            "get_params_from_function"
           ],
           "retrieved_ids": [
-            "get_callback",
-            "callback",
-            "Typer.callback",
-            "get_param_callback",
-            "install_callback"
+            "get_params_convertors_ctx_param_name_from_function",
+            "get_params_from_function",
+            "Command.get_params",
+            "iter_params_for_processing",
+            "get_click_param"
           ],
           "retrieved_labels": [
-            "get_callback",
-            "callback",
-            "callback",
-            "get_param_callback",
-            "install_callback"
+            "get_params_convertors_ctx_param_name_from_function",
+            "get_params_from_function",
+            "get_params",
+            "iter_params_for_processing",
+            "get_click_param"
           ],
           "retrieved_scores": [
-            41.0,
-            39.0,
-            38.0,
-            38.0,
-            37.0
+            56.0,
+            56.0,
+            47.0,
+            40.0,
+            36.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 1,
-          "retrieval_time": 0.0054,
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0064,
           "error": null,
           "metrics": {
-            "top_1": true,
+            "top_1": false,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.3333,
-            "recall_3": 0.6667,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 1.0,
-            "precision_3": 0.6667,
-            "precision_5": 0.6,
-            "mrr": 1.0
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.5
           }
-        }
-      ]
-    },
-    "Requests": {
-      "aggregate": {
-        "top_1": 0.8,
-        "top_3": 1.0,
-        "top_5": 1.0,
-        "recall_1": 0.2667,
-        "recall_3": 0.6,
-        "recall_5": 0.8,
-        "precision_1": 0.8,
-        "precision_3": 0.6,
-        "precision_5": 0.48,
-        "mrr": 0.8667
-      },
-      "questions": [
+        },
         {
-          "repository": "Requests",
-          "category": "",
-          "question": "How are HTTP requests executed?",
+          "repository": "Typer",
+          "category": "Utilities",
+          "question": "How are params from functions collected?",
           "expected_symbols": [
-            "HTTPAdapter.send",
-            "Session.send",
-            "HTTPAdapter.request_url"
+            "get_params_from_function"
           ],
           "retrieved_ids": [
-            "HTTPAdapter.send",
-            "HTTPAdapter.request_url",
-            "RequestsCookieJar",
-            "HTTPAdapter.get_connection",
-            "HTTPAdapter.get_connection_with_tls_context"
+            "get_params_convertors_ctx_param_name_from_function",
+            "get_params_from_function",
+            "Command.get_params",
+            "FuncParamType",
+            "iter_params_for_processing"
           ],
           "retrieved_labels": [
-            "send",
-            "request_url",
-            "RequestsCookieJar",
-            "get_connection",
-            "get_connection_with_tls_context"
+            "get_params_convertors_ctx_param_name_from_function",
+            "get_params_from_function",
+            "get_params",
+            "FuncParamType",
+            "iter_params_for_processing"
           ],
           "retrieved_scores": [
-            39.0,
             37.0,
+            37.0,
+            28.0,
+            25.0,
+            25.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 2,
+          "retrieval_time": 0.004,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.5
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "Utilities",
+          "question": "How is rich format help implemented?",
+          "expected_symbols": [
+            "rich_format_help"
+          ],
+          "retrieved_ids": [
+            "rich_format_help",
+            "Command.format_help",
+            "TyperCommand.format_help",
+            "TyperGroup.format_help",
+            "Command.format_help_text"
+          ],
+          "retrieved_labels": [
+            "rich_format_help",
+            "format_help",
+            "format_help",
+            "format_help",
+            "format_help_text"
+          ],
+          "retrieved_scores": [
+            62.0,
+            53.0,
+            53.0,
+            52.0,
+            49.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0042,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "CLI",
+          "question": "What is the purpose of the param type?",
+          "expected_symbols": [
+            "ParamType"
+          ],
+          "retrieved_ids": [
+            "_param_type_to_user_string",
+            "BoolParamType",
+            "FuncParamType",
+            "ParamType",
+            "CompositeParamType"
+          ],
+          "retrieved_labels": [
+            "_param_type_to_user_string",
+            "BoolParamType",
+            "FuncParamType",
+            "ParamType",
+            "CompositeParamType"
+          ],
+          "retrieved_scores": [
+            26.0,
+            25.0,
+            25.0,
+            25.0,
+            24.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 4,
+          "retrieval_time": 0.006,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": false,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 0.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.0,
+            "precision_5": 0.2,
+            "mrr": 0.25
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "CLI",
+          "question": "What is the purpose of the parameter?",
+          "expected_symbols": [
+            "Parameter"
+          ],
+          "retrieved_ids": [
+            "Parameter",
+            "BadParameter",
+            "MissingParameter",
+            "Context.get_parameter_source",
+            "Context.set_parameter_source"
+          ],
+          "retrieved_labels": [
+            "Parameter",
+            "BadParameter",
+            "MissingParameter",
+            "get_parameter_source",
+            "set_parameter_source"
+          ],
+          "retrieved_scores": [
+            39.0,
+            35.0,
             35.0,
             34.0,
             34.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0054,
+          "retrieval_time": 0.0027,
           "error": null,
           "metrics": {
             "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.3333,
-            "recall_3": 0.6667,
-            "recall_5": 0.6667,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
             "precision_1": 1.0,
-            "precision_3": 0.6667,
-            "precision_5": 0.4,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
             "mrr": 1.0
           }
         },
         {
-          "repository": "Requests",
-          "category": "",
-          "question": "How are sessions managed?",
+          "repository": "Typer",
+          "category": "CLI",
+          "question": "What is the purpose of the usage error?",
           "expected_symbols": [
-            "Session.send",
-            "Session.__init__",
-            "session"
+            "UsageError"
           ],
           "retrieved_ids": [
-            "Session.send",
-            "SessionRedirectMixin.send",
-            "HTTPAdapter.init_poolmanager",
-            "HTTPAdapter.build_connection_pool_key_attributes",
-            "session"
+            "augment_usage_errors",
+            "UsageError",
+            "Command.get_usage",
+            "Context.get_usage",
+            "UsageError.show"
           ],
           "retrieved_labels": [
-            "send",
-            "send",
-            "init_poolmanager",
-            "build_connection_pool_key_attributes",
-            "session"
+            "augment_usage_errors",
+            "UsageError",
+            "get_usage",
+            "get_usage",
+            "show"
           ],
           "retrieved_scores": [
-            35.0,
-            32.0,
+            27.0,
+            25.0,
+            19.0,
+            17.0,
+            17.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0024,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.5
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "CLI",
+          "question": "What is the purpose of the completion item?",
+          "expected_symbols": [
+            "CompletionItem"
+          ],
+          "retrieved_ids": [
+            "CompletionItem",
+            "ShellComplete.format_completion",
+            "ShellComplete.get_completion_args",
+            "get_completion_script",
+            "get_param_completion"
+          ],
+          "retrieved_labels": [
+            "CompletionItem",
+            "format_completion",
+            "get_completion_args",
+            "get_completion_script",
+            "get_param_completion"
+          ],
+          "retrieved_scores": [
             31.0,
-            30.0,
-            30.0
+            28.0,
+            28.0,
+            28.0,
+            28.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0032,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "CLI",
+          "question": "How does the completion item work?",
+          "expected_symbols": [
+            "CompletionItem"
+          ],
+          "retrieved_ids": [
+            "CompletionItem",
+            "ShellComplete.format_completion",
+            "ShellComplete.get_completion_args",
+            "get_completion_script",
+            "get_param_completion"
+          ],
+          "retrieved_labels": [
+            "CompletionItem",
+            "format_completion",
+            "get_completion_args",
+            "get_completion_script",
+            "get_param_completion"
+          ],
+          "retrieved_scores": [
+            31.0,
+            28.0,
+            28.0,
+            28.0,
+            28.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
@@ -1302,154 +2615,1325 @@
             "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.3333,
-            "recall_3": 0.3333,
-            "recall_5": 0.6667,
-            "precision_1": 1.0,
-            "precision_3": 0.3333,
-            "precision_5": 0.4,
-            "mrr": 1.0
-          }
-        },
-        {
-          "repository": "Requests",
-          "category": "",
-          "question": "How are adapters used?",
-          "expected_symbols": [
-            "HTTPAdapter",
-            "BaseAdapter",
-            "Session.get_adapter"
-          ],
-          "retrieved_ids": [
-            "Session.get_adapter",
-            "BaseAdapter",
-            "HTTPAdapter",
-            "C:\\Users\\awane\\RepoGraphAI\\backend\\repos\\requests\\src\\requests\\adapters.py",
-            "HTTPAdapter.build_response"
-          ],
-          "retrieved_labels": [
-            "get_adapter",
-            "BaseAdapter",
-            "HTTPAdapter",
-            "adapters.py",
-            "build_response"
-          ],
-          "retrieved_scores": [
-            15.0,
-            14.0,
-            14.0,
-            10.0,
-            10.0
-          ],
-          "pass_fail": "PASS",
-          "first_hit_rank": 1,
-          "retrieval_time": 0.0014,
-          "error": null,
-          "metrics": {
-            "top_1": true,
-            "top_3": true,
-            "top_5": true,
-            "recall_1": 0.3333,
+            "recall_1": 1.0,
             "recall_3": 1.0,
             "recall_5": 1.0,
             "precision_1": 1.0,
-            "precision_3": 1.0,
-            "precision_5": 0.6,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
             "mrr": 1.0
           }
         },
         {
-          "repository": "Requests",
-          "category": "",
-          "question": "How are redirects handled?",
+          "repository": "Typer",
+          "category": "CLI",
+          "question": "How does color default resolution work?",
           "expected_symbols": [
-            "SessionRedirectMixin.resolve_redirects",
-            "HTTPDigestAuth.handle_redirect",
-            "Response.is_redirect"
+            "resolve_color_default"
           ],
           "retrieved_ids": [
-            "SessionRedirectMixin.resolve_redirects",
-            "HTTPDigestAuth.handle_redirect",
-            "TooManyRedirects",
-            "Response.is_redirect",
-            "HTTPDigestAuth.handle_401"
+            "resolve_color_default",
+            "Default",
+            "Parameter.get_default",
+            "Context.lookup_default",
+            "make_default_short_help"
           ],
           "retrieved_labels": [
-            "resolve_redirects",
-            "handle_redirect",
-            "TooManyRedirects",
-            "is_redirect",
-            "handle_401"
+            "resolve_color_default",
+            "Default",
+            "get_default",
+            "lookup_default",
+            "make_default_short_help"
           ],
           "retrieved_scores": [
-            28.0,
-            27.0,
-            23.0,
-            17.0,
+            40.0,
+            18.0,
+            18.0,
+            14.0,
             14.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0037,
+          "retrieval_time": 0.0045,
           "error": null,
           "metrics": {
             "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.3333,
-            "recall_3": 0.6667,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
             "recall_5": 1.0,
             "precision_1": 1.0,
-            "precision_3": 0.6667,
-            "precision_5": 0.6,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "CLI",
+          "question": "How are color defaults resolved?",
+          "expected_symbols": [
+            "resolve_color_default"
+          ],
+          "retrieved_ids": [
+            "resolve_color_default",
+            "solve_typer_info_defaults",
+            "MixedAnnotatedAndDefaultStyleError",
+            "Default",
+            "Parameter.get_default"
+          ],
+          "retrieved_labels": [
+            "resolve_color_default",
+            "solve_typer_info_defaults",
+            "MixedAnnotatedAndDefaultStyleError",
+            "Default",
+            "get_default"
+          ],
+          "retrieved_scores": [
+            40.0,
+            27.0,
+            24.0,
+            18.0,
+            18.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0031,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "CLI",
+          "question": "How is a current context retrieved?",
+          "expected_symbols": [
+            "get_current_context"
+          ],
+          "retrieved_ids": [
+            "get_current_context",
+            "get_current_version",
+            "Context.lookup_default",
+            "Context.find_object",
+            "Context.find_root"
+          ],
+          "retrieved_labels": [
+            "get_current_context",
+            "get_current_version",
+            "lookup_default",
+            "find_object",
+            "find_root"
+          ],
+          "retrieved_scores": [
+            53.0,
+            36.0,
+            35.0,
+            34.0,
+            34.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0053,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "CLI",
+          "question": "How are current contexts fetched?",
+          "expected_symbols": [
+            "get_current_context"
+          ],
+          "retrieved_ids": [
+            "get_current_context",
+            "get_current_version",
+            "Command.make_context",
+            "current_version",
+            "_resolve_context"
+          ],
+          "retrieved_labels": [
+            "get_current_context",
+            "get_current_version",
+            "make_context",
+            "current_version",
+            "_resolve_context"
+          ],
+          "retrieved_scores": [
+            53.0,
+            36.0,
+            33.0,
+            32.0,
+            29.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0066,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "CLI",
+          "question": "How are current contexts collected?",
+          "expected_symbols": [
+            "get_current_context"
+          ],
+          "retrieved_ids": [
+            "get_current_context",
+            "Command.make_context",
+            "Context",
+            "_build_prompt",
+            "current_version"
+          ],
+          "retrieved_labels": [
+            "get_current_context",
+            "make_context",
+            "Context",
+            "_build_prompt",
+            "current_version"
+          ],
+          "retrieved_scores": [
+            34.0,
+            18.0,
+            18.0,
+            17.0,
+            17.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0046,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "CLI",
+          "question": "How is a click param retrieved?",
+          "expected_symbols": [
+            "get_click_param"
+          ],
+          "retrieved_ids": [
+            "get_click_param",
+            "get_click_type",
+            "get_docs_for_click",
+            "get_param_callback",
+            "get_param_completion"
+          ],
+          "retrieved_labels": [
+            "get_click_param",
+            "get_click_type",
+            "get_docs_for_click",
+            "get_param_callback",
+            "get_param_completion"
+          ],
+          "retrieved_scores": [
+            53.0,
+            36.0,
+            36.0,
+            36.0,
+            36.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0071,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Typer",
+          "category": "CLI",
+          "question": "How are click params fetched?",
+          "expected_symbols": [
+            "get_click_param"
+          ],
+          "retrieved_ids": [
+            "get_click_param",
+            "get_params_convertors_ctx_param_name_from_function",
+            "Command.get_params",
+            "get_params_from_function",
+            "iter_params_for_processing"
+          ],
+          "retrieved_labels": [
+            "get_click_param",
+            "get_params_convertors_ctx_param_name_from_function",
+            "get_params",
+            "get_params_from_function",
+            "iter_params_for_processing"
+          ],
+          "retrieved_scores": [
+            53.0,
+            50.0,
+            47.0,
+            47.0,
+            40.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0061,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        }
+      ]
+    },
+    "Requests": {
+      "aggregate": {
+        "top_1": 0.8182,
+        "top_3": 0.9091,
+        "top_5": 0.9545,
+        "recall_1": 0.8182,
+        "recall_3": 0.9091,
+        "recall_5": 0.9545,
+        "precision_1": 0.8182,
+        "precision_3": 0.303,
+        "precision_5": 0.1909,
+        "mrr": 0.8727
+      },
+      "questions": [
+        {
+          "repository": "Requests",
+          "category": "Graph Construction",
+          "question": "What is the purpose of the request exception?",
+          "expected_symbols": [
+            "RequestException"
+          ],
+          "retrieved_ids": [
+            "Session.request",
+            "request",
+            "HTTPAdapter.request_url",
+            "Session.prepare_request",
+            "HTTPAdapter.send"
+          ],
+          "retrieved_labels": [
+            "request",
+            "request",
+            "request_url",
+            "prepare_request",
+            "send"
+          ],
+          "retrieved_scores": [
+            33.0,
+            33.0,
+            32.0,
+            32.0,
+            27.0
+          ],
+          "pass_fail": "FAIL",
+          "first_hit_rank": null,
+          "retrieval_time": 0.0055,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": false,
+            "top_5": false,
+            "recall_1": 0.0,
+            "recall_3": 0.0,
+            "recall_5": 0.0,
+            "precision_1": 0.0,
+            "precision_3": 0.0,
+            "precision_5": 0.0,
+            "mrr": 0.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "Graph Construction",
+          "question": "What is the purpose of the session?",
+          "expected_symbols": [
+            "Session"
+          ],
+          "retrieved_ids": [
+            "Session.send",
+            "SessionRedirectMixin.send",
+            "HTTPAdapter.build_connection_pool_key_attributes",
+            "session",
+            "Session"
+          ],
+          "retrieved_labels": [
+            "send",
+            "send",
+            "build_connection_pool_key_attributes",
+            "session",
+            "Session"
+          ],
+          "retrieved_scores": [
+            35.0,
+            32.0,
+            30.0,
+            30.0,
+            28.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 5,
+          "retrieval_time": 0.0042,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": false,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 0.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.0,
+            "precision_5": 0.2,
+            "mrr": 0.2
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "Parsing",
+          "question": "How is cookies to jar extraction implemented?",
+          "expected_symbols": [
+            "extract_cookies_to_jar"
+          ],
+          "retrieved_ids": [
+            "extract_cookies_to_jar",
+            "merge_cookies",
+            "PreparedRequest.prepare_cookies",
+            "RequestsCookieJar",
+            "cookiejar_from_dict"
+          ],
+          "retrieved_labels": [
+            "extract_cookies_to_jar",
+            "merge_cookies",
+            "prepare_cookies",
+            "RequestsCookieJar",
+            "cookiejar_from_dict"
+          ],
+          "retrieved_scores": [
+            46.0,
+            27.0,
+            26.0,
+            25.0,
+            25.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0028,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
             "mrr": 1.0
           }
         },
         {
           "repository": "Requests",
-          "category": "",
-          "question": "How are responses processed?",
+          "category": "Parsing",
+          "question": "How are cookies to jars extracted?",
           "expected_symbols": [
-            "Response.iter_content",
-            "Response.content",
-            "stream_decode_response_unicode"
+            "extract_cookies_to_jar"
           ],
           "retrieved_ids": [
-            "HTTPAdapter.build_response",
-            "get_unicode_from_response",
-            "stream_decode_response_unicode",
-            "Response.iter_content",
-            "Response.links"
+            "extract_cookies_to_jar",
+            "merge_cookies",
+            "PreparedRequest.prepare_cookies",
+            "cookiejar_from_dict",
+            "add_dict_to_cookiejar"
           ],
           "retrieved_labels": [
-            "build_response",
-            "get_unicode_from_response",
-            "stream_decode_response_unicode",
-            "iter_content",
-            "links"
+            "extract_cookies_to_jar",
+            "merge_cookies",
+            "prepare_cookies",
+            "cookiejar_from_dict",
+            "add_dict_to_cookiejar"
           ],
           "retrieved_scores": [
-            29.0,
-            26.0,
-            26.0,
-            25.0,
-            24.0
+            68.0,
+            42.0,
+            41.0,
+            40.0,
+            37.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 3,
-          "retrieval_time": 0.0053,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0032,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "Utilities",
+          "question": "How is to native string implemented?",
+          "expected_symbols": [
+            "to_native_string"
+          ],
+          "retrieved_ids": [
+            "to_native_string",
+            "_basic_auth_str",
+            "StreamConsumedError",
+            "SessionRedirectMixin.should_strip_auth",
+            "stream_decode_response_unicode"
+          ],
+          "retrieved_labels": [
+            "to_native_string",
+            "_basic_auth_str",
+            "StreamConsumedError",
+            "should_strip_auth",
+            "stream_decode_response_unicode"
+          ],
+          "retrieved_scores": [
+            40.0,
+            13.0,
+            12.0,
+            11.0,
+            11.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0016,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "Utilities",
+          "question": "How is to native string handled?",
+          "expected_symbols": [
+            "to_native_string"
+          ],
+          "retrieved_ids": [
+            "to_native_string",
+            "HTTPDigestAuth.handle_401",
+            "_basic_auth_str",
+            "StreamConsumedError",
+            "SessionRedirectMixin.should_strip_auth"
+          ],
+          "retrieved_labels": [
+            "to_native_string",
+            "handle_401",
+            "_basic_auth_str",
+            "StreamConsumedError",
+            "should_strip_auth"
+          ],
+          "retrieved_scores": [
+            40.0,
+            14.0,
+            13.0,
+            12.0,
+            11.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0022,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "Utilities",
+          "question": "How is a auth from url retrieved?",
+          "expected_symbols": [
+            "get_auth_from_url"
+          ],
+          "retrieved_ids": [
+            "get_auth_from_url",
+            "urldefragauth",
+            "MockRequest.get_full_url",
+            "PreparedRequest.prepare_url",
+            "HTTPAdapter.request_url"
+          ],
+          "retrieved_labels": [
+            "get_auth_from_url",
+            "urldefragauth",
+            "get_full_url",
+            "prepare_url",
+            "request_url"
+          ],
+          "retrieved_scores": [
+            53.0,
+            37.0,
+            34.0,
+            32.0,
+            30.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0049,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "Utilities",
+          "question": "How are auth from urls fetched?",
+          "expected_symbols": [
+            "get_auth_from_url"
+          ],
+          "retrieved_ids": [
+            "get_auth_from_url",
+            "urldefragauth",
+            "MockRequest.get_full_url",
+            "PreparedRequest.prepare_url",
+            "HTTPAdapter.request_url"
+          ],
+          "retrieved_labels": [
+            "get_auth_from_url",
+            "urldefragauth",
+            "get_full_url",
+            "prepare_url",
+            "request_url"
+          ],
+          "retrieved_scores": [
+            53.0,
+            37.0,
+            34.0,
+            32.0,
+            30.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0029,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "HTTP",
+          "question": "What is the purpose of the response?",
+          "expected_symbols": [
+            "Response"
+          ],
+          "retrieved_ids": [
+            "Response",
+            "HTTPAdapter.build_response",
+            "MockResponse",
+            "get_unicode_from_response",
+            "stream_decode_response_unicode"
+          ],
+          "retrieved_labels": [
+            "Response",
+            "build_response",
+            "MockResponse",
+            "get_unicode_from_response",
+            "stream_decode_response_unicode"
+          ],
+          "retrieved_scores": [
+            18.0,
+            17.0,
+            14.0,
+            14.0,
+            14.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.002,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "HTTP",
+          "question": "What is the purpose of the http adapter?",
+          "expected_symbols": [
+            "HTTPAdapter"
+          ],
+          "retrieved_ids": [
+            "HTTPAdapter",
+            "HTTPAdapter.send",
+            "Session.get_adapter",
+            "HTTPAdapter.get_connection",
+            "HTTPAdapter.get_connection_with_tls_context"
+          ],
+          "retrieved_labels": [
+            "HTTPAdapter",
+            "send",
+            "get_adapter",
+            "get_connection",
+            "get_connection_with_tls_context"
+          ],
+          "retrieved_scores": [
+            31.0,
+            29.0,
+            29.0,
+            28.0,
+            28.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.004,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "HTTP",
+          "question": "What is the purpose of the http basic auth?",
+          "expected_symbols": [
+            "HTTPBasicAuth"
+          ],
+          "retrieved_ids": [
+            "_basic_auth_str",
+            "HTTPBasicAuth",
+            "HTTPDigestAuth",
+            "HTTPProxyAuth",
+            "HTTPAdapter.send"
+          ],
+          "retrieved_labels": [
+            "_basic_auth_str",
+            "HTTPBasicAuth",
+            "HTTPDigestAuth",
+            "HTTPProxyAuth",
+            "send"
+          ],
+          "retrieved_scores": [
+            46.0,
+            45.0,
+            39.0,
+            37.0,
+            35.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0044,
           "error": null,
           "metrics": {
             "top_1": false,
             "top_3": true,
             "top_5": true,
             "recall_1": 0.0,
-            "recall_3": 0.3333,
-            "recall_5": 0.6667,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
             "precision_1": 0.0,
             "precision_3": 0.3333,
-            "precision_5": 0.4,
-            "mrr": 0.3333
+            "precision_5": 0.2,
+            "mrr": 0.5
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "HTTP",
+          "question": "How does the http basic auth work?",
+          "expected_symbols": [
+            "HTTPBasicAuth"
+          ],
+          "retrieved_ids": [
+            "_basic_auth_str",
+            "HTTPBasicAuth",
+            "HTTPDigestAuth",
+            "HTTPProxyAuth",
+            "HTTPAdapter.send"
+          ],
+          "retrieved_labels": [
+            "_basic_auth_str",
+            "HTTPBasicAuth",
+            "HTTPDigestAuth",
+            "HTTPProxyAuth",
+            "send"
+          ],
+          "retrieved_scores": [
+            46.0,
+            45.0,
+            39.0,
+            37.0,
+            35.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0044,
+          "error": null,
+          "metrics": {
+            "top_1": false,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 0.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 0.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 0.5
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "HTTP",
+          "question": "What is the purpose of the http digest auth?",
+          "expected_symbols": [
+            "HTTPDigestAuth"
+          ],
+          "retrieved_ids": [
+            "HTTPDigestAuth",
+            "HTTPBasicAuth",
+            "HTTPDigestAuth.build_digest_header",
+            "HTTPProxyAuth",
+            "HTTPAdapter.send"
+          ],
+          "retrieved_labels": [
+            "HTTPDigestAuth",
+            "HTTPBasicAuth",
+            "build_digest_header",
+            "HTTPProxyAuth",
+            "send"
+          ],
+          "retrieved_scores": [
+            45.0,
+            39.0,
+            38.0,
+            37.0,
+            35.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0041,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "HTTP",
+          "question": "What is the purpose of the mock response?",
+          "expected_symbols": [
+            "MockResponse"
+          ],
+          "retrieved_ids": [
+            "MockResponse",
+            "Response",
+            "HTTPAdapter.build_response",
+            "MockRequest",
+            "MockResponse.getheaders"
+          ],
+          "retrieved_labels": [
+            "MockResponse",
+            "Response",
+            "build_response",
+            "MockRequest",
+            "getheaders"
+          ],
+          "retrieved_scores": [
+            25.0,
+            18.0,
+            17.0,
+            14.0,
+            14.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0024,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "HTTP",
+          "question": "How is handle 401 implemented?",
+          "expected_symbols": [
+            "HTTPDigestAuth.handle_401"
+          ],
+          "retrieved_ids": [
+            "HTTPDigestAuth.handle_401",
+            "HTTPDigestAuth.handle_redirect",
+            "dispatch_hook",
+            "_implementation"
+          ],
+          "retrieved_labels": [
+            "handle_401",
+            "handle_redirect",
+            "dispatch_hook",
+            "_implementation"
+          ],
+          "retrieved_scores": [
+            34.0,
+            13.0,
+            11.0,
+            10.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0018,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "HTTP",
+          "question": "How is handle 401 handled?",
+          "expected_symbols": [
+            "HTTPDigestAuth.handle_401"
+          ],
+          "retrieved_ids": [
+            "HTTPDigestAuth.handle_401",
+            "HTTPDigestAuth.handle_redirect",
+            "dispatch_hook"
+          ],
+          "retrieved_labels": [
+            "handle_401",
+            "handle_redirect",
+            "dispatch_hook"
+          ],
+          "retrieved_scores": [
+            40.0,
+            24.0,
+            11.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0018,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "HTTP",
+          "question": "How is iter content implemented?",
+          "expected_symbols": [
+            "Response.iter_content"
+          ],
+          "retrieved_ids": [
+            "Response.iter_content",
+            "Response.content",
+            "PreparedRequest.prepare_content_length",
+            "Response.iter_lines",
+            "iter_slices"
+          ],
+          "retrieved_labels": [
+            "iter_content",
+            "content",
+            "prepare_content_length",
+            "iter_lines",
+            "iter_slices"
+          ],
+          "retrieved_scores": [
+            34.0,
+            16.0,
+            15.0,
+            15.0,
+            15.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0015,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "HTTP",
+          "question": "How is iter content handled?",
+          "expected_symbols": [
+            "Response.iter_content"
+          ],
+          "retrieved_ids": [
+            "Response.iter_content",
+            "Response.content",
+            "PreparedRequest.prepare_content_length",
+            "Response.iter_lines",
+            "iter_slices"
+          ],
+          "retrieved_labels": [
+            "iter_content",
+            "content",
+            "prepare_content_length",
+            "iter_lines",
+            "iter_slices"
+          ],
+          "retrieved_scores": [
+            34.0,
+            16.0,
+            15.0,
+            15.0,
+            15.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.003,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "Configuration",
+          "question": "How is merge environment settings implemented?",
+          "expected_symbols": [
+            "Session.merge_environment_settings"
+          ],
+          "retrieved_ids": [
+            "Session.merge_environment_settings",
+            "merge_setting",
+            "merge_cookies",
+            "merge_hooks",
+            "_implementation"
+          ],
+          "retrieved_labels": [
+            "merge_environment_settings",
+            "merge_setting",
+            "merge_cookies",
+            "merge_hooks",
+            "_implementation"
+          ],
+          "retrieved_scores": [
+            59.0,
+            44.0,
+            26.0,
+            26.0,
+            20.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0019,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "Configuration",
+          "question": "How is merge environment settings handled?",
+          "expected_symbols": [
+            "Session.merge_environment_settings"
+          ],
+          "retrieved_ids": [
+            "Session.merge_environment_settings",
+            "merge_setting",
+            "merge_cookies",
+            "merge_hooks",
+            "HTTPDigestAuth.handle_401"
+          ],
+          "retrieved_labels": [
+            "merge_environment_settings",
+            "merge_setting",
+            "merge_cookies",
+            "merge_hooks",
+            "handle_401"
+          ],
+          "retrieved_scores": [
+            59.0,
+            44.0,
+            26.0,
+            26.0,
+            24.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0024,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "Authentication",
+          "question": "How is should strip auth implemented?",
+          "expected_symbols": [
+            "SessionRedirectMixin.should_strip_auth"
+          ],
+          "retrieved_ids": [
+            "SessionRedirectMixin.should_strip_auth",
+            "PreparedRequest.prepare_auth",
+            "get_auth_from_url",
+            "SessionRedirectMixin.rebuild_auth",
+            "get_netrc_auth"
+          ],
+          "retrieved_labels": [
+            "should_strip_auth",
+            "prepare_auth",
+            "get_auth_from_url",
+            "rebuild_auth",
+            "get_netrc_auth"
+          ],
+          "retrieved_scores": [
+            50.0,
+            28.0,
+            28.0,
+            27.0,
+            27.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0017,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
+          }
+        },
+        {
+          "repository": "Requests",
+          "category": "Authentication",
+          "question": "How is should strip auth handled?",
+          "expected_symbols": [
+            "SessionRedirectMixin.should_strip_auth"
+          ],
+          "retrieved_ids": [
+            "SessionRedirectMixin.should_strip_auth",
+            "HTTPDigestAuth.handle_401",
+            "HTTPDigestAuth.handle_redirect",
+            "PreparedRequest.prepare_auth",
+            "get_auth_from_url"
+          ],
+          "retrieved_labels": [
+            "should_strip_auth",
+            "handle_401",
+            "handle_redirect",
+            "prepare_auth",
+            "get_auth_from_url"
+          ],
+          "retrieved_scores": [
+            50.0,
+            36.0,
+            32.0,
+            28.0,
+            28.0
+          ],
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0023,
+          "error": null,
+          "metrics": {
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
           }
         }
       ]
