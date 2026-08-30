@@ -401,6 +401,23 @@ _INTENT_EXPANSION_POLICIES: dict[IntentCategory, IntentExpansionPolicy] = {
             _R.CONTAINS: 0,
         },
     ),
+    # OVERVIEW: "overall structure", "project layout", "how is it organized"
+    # Follow IMPORTS deeply (reveals the dependency/module graph) and CONTAINS
+    # one hop (shows what each file defines). Suppress CALLS/INHERITS/DECORATES
+    # — they pull in method-level noise that makes structural answers verbose.
+    IntentCategory.OVERVIEW: IntentExpansionPolicy(
+        name="overview",
+        edge_hop_limits={
+            _R.IMPORTS: 2,  # import chains reveal the module dependency topology
+            _R.CONTAINS: 1,  # file→class containment shows what each module defines
+            _R.CALLS: 0,  # suppress — execution details noise for structure questions
+            _R.INHERITS: 0,
+            _R.INSTANTIATES: 0,
+            _R.DECORATES: 0,
+            _R.OVERRIDES: 0,
+        },
+        default_hops=0,
+    ),
     IntentCategory.UNKNOWN: DEFAULT_EXPANSION_POLICY,
 }
 
@@ -660,6 +677,20 @@ class ContextBuilder:
         # --- Step 1: resolve query to ranked node IDs --------------------
         resolution = self._resolver.resolve_query(question, top_k=effective_k)
 
+        # --- Step 1b (OVERVIEW fallback): if the intent is OVERVIEW and we
+        # got few/no matches from keyword scoring, seed with the top FILE and
+        # MODULE nodes by degree. Overview questions like "overall structure"
+        # rarely match specific symbol names, so keyword retrieval alone can't
+        # answer them — we need structural anchors from the graph itself.
+        if (
+            resolution.intent.categories
+            and resolution.intent.categories[0] == IntentCategory.OVERVIEW
+            and len(resolution.matches) < effective_k
+        ):
+            resolution = self._augment_with_structural_nodes(
+                resolution, question, effective_k
+            )
+
         # --- Step 2: per-node retrieval ----------------------------------
         retrieval_results = self._collect_retrieval_results(resolution.matches)
 
@@ -708,6 +739,103 @@ class ContextBuilder:
             llm_context=llm_context,
             traversal_strategy=policy.name,
             raw_resolution=resolution,
+        )
+
+    # ------------------------------------------------------------------
+    # OVERVIEW intent — structural seeding fallback
+    # ------------------------------------------------------------------
+
+    def _augment_with_structural_nodes(
+        self,
+        resolution,
+        question: str,
+        top_k: int,
+    ):
+        """
+        For OVERVIEW-intent questions ("overall structure", "how is it
+        organized", etc.), inject top-degree FILE, MODULE, and CLASS nodes
+        as seeds.  Overview questions rarely match specific symbol names,
+        so keyword retrieval alone yields little context; the highest-degree
+        structural nodes give the LLM the architectural anchors it needs.
+
+        Preserves any existing keyword matches by appending — does not
+        replace them.
+        """
+        from app.models.pydantic_models import NodeType
+        from app.retrievers.query_resolver import QueryMatch, QueryResolutionResult
+
+        graph = self._retriever._graph  # RepositoryGraph
+        node_index = self._retriever._nodes  # dict[str, GraphNode]
+
+        # Compute total degree (in + out) per node
+        degree: dict[str, int] = {}
+        for edge in graph.edges:
+            degree[edge.source] = degree.get(edge.source, 0) + 1
+            degree[edge.target] = degree.get(edge.target, 0) + 1
+
+        # Rank structural nodes with a composite priority:
+        #   1. Prefer FILE nodes over MODULE over CLASS
+        #   2. Prefer entry-point-like paths (main.py, __init__.py, app.py, api/)
+        #      over one-off scripts/tests
+        #   3. Then rank by degree
+        type_priority = {NodeType.FILE: 0, NodeType.MODULE: 1, NodeType.CLASS: 2}
+
+        def _path_priority(node) -> int:
+            """Lower = higher priority for the OVERVIEW seed list."""
+            path = (getattr(node, "file_path", None) or node.id).lower()
+            # Highest priority: obvious entry points
+            if any(seg in path for seg in ("/main.py", "/__init__.py", "/app.py", "/server.py")):
+                return 0
+            # High priority: application source under app/, src/, lib/
+            if "/app/" in path or "/src/" in path or "/lib/" in path:
+                # Prefer api/, routes/, services/ inside the app tree
+                if any(seg in path for seg in ("/api/", "/routes/", "/services/", "/core/")):
+                    return 1
+                return 2
+            # Penalise scripts, migrations, tests, examples
+            if any(seg in path for seg in ("/scripts/", "/migrations/", "/tests/",
+                                            "/test_", "/examples/", "/scratch/")):
+                return 9
+            return 5  # default (top-level files, docs)
+
+        structural = []
+        for node_id, deg in degree.items():
+            node = node_index.get(node_id)
+            if node is None or node.type not in type_priority:
+                continue
+            structural.append((
+                type_priority[node.type],
+                _path_priority(node),
+                -deg,
+                node_id,
+                node,
+            ))
+
+        structural.sort()  # by (type, path priority, -degree, id)
+
+        # Skip node IDs already resolved
+        existing_ids = {m.node_id for m in resolution.matches}
+        additional: list[QueryMatch] = []
+        for _type_pri, _path_pri, neg_deg, node_id, node in structural:
+            if node_id in existing_ids:
+                continue
+            additional.append(
+                QueryMatch(
+                    node_id=node_id,
+                    node_type=node.type,
+                    score=1.0,  # low synthetic score
+                    reason=f"OVERVIEW seed: {node.type.value} degree={-neg_deg}",
+                )
+            )
+            if len(resolution.matches) + len(additional) >= top_k:
+                break
+
+        return QueryResolutionResult(
+            query=resolution.query,
+            keywords=resolution.keywords,
+            expanded_keywords=resolution.expanded_keywords,
+            intent=resolution.intent,
+            matches=list(resolution.matches) + additional,
         )
 
     # ------------------------------------------------------------------

@@ -275,6 +275,21 @@ _STOP_WORDS: frozenset[str] = frozenset(
         "done",
         "way",
         "ways",
+        # Architectural meta-words: kept in OVERVIEW lexicon but stop here
+        # so they don't substring-match unrelated method names (e.g.
+        # "overall" → "weighted_overall", "structure" → "data_structure_utils")
+        "overall",
+        "general",
+        "main",
+        "give",
+        "show",
+        "tell",
+        "explain",
+        "describe",
+        "understand",
+        "look",
+        "find",
+        "check",
     }
 )
 
@@ -336,6 +351,7 @@ class IntentCategory(str, Enum):
     TRANSFORMATION = "transformation"
     GRAPH_TRAVERSAL = "graph_traversal"  # v4 NEW: subgraph, walk, traverse
     AGGREGATION = "aggregation"  # v4 NEW: count, rank, aggregate, compute
+    OVERVIEW = "overview"  # NEW: "overall structure", "project layout", "how is it organized"
     UNKNOWN = "unknown"
 
 
@@ -503,6 +519,10 @@ _INTENT_LEXICONS: dict[IntentCategory, frozenset[str]] = {
         {
             "auth",
             "authenticat",
+            "authentic",  # stem of "authentication" produced by _stem()
+            "authentication",
+            "authenticate",
+            "authenticated",
             "login",
             "signin",
             "logout",
@@ -511,10 +531,14 @@ _INTENT_LEXICONS: dict[IntentCategory, frozenset[str]] = {
             "permission",
             "authoriz",
             "authoris",
+            "authorization",
+            "authorize",
             "credential",
             "session",
             "oauth",
             "jwt",
+            "bearer",
+            "password",
         }
     ),
     IntentCategory.ROUTING: frozenset(
@@ -658,6 +682,43 @@ _INTENT_LEXICONS: dict[IntentCategory, frozenset[str]] = {
             "centrality",
         }
     ),
+    # OVERVIEW: architectural/structural meta-questions about the codebase
+    # Triggers: "overall structure", "how is the project organized", "what are the
+    # main modules", "project layout", "architecture", "folder structure", etc.
+    IntentCategory.OVERVIEW: frozenset(
+        {
+            "structure",
+            "structured",
+            "overview",
+            "architecture",
+            "architectural",
+            "layout",
+            "organized",
+            "organization",
+            "organise",
+            "organize",
+            "codebase",
+            "project",
+            "folder",
+            "folders",
+            "directory",
+            "directories",
+            "component",
+            "components",
+            "layer",
+            "layers",
+            "module",
+            "modules",
+            "package",
+            "packages",
+            "design",
+            "overall",
+            "high-level",
+            "highlevel",
+            "entrypoint",
+            "entry",
+        }
+    ),
 }
 
 # ---------------------------------------------------------------------------
@@ -712,6 +773,10 @@ _INTENT_PREFERRED_TYPES: dict[IntentCategory, frozenset[NodeType]] = {
     IntentCategory.VALIDATION: frozenset({NodeType.CLASS, NodeType.METHOD, NodeType.FUNCTION}),
     IntentCategory.VISUALIZATION: frozenset({NodeType.FUNCTION, NodeType.METHOD, NodeType.CLASS}),
     IntentCategory.CONFIGURATION: frozenset({NodeType.CLASS, NodeType.FUNCTION, NodeType.METHOD}),
+    # OVERVIEW: architectural questions — files and modules first, then classes
+    # Explicitly does NOT include FUNCTION or METHOD; those are implementation details
+    # that pollute an overview answer with irrelevant callables.
+    IntentCategory.OVERVIEW: frozenset({NodeType.FILE, NodeType.MODULE, NodeType.CLASS}),
 }
 
 # ---------------------------------------------------------------------------
@@ -1240,6 +1305,30 @@ def _detect_phrases(question: str) -> list[_PhraseEntry]:
 # ===========================================================================
 
 _QUERY_EXPANSION: dict[str, list[str]] = {
+    # ---- Authentication / authorization ----
+    # Query terms expand into every plausible node-name substring so that
+    # keyword scoring reliably finds AuthService, get_current_user, jwt utils,
+    # login/register routes, etc.
+    "authentication": ["auth", "authenticate", "login", "token", "jwt", "user", "session"],
+    "authenticate":   ["auth", "login", "token", "jwt"],
+    "authenticated":  ["auth", "user", "current_user"],
+    "authentic":      ["auth", "login", "token", "jwt"],  # stem of "authentication"
+    "authenticat":    ["auth", "login", "token", "jwt"],
+    "auth":           ["login", "token", "jwt", "user", "credential"],
+    "login":          ["auth", "signin", "token"],
+    "logout":         ["auth", "signout", "token"],
+    "token":          ["jwt", "bearer", "auth", "access_token"],
+    "jwt":            ["token", "auth", "bearer"],
+    "authorization":  ["auth", "permission", "role"],
+    "authorize":      ["auth", "permission"],
+    "credential":     ["auth", "password", "token"],
+    "session":        ["auth", "conversation", "cookie"],
+    # ---- Overview / architecture ----
+    "structure":   ["module", "package", "layout", "architecture"],
+    "structured":  ["module", "package"],
+    "architecture":["structure", "module", "layout"],
+    "layout":      ["structure", "architecture"],
+    "organization":["structure", "layout"],
     # ---- Parsing / reading ----
     "parse": [
         "read",

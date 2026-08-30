@@ -4,8 +4,14 @@ Run: streamlit run frontend/app.py
 """
 
 import json
+import os
+
 import requests
 import streamlit as st
+
+# Read backend URL from environment variable if set (useful for deployment)
+# Falls back to localhost:8000 — change this if running backend on a different port
+_DEFAULT_BACKEND = os.getenv("REPOGRAPHAI_BACKEND_URL", "http://localhost:8000")
 
 # ── Page config (must be first) ───────────────────────────────────────────────
 st.set_page_config(
@@ -305,7 +311,8 @@ with st.sidebar:
 
     backend_url = st.text_input(
         "🔗 Backend URL",
-        value="http://localhost:8000",
+        value=_DEFAULT_BACKEND,
+        help="Set REPOGRAPHAI_BACKEND_URL env var to change the default.",
     ).rstrip("/")
 
     repo_url = st.text_input(
@@ -447,6 +454,16 @@ def _ask_streaming(question: str):
     source_nodes = []
     meta         = {}
 
+    # Diagnose connection before streaming
+    try:
+        requests.get(f"{backend_url}/health", timeout=3)
+    except Exception:
+        st.error(
+            f"Cannot reach backend at **{backend_url}**. "
+            "Check the Backend URL in the sidebar and make sure the server is running."
+        )
+        return None
+
     try:
         with requests.post(
             f"{backend_url}/qa/stream",
@@ -455,8 +472,25 @@ def _ask_streaming(question: str):
                   "top_k": top_k, "max_hops": max_hops, "use_embeddings": use_embeddings},
             stream=True, timeout=300,
         ) as resp:
+            if resp.status_code == 422:
+                try:
+                    detail = resp.json().get("detail", resp.text)
+                except Exception:
+                    detail = resp.text
+                st.error(f"Validation error: {detail}")
+                return None
+            if resp.status_code == 401:
+                st.error("API key required. Enter it in the sidebar under **API Key**.")
+                return None
+            if resp.status_code == 429:
+                st.error("Rate limit exceeded. Wait a moment and try again.")
+                return None
             if resp.status_code != 200:
-                st.error(f"Error {resp.status_code}: {resp.json().get('detail', resp.text)}")
+                try:
+                    detail = resp.json().get("detail", resp.text)
+                except Exception:
+                    detail = resp.text
+                st.error(f"Server error {resp.status_code}: {detail}")
                 return None
 
             for raw in resp.iter_lines():
@@ -491,13 +525,18 @@ def _ask_streaming(question: str):
                         _render_metadata(meta, source_nodes)
                     return full
                 elif t == "error":
-                    st.error("Server: " + ev.get("detail", "Unknown error"))
+                    st.error("Server error: " + ev.get("detail", "Unknown error"))
                     return None
 
     except requests.exceptions.Timeout:
-        st.error("Request timed out.")
+        st.error("Request timed out. Try a smaller repository or simpler question.")
+    except requests.exceptions.ConnectionError:
+        st.error(
+            f"Connection refused at **{backend_url}**. "
+            "Is the backend running? Try clicking **🔍 Server health** in the sidebar."
+        )
     except Exception as e:
-        st.error(f"Connection error: {e}")
+        st.error(f"Unexpected error: {e}")
     return None
 
 
@@ -536,7 +575,11 @@ def _ask_sync(question: str):
 
 
 def _ask_session(question: str):
-    with st.spinner("Querying session…"):
+    """Ask a question within an existing session. Handles expired sessions gracefully."""
+    if not st.session_state.session_id:
+        return None
+
+    with st.spinner("Querying session (no re-clone)…"):
         try:
             r = requests.post(
                 f"{backend_url}/sessions/{st.session_state.session_id}/qa",
@@ -544,16 +587,32 @@ def _ask_session(question: str):
                 json={"question": question},
                 timeout=120,
             )
+        except requests.exceptions.ConnectionError:
+            st.error(
+                f"Connection refused at **{backend_url}**. "
+                "Is the backend running? The session is still saved — try again."
+            )
+            return None
         except Exception as e:
             st.error(f"Error: {e}")
             return None
 
     if r.status_code == 404:
-        st.warning("Session expired — creating a new one…")
+        # Session lost — server may have restarted. Rebuild transparently.
+        st.toast("Session expired — rebuilding graph…", icon="🔄")
         st.session_state.session_id = None
+        return None  # caller will handle retry
+
+    if r.status_code == 401:
+        st.error("API key required. Enter it in the sidebar under **API Key**.")
         return None
+
     if r.status_code != 200:
-        st.error(f"Error {r.status_code}: {r.json().get('detail', r.text)}")
+        try:
+            detail = r.json().get("detail", r.text)
+        except Exception:
+            detail = r.text
+        st.error(f"Error {r.status_code}: {detail}")
         return None
 
     d      = r.json()
@@ -564,7 +623,7 @@ def _ask_session(question: str):
     if answer:
         st.markdown(answer)
     else:
-        st.info("⚡ Offline mode.")
+        st.info("⚡ No LLM key configured — showing retrieval context.")
         st.code(d.get("llm_context", ""), language=None)
 
     if meta or nodes:
@@ -631,18 +690,29 @@ if question and repo_url:
         answer = None
 
         if use_session:
+            # Create session if none exists or repo changed
             if not st.session_state.session_id or st.session_state.last_repo != repo_url:
                 ok = _create_session(repo_url)
                 if not ok:
                     st.stop()
+
             answer = _ask_session(question)
+
+            # Session expired (404) — auto-rebuild once, then fall back to streaming
             if answer is None and not st.session_state.session_id:
-                if _create_session(repo_url):
+                st.info("Rebuilding session after expiry…")
+                ok = _create_session(repo_url)
+                if ok:
                     answer = _ask_session(question)
+                else:
+                    # Session creation itself failed — fall back to streaming
+                    st.warning("Session rebuild failed. Falling back to streaming mode.")
+                    answer = _ask_streaming(question)
+
         elif use_stream:
             answer = _ask_streaming(question)
         else:
             answer = _ask_sync(question)
 
-    if answer:
+    if answer and answer not in ("(offline)",):
         st.session_state.messages.append({"role": "assistant", "content": answer})
