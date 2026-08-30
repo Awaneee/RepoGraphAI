@@ -59,17 +59,14 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Callable, Optional
-from app.models.pydantic_models import BaseModel
+from typing import Callable, Iterator, Optional
 
-from app.models.pydantic_models import RepositoryGraph
+from app.models.pydantic_models import BaseModel, RepositoryGraph
 from app.rag.context_builder import (
     ContextBuilder,
     ContextPackage,
-    ResolvedNode,
     build_context_builder,
 )
-
 
 # ===========================================================================
 # Exceptions
@@ -125,6 +122,20 @@ class LLMProvider(ABC):
             ``GraphRAGEngine`` treats both as failures.
         """
         raise NotImplementedError
+
+    def stream(self, *, system_prompt: str, user_prompt: str) -> Iterator[str]:
+        """
+        Stream a completion for the given prompts, yielding text chunks.
+
+        Default implementation calls ``generate`` and yields the full response
+        as a single chunk. Subclasses override this for true token streaming.
+
+        Yields
+        ------
+        str
+            Successive text chunks of the model's answer.
+        """
+        yield self.generate(system_prompt=system_prompt, user_prompt=user_prompt)
 
 
 class EchoLLMProvider(LLMProvider):
@@ -246,6 +257,18 @@ class AnthropicLLMProvider(LLMProvider):
         ]
         return "".join(text_blocks)
 
+    def stream(self, *, system_prompt: str, user_prompt: str) -> Iterator[str]:
+        """Stream using Anthropic's streaming Messages API."""
+        client = self._get_client()
+        with client.messages.stream(
+            model=self._model,
+            max_tokens=self._max_tokens,
+            system=system_prompt,
+            messages=[{"role": "user", "content": user_prompt}],
+        ) as stream_ctx:
+            for text in stream_ctx.text_stream:
+                yield text
+
 
 class GeminiLLMProvider(LLMProvider):
     """
@@ -319,6 +342,27 @@ class GeminiLLMProvider(LLMProvider):
             return ""
         return response.text
 
+    def stream(self, *, system_prompt: str, user_prompt: str) -> Iterator[str]:
+        """Stream using Gemini's generate_content_stream API."""
+        client = self._get_client()
+        try:
+            from google.genai import types
+        except ImportError as exc:
+            raise ImportError(
+                "GeminiLLMProvider requires the 'google-genai' package. "
+                "Install it with `pip install google-genai`."
+            ) from exc
+
+        for chunk in client.models.generate_content_stream(
+            model=self._model,
+            contents=user_prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+            ),
+        ):
+            if chunk.text:
+                yield chunk.text
+
 
 # ===========================================================================
 # Prompt construction strategy
@@ -348,44 +392,104 @@ class PromptBuilder(ABC):
 
 DEFAULT_SYSTEM_PROMPT = """\
 You are a senior software engineer answering questions about a specific \
-Python codebase.
+Python codebase. You have access to a structured knowledge graph of the \
+repository — it contains nodes (files, classes, functions, methods) and \
+typed edges (CALLS, INHERITS, IMPORTS, INSTANTIATES, DECORATES, OVERRIDES).
 
-Ground every statement in the REPOSITORY CONTEXT you are given. Do not \
-invent function names, classes, file paths, or behaviour that is not shown \
-in the context. If the context is insufficient to answer confidently, say \
-so explicitly instead of guessing.
+STRICT GROUNDING RULES
+----------------------
+1. Ground every statement in the REPOSITORY CONTEXT provided. Do not invent \
+function names, class names, file paths, or behaviour not present in the context.
+2. If the context is insufficient to answer confidently, say so explicitly: \
+"The provided context does not contain enough information to answer this \
+question. Try rephrasing or asking about a specific symbol."
+3. Never hallucinate. An honest "I don't know" is more valuable than a \
+confident wrong answer.
 
-When you reference code, cite the relevant node id (for example \
-ClassName.method_name or function_name) so the reader can locate it in the \
-repository."""
+CITATION FORMAT
+---------------
+When referencing code, always cite the node id from the context, e.g.:
+  - Class: `GraphBuilder`
+  - Method: `GraphBuilder.build_graph`
+  - Function: `build_context_builder`
+  - File: `app/graph/graph_builder.py`
+
+ANSWER STYLE
+------------
+- Be specific and concise. Avoid restating the question.
+- Lead with the direct answer, then provide supporting detail.
+- If a function calls other functions or a class has relevant subclasses, \
+mention them using their node ids.
+- Use markdown code formatting for symbol names (`ClassName.method`).
+
+SELF-CHECK (do this silently before answering)
+----------------------------------------------
+Before writing your answer, identify:
+  1. Which nodes in the context are most relevant?
+  2. What do the graph edges (CALLS, INHERITS, etc.) tell you about relationships?
+  3. Is there enough context to answer confidently?
+Then write your answer based only on that evidence."""
+
+
+# Few-shot examples embedded in the user prompt to demonstrate the
+# expected answer format and grounding behaviour.
+_FEW_SHOT_EXAMPLES = """\
+─────────────────────────────────────────────────────────────────
+EXAMPLE QUESTIONS AND EXPECTED ANSWER STYLE (for calibration only)
+─────────────────────────────────────────────────────────────────
+Example Q: What does `Session.send` do?
+Example A: `Session.send` (in `requests/sessions.py`) is the central dispatch
+method that all public request methods (`get`, `post`, `put`, etc.) route
+through. It resolves the appropriate transport adapter via `get_adapter`,
+calls `HTTPAdapter.send` to perform the actual HTTP request, and processes
+the response (including redirect following via `SessionRedirectMixin.resolve_redirects`).
+
+Example Q: What calls `build_graph`?
+Example A: Based on the context, `GraphService.generate_graph` calls
+`GraphBuilder.build_graph`. The CALLS edge in the subgraph confirms this:
+`GraphService.generate_graph → GraphBuilder.build_graph`.
+─────────────────────────────────────────────────────────────────
+END OF EXAMPLES — answer the ACTUAL question below using ONLY the
+REPOSITORY CONTEXT provided, not the examples above.
+─────────────────────────────────────────────────────────────────
+"""
 
 
 class GraphRAGPromptBuilder(PromptBuilder):
     """
-    Default prompt construction strategy for GraphRAG v1.
+    Default prompt construction strategy for GraphRAG v2.
 
-    The user prompt is the ``ContextPackage.llm_context`` block (which
-    already contains the question, detected intent, keywords, per-node
-    context, and subgraph relationships) followed by an explicit
-    answer-instruction footer that restates the question. Restating the
-    question after a long context block measurably improves instruction
-    adherence on most chat models.
+    Improvements over v1:
+    - Stronger system prompt with explicit grounding rules, citation format,
+      and a chain-of-thought self-check step.
+    - Few-shot examples showing the expected answer style and grounding.
+    - Question restated after the context block (improves instruction adherence).
+    - Optional few-shot injection (disable with ``include_examples=False``).
     """
 
-    def __init__(self, system_prompt: Optional[str] = None) -> None:
-        self._system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
+    def __init__(
+        self,
+        system_prompt: Optional[str] = None,
+        *,
+        include_examples: bool = True,
+    ) -> None:
+        self._system_prompt    = system_prompt or DEFAULT_SYSTEM_PROMPT
+        self._include_examples = include_examples
 
     def build(self, package: ContextPackage) -> PromptBundle:
         sep = "─" * 60
+        examples = _FEW_SHOT_EXAMPLES if self._include_examples else ""
         user_prompt = (
             f"{package.llm_context}\n\n"
+            f"{examples}"
             f"{sep}\n"
             "ANSWER INSTRUCTIONS\n"
             f"{sep}\n"
-            "Using only the repository context above, answer the following "
-            "question as specifically as possible, citing the relevant node "
-            "id(s) where it helps the reader locate the code:\n\n"
-            f"{package.question}"
+            "Using ONLY the repository context above (not the examples), "
+            "answer the following question as specifically as possible. "
+            "Cite the relevant node id(s) so the reader can locate the code. "
+            "If the context is insufficient, say so honestly.\n\n"
+            f"QUESTION: {package.question}"
         )
         return PromptBundle(system_prompt=self._system_prompt, user_prompt=user_prompt)
 
@@ -591,6 +695,108 @@ class GraphRAGEngine:
             source_nodes=source_nodes,
             retrieval_metadata=metadata,
         )
+
+    def stream_answer(
+        self,
+        question: str,
+        *,
+        top_k: Optional[int] = None,
+        max_hops: Optional[int] = None,
+    ) -> Iterator[dict]:
+        """
+        Stream a GraphRAG answer as a sequence of Server-Sent Event payloads.
+
+        Yields a series of dicts that callers should serialise as SSE ``data:``
+        lines.  The sequence is:
+
+        1. One ``"metadata"`` event with intent, keywords, and source nodes —
+           sent before the first token so the client can render retrieval info
+           immediately while the LLM streams.
+        2. One or more ``"token"`` events, each carrying a text chunk from the
+           LLM provider's streaming API.
+        3. One ``"done"`` event with ``full_answer`` (the concatenated tokens)
+           and a ``"no_context"`` flag if retrieval was empty.
+
+        If the provider does not implement ``stream()`` (returns a single
+        chunk), the caller still sees the same event sequence — only the
+        number of ``"token"`` events differs.
+
+        Parameters
+        ----------
+        question : str
+        top_k, max_hops : int | None
+            Forwarded to ``ContextBuilder.build``.
+
+        Raises
+        ------
+        ValueError
+            If ``question`` is empty.
+        LLMProviderError
+            If the LLM provider raises during streaming.
+
+        Example SSE stream
+        ------------------
+        ::
+
+            data: {"type": "metadata", "intent_categories": [...], ...}
+            data: {"type": "token", "text": "The "}
+            data: {"type": "token", "text": "function build_graph "}
+            data: {"type": "done", "full_answer": "The function build_graph ..."}
+        """
+        if not question or not question.strip():
+            raise ValueError("question must be a non-empty string")
+
+        package  = self._context_builder.build(question, top_k=top_k, max_hops=max_hops)
+        metadata = self._build_metadata(package, top_k, max_hops)
+        source_nodes = self._build_source_nodes(package)
+
+        # --- Event 1: metadata (retrieval results, before first LLM token) ---
+        yield {
+            "type": "metadata",
+            "intent_categories": metadata.intent_categories,
+            "keywords": metadata.keywords,
+            "resolved_node_count": metadata.resolved_node_count,
+            "subgraph_node_count": metadata.subgraph_node_count,
+            "traversal_strategy": metadata.traversal_strategy,
+            "source_nodes": [
+                {
+                    "node_id":   sn.node_id,
+                    "node_type": sn.node_type,
+                    "label":     sn.label,
+                    "score":     sn.score,
+                    "file_path": sn.file_path,
+                }
+                for sn in source_nodes
+            ],
+        }
+
+        # --- No-context shortcut ---
+        if self._require_resolved_nodes and not package.resolved_nodes:
+            yield {"type": "token", "text": NO_CONTEXT_ANSWER}
+            yield {"type": "done", "full_answer": NO_CONTEXT_ANSWER, "no_context": True}
+            return
+
+        prompt      = self._prompt_builder.build(package)
+        accumulated = []
+
+        try:
+            for chunk in self._llm.stream(
+                system_prompt=prompt.system_prompt,
+                user_prompt=prompt.user_prompt,
+            ):
+                if chunk:
+                    accumulated.append(chunk)
+                    yield {"type": "token", "text": chunk}
+        except Exception as exc:
+            raise LLMProviderError(
+                f"LLM provider failed while streaming answer for question: {question!r}"
+            ) from exc
+
+        full_answer = "".join(accumulated).strip()
+        if not full_answer:
+            raise LLMProviderError("LLM provider streamed an empty response.")
+
+        yield {"type": "done", "full_answer": full_answer, "no_context": False}
 
     # ------------------------------------------------------------------
     # Internal helpers
