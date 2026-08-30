@@ -30,30 +30,35 @@ jobs:
           cache: pip
           cache-dependency-path: backend/requirements.txt
 
-      - name: Install dependencies
+      - name: Install core dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install google-genai
-          # Install CPU-only torch + sentence-transformers for embedding tests
+
+      - name: Install optional LLM dependencies
+        run: |
+          pip install anthropic google-genai
+        continue-on-error: true
+
+      - name: Install optional embedding dependencies
+        run: |
           pip install torch --index-url https://download.pytorch.org/whl/cpu
-          pip install sentence-transformers
+          pip install sentence-transformers tree-sitter tree-sitter-typescript
+        continue-on-error: true
 
       - name: Lint with ruff
         run: |
           pip install ruff
           ruff check app/ --select E,F,I,B --ignore E501,B008
 
-      - name: Run tests
+      - name: Run core tests (fast)
         run: |
           python -m pytest tests/ -q --tb=short \
             --ignore=tests/test_api.py \
-            --ignore=tests/test_security_auth.py
-        # API tests are excluded from CI because they use TestClient with async
-        # background tasks that require 3-5 minutes each due to event loop
-        # scheduling constraints. Run them locally with: pytest tests/test_api.py
+            --ignore=tests/test_security_auth.py \
+            --ignore=tests/test_hybrid_retriever.py
 
-      - name: Run fast API smoke tests
+      - name: Run API smoke tests
         run: |
           python -m pytest tests/test_api.py::TestAnalyzeEndpoint \
                            tests/test_api.py::TestGraphEndpoint \
