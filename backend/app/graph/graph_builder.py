@@ -91,6 +91,7 @@ def _module_origin(module_name: str, internal_prefixes: frozenset[str]) -> Modul
 # Node ID conventions
 # ---------------------------------------------------------------------------
 
+
 def _file_id(file_path: str) -> str:
     return file_path
 
@@ -117,39 +118,143 @@ def _module_id(module_path: str) -> str:
 # ---------------------------------------------------------------------------
 
 # Python built-in names that appear as call targets or base classes.
-_PYTHON_BUILTINS: frozenset[str] = frozenset({
-    # Built-in types
-    "bool", "bytearray", "bytes", "complex", "dict", "float", "frozenset",
-    "int", "list", "memoryview", "object", "range", "set", "slice", "str",
-    "tuple", "type",
-    # Built-in exceptions
-    "ArithmeticError", "AssertionError", "AttributeError", "BaseException",
-    "BlockingIOError", "BrokenPipeError", "BufferError", "BytesWarning",
-    "ChildProcessError", "ConnectionAbortedError", "ConnectionError",
-    "ConnectionRefusedError", "ConnectionResetError", "DeprecationWarning",
-    "EOFError", "EnvironmentError", "Exception", "FileExistsError",
-    "FileNotFoundError", "FloatingPointError", "FutureWarning", "GeneratorExit",
-    "IOError", "ImportError", "ImportWarning", "IndentationError", "IndexError",
-    "InterruptedError", "IsADirectoryError", "KeyError", "KeyboardInterrupt",
-    "LookupError", "MemoryError", "ModuleNotFoundError", "NameError",
-    "NotADirectoryError", "NotImplementedError", "OSError", "OverflowError",
-    "PendingDeprecationWarning", "PermissionError", "ProcessLookupError",
-    "RecursionError", "ReferenceError", "ResourceWarning", "RuntimeError",
-    "RuntimeWarning", "StopAsyncIteration", "StopIteration", "SyntaxError",
-    "SyntaxWarning", "SystemError", "SystemExit", "TimeoutError", "TypeError",
-    "UnboundLocalError", "UnicodeDecodeError", "UnicodeEncodeError",
-    "UnicodeError", "UnicodeTranslateError", "UnicodeWarning", "UserWarning",
-    "ValueError", "Warning", "ZeroDivisionError",
-    # Built-in functions that look like classes when called
-    "classmethod", "staticmethod", "property", "super",
-    "enumerate", "filter", "map", "reversed", "sorted", "zip",
-    "open", "print", "len", "repr", "hash", "id", "iter", "next",
-    "abs", "all", "any", "bin", "callable", "chr", "compile",
-    "delattr", "dir", "divmod", "eval", "exec", "format", "getattr",
-    "globals", "hasattr", "hex", "input", "isinstance", "issubclass",
-    "locals", "max", "min", "oct", "ord", "pow", "round", "setattr",
-    "sum", "vars",
-})
+_PYTHON_BUILTINS: frozenset[str] = frozenset(
+    {
+        # Built-in types
+        "bool",
+        "bytearray",
+        "bytes",
+        "complex",
+        "dict",
+        "float",
+        "frozenset",
+        "int",
+        "list",
+        "memoryview",
+        "object",
+        "range",
+        "set",
+        "slice",
+        "str",
+        "tuple",
+        "type",
+        # Built-in exceptions
+        "ArithmeticError",
+        "AssertionError",
+        "AttributeError",
+        "BaseException",
+        "BlockingIOError",
+        "BrokenPipeError",
+        "BufferError",
+        "BytesWarning",
+        "ChildProcessError",
+        "ConnectionAbortedError",
+        "ConnectionError",
+        "ConnectionRefusedError",
+        "ConnectionResetError",
+        "DeprecationWarning",
+        "EOFError",
+        "EnvironmentError",
+        "Exception",
+        "FileExistsError",
+        "FileNotFoundError",
+        "FloatingPointError",
+        "FutureWarning",
+        "GeneratorExit",
+        "IOError",
+        "ImportError",
+        "ImportWarning",
+        "IndentationError",
+        "IndexError",
+        "InterruptedError",
+        "IsADirectoryError",
+        "KeyError",
+        "KeyboardInterrupt",
+        "LookupError",
+        "MemoryError",
+        "ModuleNotFoundError",
+        "NameError",
+        "NotADirectoryError",
+        "NotImplementedError",
+        "OSError",
+        "OverflowError",
+        "PendingDeprecationWarning",
+        "PermissionError",
+        "ProcessLookupError",
+        "RecursionError",
+        "ReferenceError",
+        "ResourceWarning",
+        "RuntimeError",
+        "RuntimeWarning",
+        "StopAsyncIteration",
+        "StopIteration",
+        "SyntaxError",
+        "SyntaxWarning",
+        "SystemError",
+        "SystemExit",
+        "TimeoutError",
+        "TypeError",
+        "UnboundLocalError",
+        "UnicodeDecodeError",
+        "UnicodeEncodeError",
+        "UnicodeError",
+        "UnicodeTranslateError",
+        "UnicodeWarning",
+        "UserWarning",
+        "ValueError",
+        "Warning",
+        "ZeroDivisionError",
+        # Built-in functions that look like classes when called
+        "classmethod",
+        "staticmethod",
+        "property",
+        "super",
+        "enumerate",
+        "filter",
+        "map",
+        "reversed",
+        "sorted",
+        "zip",
+        "open",
+        "print",
+        "len",
+        "repr",
+        "hash",
+        "id",
+        "iter",
+        "next",
+        "abs",
+        "all",
+        "any",
+        "bin",
+        "callable",
+        "chr",
+        "compile",
+        "delattr",
+        "dir",
+        "divmod",
+        "eval",
+        "exec",
+        "format",
+        "getattr",
+        "globals",
+        "hasattr",
+        "hex",
+        "input",
+        "isinstance",
+        "issubclass",
+        "locals",
+        "max",
+        "min",
+        "oct",
+        "ord",
+        "pow",
+        "round",
+        "setattr",
+        "sum",
+        "vars",
+    }
+)
 
 # Well-known third-party / framework base names that are universally
 # "framework plumbing" with no semantic value for internal impact analysis.
@@ -157,28 +262,49 @@ _PYTHON_BUILTINS: frozenset[str] = frozenset({
 #   (a) appear as base classes or common call targets across many frameworks,
 #   (b) are never defined inside a user repository,
 #   (c) would pollute the graph with phantom nodes if not excluded.
-_EXTERNAL_SYMBOLS: frozenset[str] = frozenset({
-    # Pydantic
-    "BaseModel", "BaseSettings", "validator", "root_validator",
-    "field_validator", "model_validator",
-    # typing / abc
-    "TypedDict", "Protocol", "ABC", "ABCMeta", "Generic",
-    # enum
-    "Enum", "IntEnum", "StrEnum", "Flag", "IntFlag",
-    # dataclasses
-    "dataclass",
-    # common Django base classes
-    "Model", "View", "APIView", "ModelViewSet", "ViewSet",
-    "ModelSerializer", "Serializer",
-    # common Flask / FastAPI patterns
-    "Resource",
-    # SQLAlchemy
-    "Base", "DeclarativeBase", "DeclarativeMeta",
-    # Celery / Airflow
-    "Task",
-    # pytest
-    "TestCase",
-})
+_EXTERNAL_SYMBOLS: frozenset[str] = frozenset(
+    {
+        # Pydantic
+        "BaseModel",
+        "BaseSettings",
+        "validator",
+        "root_validator",
+        "field_validator",
+        "model_validator",
+        # typing / abc
+        "TypedDict",
+        "Protocol",
+        "ABC",
+        "ABCMeta",
+        "Generic",
+        # enum
+        "Enum",
+        "IntEnum",
+        "StrEnum",
+        "Flag",
+        "IntFlag",
+        # dataclasses
+        "dataclass",
+        # common Django base classes
+        "Model",
+        "View",
+        "APIView",
+        "ModelViewSet",
+        "ViewSet",
+        "ModelSerializer",
+        "Serializer",
+        # common Flask / FastAPI patterns
+        "Resource",
+        # SQLAlchemy
+        "Base",
+        "DeclarativeBase",
+        "DeclarativeMeta",
+        # Celery / Airflow
+        "Task",
+        # pytest
+        "TestCase",
+    }
+)
 
 # Union of all names that must never become repository symbol nodes.
 _EXCLUDED_SYMBOLS: frozenset[str] = _PYTHON_BUILTINS | _EXTERNAL_SYMBOLS
@@ -187,6 +313,7 @@ _EXCLUDED_SYMBOLS: frozenset[str] = _PYTHON_BUILTINS | _EXTERNAL_SYMBOLS
 # ---------------------------------------------------------------------------
 # Repository-owned symbol registry
 # ---------------------------------------------------------------------------
+
 
 class _SymbolRegistry:
     """
@@ -241,23 +368,19 @@ class _SymbolRegistry:
         return any(name in methods for methods in self.method_map.values())
 
     def is_repo_symbol(self, name: str) -> bool:
-        return (
-            self.is_repo_class(name)
-            or self.is_repo_function(name)
-            or self.is_repo_method(name)
-        )
+        return self.is_repo_class(name) or self.is_repo_function(name) or self.is_repo_method(name)
 
     def parent_defines_method(self, parent_name: str, method_name: str) -> bool:
         """True if parent_name is a repo-owned class that defines method_name."""
-        return (
-            parent_name in self.class_names
-            and method_name in self.method_map.get(parent_name, set())
+        return parent_name in self.class_names and method_name in self.method_map.get(
+            parent_name, set()
         )
 
 
 # ---------------------------------------------------------------------------
 # GraphBuilder
 # ---------------------------------------------------------------------------
+
 
 class GraphBuilder:
     """
@@ -322,7 +445,7 @@ class GraphBuilder:
         # ----------------------------------------------------------------
 
         nodes: dict[str, GraphNode] = {}
-        edges: set[tuple] = set()   # (source_id, target_id, relationship, extra)
+        edges: set[tuple] = set()  # (source_id, target_id, relationship, extra)
 
         def add_node(node: GraphNode) -> None:
             if node.id not in nodes:
@@ -338,7 +461,6 @@ class GraphBuilder:
             edges.add(key)
 
         for parsed_file in repository.files:
-
             # ----------------------------------------------------------
             # File node — always emitted (files are always repo-owned)
             # ----------------------------------------------------------
@@ -346,12 +468,14 @@ class GraphBuilder:
             file_id = _file_id(parsed_file.file_path)
             file_label = os.path.basename(parsed_file.file_path)
 
-            add_node(GraphNode(
-                id=file_id,
-                type=NodeType.FILE,
-                label=file_label,
-                file_path=parsed_file.file_path,
-            ))
+            add_node(
+                GraphNode(
+                    id=file_id,
+                    type=NodeType.FILE,
+                    label=file_label,
+                    file_path=parsed_file.file_path,
+                )
+            )
 
             # ----------------------------------------------------------
             # Import edges: File → Module
@@ -361,12 +485,14 @@ class GraphBuilder:
                 mod_id = _module_id(module_path)
                 origin = _module_origin(module_path, internal_prefixes)
 
-                add_node(GraphNode(
-                    id=mod_id,
-                    type=NodeType.MODULE,
-                    label=module_path.split(".")[-1],
-                    module_origin=origin,
-                ))
+                add_node(
+                    GraphNode(
+                        id=mod_id,
+                        type=NodeType.MODULE,
+                        label=module_path.split(".")[-1],
+                        module_origin=origin,
+                    )
+                )
 
                 add_edge(file_id, mod_id, RelationshipType.IMPORTS)
 
@@ -375,23 +501,24 @@ class GraphBuilder:
             # ----------------------------------------------------------
 
             for cls in parsed_file.classes:
-
                 # Guard: only emit Class nodes for repo-owned classes.
                 if not registry.is_repo_class(cls.name):
                     continue
 
                 cls_id = _class_id(cls.name)
 
-                add_node(GraphNode(
-                    id=cls_id,
-                    type=NodeType.CLASS,
-                    label=cls.name,
-                    file_path=parsed_file.file_path,
-                    line_number=cls.line_number,
-                    line_end=cls.line_end,
-                    docstring=cls.docstring,
-                    source_code=cls.source_code,
-                ))
+                add_node(
+                    GraphNode(
+                        id=cls_id,
+                        type=NodeType.CLASS,
+                        label=cls.name,
+                        file_path=parsed_file.file_path,
+                        line_number=cls.line_number,
+                        line_end=cls.line_end,
+                        docstring=cls.docstring,
+                        source_code=cls.source_code,
+                    )
+                )
 
                 # File CONTAINS Class
                 add_edge(file_id, cls_id, RelationshipType.CONTAINS)
@@ -437,16 +564,18 @@ class GraphBuilder:
                 for method in cls.methods:
                     method_id = _method_id(cls.name, method.name)
 
-                    add_node(GraphNode(
-                        id=method_id,
-                        type=NodeType.METHOD,
-                        label=method.name,
-                        file_path=parsed_file.file_path,
-                        line_number=method.line_number,
-                        line_end=method.line_end,
-                        docstring=method.docstring,
-                        source_code=method.source_code,
-                    ))
+                    add_node(
+                        GraphNode(
+                            id=method_id,
+                            type=NodeType.METHOD,
+                            label=method.name,
+                            file_path=parsed_file.file_path,
+                            line_number=method.line_number,
+                            line_end=method.line_end,
+                            docstring=method.docstring,
+                            source_code=method.source_code,
+                        )
+                    )
 
                     # Class CONTAINS Method
                     add_edge(cls_id, method_id, RelationshipType.CONTAINS)
@@ -507,23 +636,24 @@ class GraphBuilder:
             # ----------------------------------------------------------
 
             for fn in parsed_file.functions:
-
                 # Guard: only emit Function nodes for repo-owned functions.
                 if not registry.is_repo_function(fn.name):
                     continue
 
                 fn_id = _function_id(fn.name)
 
-                add_node(GraphNode(
-                    id=fn_id,
-                    type=NodeType.FUNCTION,
-                    label=fn.name,
-                    file_path=parsed_file.file_path,
-                    line_number=fn.line_number,
-                    line_end=fn.line_end,
-                    docstring=fn.docstring,
-                    source_code=fn.source_code,
-                ))
+                add_node(
+                    GraphNode(
+                        id=fn_id,
+                        type=NodeType.FUNCTION,
+                        label=fn.name,
+                        file_path=parsed_file.file_path,
+                        line_number=fn.line_number,
+                        line_end=fn.line_end,
+                        docstring=fn.docstring,
+                        source_code=fn.source_code,
+                    )
+                )
 
                 # File CONTAINS Function
                 add_edge(file_id, fn_id, RelationshipType.CONTAINS)
@@ -563,11 +693,7 @@ class GraphBuilder:
             connected_ids.add(source)
             connected_ids.add(target)
 
-        nodes = {
-            nid: node
-            for nid, node in nodes.items()
-            if nid in connected_ids
-        }
+        nodes = {nid: node for nid, node in nodes.items() if nid in connected_ids}
 
         # ----------------------------------------------------------------
         # Assemble GraphEdge objects
@@ -577,12 +703,14 @@ class GraphBuilder:
         for edge_key in sorted(edges):
             source, target, rel_value, *extras = edge_key
             extra_dict = dict(extras)
-            graph_edges.append(GraphEdge(
-                source=source,
-                target=target,
-                relationship=RelationshipType(rel_value),
-                decorator_name=extra_dict.get("decorator_name"),
-            ))
+            graph_edges.append(
+                GraphEdge(
+                    source=source,
+                    target=target,
+                    relationship=RelationshipType(rel_value),
+                    decorator_name=extra_dict.get("decorator_name"),
+                )
+            )
 
         return RepositoryGraph(
             nodes=sorted(nodes.values(), key=lambda n: (n.type, n.id)),
@@ -624,35 +752,47 @@ class GraphBuilder:
     # without any changes to downstream code.
     # ------------------------------------------------------------------
 
-    _ARCHITECTURE_NODE_TYPES: frozenset[NodeType] = frozenset({
-        NodeType.FILE,
-        NodeType.MODULE,
-        NodeType.CLASS,
-    })
+    _ARCHITECTURE_NODE_TYPES: frozenset[NodeType] = frozenset(
+        {
+            NodeType.FILE,
+            NodeType.MODULE,
+            NodeType.CLASS,
+        }
+    )
 
-    _ARCHITECTURE_EDGE_TYPES: frozenset[RelationshipType] = frozenset({
-        RelationshipType.IMPORTS,
-        RelationshipType.CONTAINS,
-    })
+    _ARCHITECTURE_EDGE_TYPES: frozenset[RelationshipType] = frozenset(
+        {
+            RelationshipType.IMPORTS,
+            RelationshipType.CONTAINS,
+        }
+    )
 
-    _CLASS_NODE_TYPES: frozenset[NodeType] = frozenset({
-        NodeType.CLASS,
-    })
+    _CLASS_NODE_TYPES: frozenset[NodeType] = frozenset(
+        {
+            NodeType.CLASS,
+        }
+    )
 
-    _CLASS_EDGE_TYPES: frozenset[RelationshipType] = frozenset({
-        RelationshipType.INHERITS,
-        RelationshipType.INSTANTIATES,
-        RelationshipType.DECORATES,
-    })
+    _CLASS_EDGE_TYPES: frozenset[RelationshipType] = frozenset(
+        {
+            RelationshipType.INHERITS,
+            RelationshipType.INSTANTIATES,
+            RelationshipType.DECORATES,
+        }
+    )
 
-    _CALL_NODE_TYPES: frozenset[NodeType] = frozenset({
-        NodeType.FUNCTION,
-        NodeType.METHOD,
-    })
+    _CALL_NODE_TYPES: frozenset[NodeType] = frozenset(
+        {
+            NodeType.FUNCTION,
+            NodeType.METHOD,
+        }
+    )
 
-    _CALL_EDGE_TYPES: frozenset[RelationshipType] = frozenset({
-        RelationshipType.CALLS,
-    })
+    _CALL_EDGE_TYPES: frozenset[RelationshipType] = frozenset(
+        {
+            RelationshipType.CALLS,
+        }
+    )
 
     def build_architecture_graph(self, master: RepositoryGraph) -> RepositoryGraph:
         """
@@ -797,9 +937,7 @@ class GraphBuilder:
 
         # Step 1 — allowed node IDs
         allowed_node_ids: set[str] = {
-            node.id
-            for node in master.nodes
-            if node.type in allowed_node_types
+            node.id for node in master.nodes if node.type in allowed_node_types
         }
 
         # Step 2 — filter edges
@@ -871,14 +1009,10 @@ class GraphBuilder:
             degree_counter[edge.target] += 1
 
         # Build a lookup: node_id → NodeType for degree grouping
-        node_type_lookup: dict[str, NodeType] = {
-            node.id: node.type for node in graph.nodes
-        }
+        node_type_lookup: dict[str, NodeType] = {node.id: node.type for node in graph.nodes}
 
         # Backward-compat: top-10 by degree, any type
-        most_connected = [
-            node_id for node_id, _ in degree_counter.most_common(10)
-        ]
+        most_connected = [node_id for node_id, _ in degree_counter.most_common(10)]
 
         # Task 3: architectural_hotspots — same as most_connected but
         # returned as NodeDegree objects for richer downstream consumers.
@@ -899,10 +1033,7 @@ class GraphBuilder:
         def _top10(node_type: NodeType) -> list[NodeDegree]:
             bucket = type_degree_buckets.get(node_type, [])
             bucket_sorted = sorted(bucket, key=lambda x: x[1], reverse=True)
-            return [
-                NodeDegree(node_id=nid, degree=deg)
-                for nid, deg in bucket_sorted[:10]
-            ]
+            return [NodeDegree(node_id=nid, degree=deg) for nid, deg in bucket_sorted[:10]]
 
         return GraphStatistics(
             total_nodes=len(graph.nodes),

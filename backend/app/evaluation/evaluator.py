@@ -202,9 +202,7 @@ class RetryingLLMProvider(LLMProvider):
         backoff = self._initial_backoff
         while True:
             try:
-                result = self._inner.generate(
-                    system_prompt=system_prompt, user_prompt=user_prompt
-                )
+                result = self._inner.generate(system_prompt=system_prompt, user_prompt=user_prompt)
                 self._consecutive_rate_limits = 0
                 return result
             except Exception as exc:  # noqa: BLE001 - inspected, re-raised if not rate-limit
@@ -248,6 +246,7 @@ class RetryingLLMProvider(LLMProvider):
 # ===========================================================================
 # Ground-truth dataset model
 # ===========================================================================
+
 
 @dataclass(frozen=True)
 class BenchmarkQuestion:
@@ -501,7 +500,11 @@ class AnswerQualityJudge:
         try:
             raw = self._llm.generate(system_prompt=JUDGE_SYSTEM_PROMPT, user_prompt=user_prompt)
         except Exception as exc:  # noqa: BLE001 - any provider failure is reported uniformly
-            return _fallback_scores(), "Judge LLM call failed; see judge_error.", f"{type(exc).__name__}: {exc}"
+            return (
+                _fallback_scores(),
+                "Judge LLM call failed; see judge_error.",
+                f"{type(exc).__name__}: {exc}",
+            )
 
         parsed = _extract_json_object(raw)
         if parsed is None:
@@ -524,7 +527,9 @@ class AnswerQualityJudge:
     def _passed(self, scores: JudgeScores, judge_error: Optional[str]) -> bool:
         if judge_error is not None:
             return False
-        return scores.overall >= self._pass_threshold and scores.hallucination >= self._pass_threshold
+        return (
+            scores.overall >= self._pass_threshold and scores.hallucination >= self._pass_threshold
+        )
 
     def evaluate(
         self,
@@ -615,6 +620,7 @@ class EchoJudgeProvider(LLMProvider):
 # Aggregation
 # ===========================================================================
 
+
 def aggregate_results(results: list[EvaluationResult]) -> dict:
     """Compute average scores and pass rate across all evaluated questions."""
     if not results:
@@ -626,8 +632,7 @@ def aggregate_results(results: list[EvaluationResult]) -> dict:
         }
 
     averages = {
-        f: round(sum(getattr(r.scores, f) for r in results) / len(results), 2)
-        for f in SCORE_FIELDS
+        f: round(sum(getattr(r.scores, f) for r in results) / len(results), 2) for f in SCORE_FIELDS
     }
     passed = sum(1 for r in results if r.passed)
     return {
@@ -732,6 +737,7 @@ def _recommendations(summary: dict, patterns: list[str]) -> list[str]:
 # ===========================================================================
 # Report builders
 # ===========================================================================
+
 
 def build_json_report(results: list[EvaluationResult], *, generated_at: str) -> dict:
     summary = aggregate_results(results)

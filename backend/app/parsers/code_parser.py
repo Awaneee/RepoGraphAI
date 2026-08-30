@@ -18,9 +18,9 @@ logger = logging.getLogger(__name__)
 # Source code extraction helpers
 # ---------------------------------------------------------------------------
 
-_MAX_SOURCE_LINES = 50        # functions/methods longer than this get truncated
-_KEEP_HEAD_LINES = 30         # lines to keep from the start
-_KEEP_TAIL_LINES = 5          # lines to keep from the end
+_MAX_SOURCE_LINES = 50  # functions/methods longer than this get truncated
+_KEEP_HEAD_LINES = 30  # lines to keep from the start
+_KEEP_TAIL_LINES = 5  # lines to keep from the end
 
 
 def _truncate_source(lines: list[str], start_line: int) -> str:
@@ -39,7 +39,7 @@ def _truncate_source(lines: list[str], start_line: int) -> str:
     if total <= _MAX_SOURCE_LINES:
         return "".join(lines)
     head = lines[:_KEEP_HEAD_LINES]
-    tail = lines[total - _KEEP_TAIL_LINES:]
+    tail = lines[total - _KEEP_TAIL_LINES :]
     skipped = total - _KEEP_HEAD_LINES - _KEEP_TAIL_LINES
     marker = f"# [... {skipped} lines truncated ...]\n"
     return "".join(head) + marker + "".join(tail)
@@ -65,8 +65,8 @@ def _extract_source_lines(
         The (possibly truncated) source code, or None if extraction fails.
     """
     try:
-        start = node.lineno - 1          # 0-indexed
-        end   = node.end_lineno          # 0-indexed exclusive (= end_lineno)
+        start = node.lineno - 1  # 0-indexed
+        end = node.end_lineno  # 0-indexed exclusive (= end_lineno)
         if start < 0 or end > len(source_lines):
             return None
         return _truncate_source(source_lines[start:end], node.lineno)
@@ -130,6 +130,7 @@ def _is_stdlib(module_name: str) -> bool:
 # CodeParser
 # ---------------------------------------------------------------------------
 
+
 class CodeParser:
     """
     Parses Python source files into structured AST representations.
@@ -144,15 +145,56 @@ class CodeParser:
       RelationshipType; nothing is extracted "speculatively".
     """
 
-    BUILTINS: frozenset[str] = frozenset({
-        "len", "list", "dict", "set", "tuple", "sorted", "print",
-        "str", "int", "float", "bool", "range", "enumerate", "open",
-        "min", "max", "sum", "any", "all", "zip", "map", "filter",
-        "isinstance", "issubclass", "getattr", "setattr", "hasattr",
-        "type", "id", "repr", "hash", "iter", "next", "reversed",
-        "abs", "round", "pow", "divmod", "hex", "oct", "bin",
-        "callable", "vars", "dir", "super", "object",
-    })
+    BUILTINS: frozenset[str] = frozenset(
+        {
+            "len",
+            "list",
+            "dict",
+            "set",
+            "tuple",
+            "sorted",
+            "print",
+            "str",
+            "int",
+            "float",
+            "bool",
+            "range",
+            "enumerate",
+            "open",
+            "min",
+            "max",
+            "sum",
+            "any",
+            "all",
+            "zip",
+            "map",
+            "filter",
+            "isinstance",
+            "issubclass",
+            "getattr",
+            "setattr",
+            "hasattr",
+            "type",
+            "id",
+            "repr",
+            "hash",
+            "iter",
+            "next",
+            "reversed",
+            "abs",
+            "round",
+            "pow",
+            "divmod",
+            "hex",
+            "oct",
+            "bin",
+            "callable",
+            "vars",
+            "dir",
+            "super",
+            "object",
+        }
+    )
 
     # ------------------------------------------------------------------
     # Decorator extraction
@@ -196,9 +238,7 @@ class CodeParser:
     # Call / instantiation extraction
     # ------------------------------------------------------------------
 
-    def _extract_calls_from_body(
-        self, node: ast.FunctionDef | ast.AsyncFunctionDef
-    ) -> list[str]:
+    def _extract_calls_from_body(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
         """
         Walk the function body and collect all called names.
 
@@ -255,10 +295,7 @@ class CodeParser:
           - line_end: last line number of the function body
         """
 
-        arguments = [
-            arg.arg
-            for arg in node.args.args
-        ]
+        arguments = [arg.arg for arg in node.args.args]
 
         calls = self._extract_calls_from_body(node)
 
@@ -269,10 +306,7 @@ class CodeParser:
             except Exception:
                 return_type = None
 
-        decorators = [
-            self._extract_decorator(d)
-            for d in node.decorator_list
-        ]
+        decorators = [self._extract_decorator(d) for d in node.decorator_list]
 
         line_end: Optional[int] = getattr(node, "end_lineno", None)
 
@@ -289,7 +323,7 @@ class CodeParser:
             docstring=ast.get_docstring(node),
             source_code=source_code,
             calls=calls,
-            instantiates=[],   # GraphBuilder fills this in second pass
+            instantiates=[],  # GraphBuilder fills this in second pass
             decorators=decorators,
         )
 
@@ -325,10 +359,7 @@ class CodeParser:
             if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 methods.append(self.extract_function(child, source_lines=source_lines))
 
-        decorators = [
-            self._extract_decorator(d)
-            for d in node.decorator_list
-        ]
+        decorators = [self._extract_decorator(d) for d in node.decorator_list]
 
         line_end: Optional[int] = getattr(node, "end_lineno", None)
 
@@ -422,15 +453,30 @@ class CodeParser:
     # Repository parsing
     # ------------------------------------------------------------------
 
-    _SKIP_DIRS: frozenset[str] = frozenset({
-        ".git", "__pycache__", ".venv", "venv", "env",
-        "node_modules", "dist", "build",
-        "docs", "docs_src",
-        "examples", "example",
-        "tests", "test",
-        ".github", ".idea", ".vscode",
-        ".mypy_cache", ".pytest_cache", ".ruff_cache",
-    })
+    _SKIP_DIRS: frozenset[str] = frozenset(
+        {
+            ".git",
+            "__pycache__",
+            ".venv",
+            "venv",
+            "env",
+            "node_modules",
+            "dist",
+            "build",
+            "docs",
+            "docs_src",
+            "examples",
+            "example",
+            "tests",
+            "test",
+            ".github",
+            ".idea",
+            ".vscode",
+            ".mypy_cache",
+            ".pytest_cache",
+            ".ruff_cache",
+        }
+    )
 
     def parse_repository(self, repository_path: str) -> ParsedRepository:
 

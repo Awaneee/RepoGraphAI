@@ -48,27 +48,42 @@ from app.models.pydantic_models import RepositoryGraph
 # Constants
 # ---------------------------------------------------------------------------
 
-_CACHE_ROOT_DIRNAME  = ".cache"
-_HASH_FILENAME       = "repository_hash.json"
-_GRAPH_FILENAME      = "repository_graph.pkl"
+_CACHE_ROOT_DIRNAME = ".cache"
+_HASH_FILENAME = "repository_hash.json"
+_GRAPH_FILENAME = "repository_graph.pkl"
 _EMBEDDINGS_FILENAME = "embeddings.npy"
-_EMBED_IDS_FILENAME  = "embedding_node_ids.json"
-_COMMIT_FILENAME     = "last_commit.txt"
+_EMBED_IDS_FILENAME = "embedding_node_ids.json"
+_COMMIT_FILENAME = "last_commit.txt"
 
 # Mirrors CodeParser's directory-skip set and test-file filtering
 # (app/parsers/code_parser.py) so the fingerprint tracks exactly the
 # files that influence the parsed graph. Duplicated here rather than
 # imported to keep this module decoupled from CodeParser's internals.
-_SKIP_DIRS: frozenset[str] = frozenset({
-    ".git", "__pycache__", ".venv", "venv", "env",
-    "node_modules", "dist", "build",
-    "docs", "docs_src",
-    "examples", "example",
-    "tests", "test",
-    ".github", ".idea", ".vscode",
-    ".mypy_cache", ".pytest_cache", ".ruff_cache",
-    _CACHE_ROOT_DIRNAME,  # never fingerprint our own cache directory
-})
+_SKIP_DIRS: frozenset[str] = frozenset(
+    {
+        ".git",
+        "__pycache__",
+        ".venv",
+        "venv",
+        "env",
+        "node_modules",
+        "dist",
+        "build",
+        "docs",
+        "docs_src",
+        "examples",
+        "example",
+        "tests",
+        "test",
+        ".github",
+        ".idea",
+        ".vscode",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        _CACHE_ROOT_DIRNAME,  # never fingerprint our own cache directory
+    }
+)
 
 
 def _is_tracked_python_file(filename: str) -> bool:
@@ -102,6 +117,7 @@ class CacheValidationResult:
 # ---------------------------------------------------------------------------
 # RepositoryCache
 # ---------------------------------------------------------------------------
+
 
 class RepositoryCache:
     """
@@ -198,11 +214,13 @@ class RepositoryCache:
 
                 rel_path = os.path.relpath(file_path, self.repository_path)
 
-                entries.append({
-                    "path": rel_path.replace(os.sep, "/"),
-                    "mtime": stat_result.st_mtime,
-                    "size": stat_result.st_size,
-                })
+                entries.append(
+                    {
+                        "path": rel_path.replace(os.sep, "/"),
+                        "mtime": stat_result.st_mtime,
+                        "size": stat_result.st_size,
+                    }
+                )
 
         entries.sort(key=lambda entry: entry["path"])
 
@@ -273,15 +291,12 @@ class RepositoryCache:
 
     def has_embeddings(self) -> bool:
         """Return True if a cached embedding matrix exists for this repo."""
-        return (
-            os.path.isfile(self.embeddings_path)
-            and os.path.isfile(self.embed_ids_path)
-        )
+        return os.path.isfile(self.embeddings_path) and os.path.isfile(self.embed_ids_path)
 
     def save_embeddings(
         self,
         node_ids: list[str],
-        matrix: "np.ndarray",  # type: ignore[name-defined]
+        matrix: object,
     ) -> None:
         """
         Persist the embedding matrix and corresponding node_ids to disk.
@@ -299,7 +314,7 @@ class RepositoryCache:
         with open(self.embed_ids_path, "w", encoding="utf-8") as fh:
             json.dump(node_ids, fh)
 
-    def load_embeddings(self) -> "tuple[list[str], np.ndarray]":  # type: ignore[name-defined]
+    def load_embeddings(self) -> tuple:  # returns (list[str], np.ndarray)
         """
         Load the cached embedding matrix and node_ids from disk.
 

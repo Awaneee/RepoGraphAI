@@ -13,12 +13,55 @@ from app.models.pydantic_models import GraphNode
 
 # Stop words to filter out when checking keyword matches
 STOP_WORDS = {
-    "how", "what", "why", "when", "where", "which", "who", "whom", "is", "are", 
-    "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", 
-    "did", "a", "an", "the", "and", "but", "or", "in", "on", "at", "by", "for", 
-    "with", "about", "to", "from", "of", "process", "implementation", "implemented", 
-    "work", "generic", "handler", "helper", "class", "function", "method"
+    "how",
+    "what",
+    "why",
+    "when",
+    "where",
+    "which",
+    "who",
+    "whom",
+    "is",
+    "are",
+    "was",
+    "were",
+    "be",
+    "been",
+    "being",
+    "have",
+    "has",
+    "had",
+    "do",
+    "does",
+    "did",
+    "a",
+    "an",
+    "the",
+    "and",
+    "but",
+    "or",
+    "in",
+    "on",
+    "at",
+    "by",
+    "for",
+    "with",
+    "about",
+    "to",
+    "from",
+    "of",
+    "process",
+    "implementation",
+    "implemented",
+    "work",
+    "generic",
+    "handler",
+    "helper",
+    "class",
+    "function",
+    "method",
 }
+
 
 def levenshtein_distance(s1: str, s2: str) -> int:
     """Compute Levenshtein edit distance between two strings."""
@@ -26,7 +69,7 @@ def levenshtein_distance(s1: str, s2: str) -> int:
         return levenshtein_distance(s2, s1)
     if len(s2) == 0:
         return len(s1)
-    
+
     previous_row = range(len(s2) + 1)
     for i, c1 in enumerate(s1):
         current_row = [i + 1]
@@ -36,8 +79,9 @@ def levenshtein_distance(s1: str, s2: str) -> int:
             substitutions = previous_row[j] + (c1 != c2)
             current_row.append(min(insertions, deletions, substitutions))
         previous_row = current_row
-        
+
     return previous_row[-1]
+
 
 def is_nearly_identical(name1: str, name2: str) -> bool:
     """Check if two symbol names are nearly identical (singular/plural or off by 1 char)."""
@@ -53,10 +97,8 @@ def is_nearly_identical(name1: str, name2: str) -> bool:
         return True
     return False
 
-def compute_importance_score(
-    node_id: str,
-    all_metrics: dict[str, dict[str, float]]
-) -> float:
+
+def compute_importance_score(node_id: str, all_metrics: dict[str, dict[str, float]]) -> float:
     """
     Compute normalized symbol-level importance score from graph metrics.
     Signals used:
@@ -68,7 +110,7 @@ def compute_importance_score(
         return 0.0
 
     node_metric = all_metrics[node_id]
-    
+
     # Extract max values across all nodes for normalization
     max_degree = max((m["degree"] for m in all_metrics.values()), default=1.0)
     max_ref = max((m["reference_count"] for m in all_metrics.values()), default=1.0)
@@ -82,17 +124,16 @@ def compute_importance_score(
     importance = 0.3 * norm_degree + 0.4 * norm_ref + 0.3 * norm_pr
     return float(round(importance, 4))
 
+
 def extract_query_keywords(question: str) -> list[str]:
     """Tokenize and extract meaningful keywords from the question."""
     # Remove punctuation and lowercase
-    cleaned = re.sub(r'[^\w\s]', '', question.lower())
+    cleaned = re.sub(r"[^\w\s]", "", question.lower())
     words = cleaned.split()
     return [w for w in words if w not in STOP_WORDS and len(w) > 1]
 
-def get_matching_nodes_count(
-    keywords: list[str],
-    all_public_nodes: list[GraphNode]
-) -> list[str]:
+
+def get_matching_nodes_count(keywords: list[str], all_public_nodes: list[GraphNode]) -> list[str]:
     """Find all public nodes whose label or ID matches all given keywords."""
     matching_ids = []
     for node in all_public_nodes:
@@ -102,12 +143,13 @@ def get_matching_nodes_count(
             matching_ids.append(node.id)
     return matching_ids
 
+
 def score_question(
     question: str,
     expected_node_id: str,
     all_public_nodes: list[GraphNode],
     all_metrics: dict[str, dict[str, float]],
-    importance_score: float
+    importance_score: float,
 ) -> tuple[float, str]:
     """
     Evaluate the quality of a question candidate.
@@ -139,7 +181,7 @@ def score_question(
         other_label = node.label
         if "." in other_label:
             other_label = other_label.split(".")[-1]
-            
+
         if is_nearly_identical(expected_label, other_label):
             # If they have nearly identical names, reject the question to avoid ambiguity
             return 0.0, f"Rejection: Ambiguous symbol naming (nearly identical to {node.id})"
@@ -150,12 +192,15 @@ def score_question(
         return 0.0, "Rejection: Question has no meaningful keywords"
 
     matching_nodes = get_matching_nodes_count(keywords, all_public_nodes)
-    
+
     # If the question matches other symbols besides the expected one, reject it
     if len(matching_nodes) > 1:
         # Check if they are actually different (not just subcomponents)
         other_matches = [nid for nid in matching_nodes if nid != expected_node_id]
-        return 0.0, f"Rejection: Ambiguous wording (matches other public symbols: {', '.join(other_matches[:3])})"
+        return (
+            0.0,
+            f"Rejection: Ambiguous wording (matches other public symbols: {', '.join(other_matches[:3])})",
+        )
 
     # 4. Generic Verb / Wording Check
     generic_verbs = {"build", "process", "handle", "execute", "run"}
@@ -167,18 +212,23 @@ def score_question(
         # If we have multiple candidates containing the noun phrase, reject it
         noun_keywords = [kw for kw in keywords if kw != question_verb]
         if noun_keywords:
-            similar_nouns = [n.id for n in all_public_nodes if any(kw in n.id.lower() for kw in noun_keywords)]
+            similar_nouns = [
+                n.id for n in all_public_nodes if any(kw in n.id.lower() for kw in noun_keywords)
+            ]
             if len(similar_nouns) > 1:
-                return 0.0, f"Rejection: Uses generic verb '{question_verb}' with ambiguous noun context"
+                return (
+                    0.0,
+                    f"Rejection: Uses generic verb '{question_verb}' with ambiguous noun context",
+                )
 
     # 5. Compute Clarity/Clarity Score
     # Give points for clean structure
     clarity_score = 1.0
-    
+
     # Penalize overly generic names in the question
     if any(gw in question.lower() for gw in ["helper", "util", "temp", "tmp", "dummy"]):
         clarity_score -= 0.3
-        
+
     # Reward specific length (not too short, not too long)
     words_count = len(question.split())
     if words_count < 4 or words_count > 10:
@@ -188,6 +238,6 @@ def score_question(
     # 60% importance score (structural value) + 40% clarity score
     final_score = 0.6 * importance_score + 0.4 * clarity_score
     final_score = max(0.0, min(1.0, final_score))
-    
+
     reason = f"Accepted: Importance={importance_score:.2f}, Clarity={clarity_score:.2f}"
     return float(round(final_score, 4)), reason

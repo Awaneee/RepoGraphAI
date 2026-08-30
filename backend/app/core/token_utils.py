@@ -44,18 +44,22 @@ def _get_encoder():
     if _tiktoken_available is None:
         try:
             import tiktoken
+
             # cl100k_base is used by GPT-4, Claude approximation is very close
             _encoder = tiktoken.get_encoding("cl100k_base")
             _tiktoken_available = True
         except (ImportError, Exception):
             _tiktoken_available = False
-            logger.debug("tiktoken not available; using character approximation for token counting.")
+            logger.debug(
+                "tiktoken not available; using character approximation for token counting."
+            )
     return _encoder
 
 
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def count_tokens(text: str) -> int:
     """
@@ -113,12 +117,12 @@ def trim_to_token_limit(
         return text
 
     marker_tokens = count_tokens(truncation_marker)
-    budget        = max(0, max_tokens - marker_tokens)
+    budget = max(0, max_tokens - marker_tokens)
 
     # Binary search for the largest character prefix that fits within budget
     lo, hi = 0, len(text)
     while lo < hi:
-        mid  = (lo + hi + 1) // 2
+        mid = (lo + hi + 1) // 2
         candidate = text[:mid]
         if count_tokens(candidate) <= budget:
             lo = mid

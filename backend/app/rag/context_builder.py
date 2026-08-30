@@ -180,6 +180,7 @@ from app.retrievers.query_resolver import (
 # ``DEFAULT_EXPANSION_POLICY`` is used when intent is UNKNOWN or when no
 # specific policy is registered.
 
+
 @dataclass(frozen=True)
 class IntentExpansionPolicy:
     """
@@ -196,6 +197,7 @@ class IntentExpansionPolicy:
         Human-readable label for logging and the ``traversal_strategy`` field
         on ``ContextPackage``.
     """
+
     edge_hop_limits: dict[RelationshipType, int]
     default_hops: int = 1
     name: str = "unknown"
@@ -207,214 +209,198 @@ _R = RelationshipType
 DEFAULT_EXPANSION_POLICY = IntentExpansionPolicy(
     name="default",
     edge_hop_limits={
-        _R.CALLS:        1,
-        _R.INHERITS:     1,
-        _R.IMPORTS:      1,
+        _R.CALLS: 1,
+        _R.INHERITS: 1,
+        _R.IMPORTS: 1,
         _R.INSTANTIATES: 1,
-        _R.DECORATES:    1,
-        _R.OVERRIDES:    1,
-        _R.CONTAINS:     0,   # always suppress structural noise
+        _R.DECORATES: 1,
+        _R.OVERRIDES: 1,
+        _R.CONTAINS: 0,  # always suppress structural noise
     },
     default_hops=1,
 )
 
 _INTENT_EXPANSION_POLICIES: dict[IntentCategory, IntentExpansionPolicy] = {
-
     IntentCategory.ROUTING: IntentExpansionPolicy(
         name="routing",
         edge_hop_limits={
-            _R.CALLS:        2,   # follow dispatch chains (middleware→handler→body)
-            _R.DECORATES:    2,   # decorators register routes (@router.get etc.)
-            _R.INHERITS:     1,   # router classes inherit base routers
-            _R.IMPORTS:      1,   # routing modules import each other
+            _R.CALLS: 2,  # follow dispatch chains (middleware→handler→body)
+            _R.DECORATES: 2,  # decorators register routes (@router.get etc.)
+            _R.INHERITS: 1,  # router classes inherit base routers
+            _R.IMPORTS: 1,  # routing modules import each other
             _R.INSTANTIATES: 1,
-            _R.OVERRIDES:    1,
-            _R.CONTAINS:     0,
+            _R.OVERRIDES: 1,
+            _R.CONTAINS: 0,
         },
     ),
-
     IntentCategory.EXECUTION: IntentExpansionPolicy(
         name="execution",
         edge_hop_limits={
-            _R.CALLS:        2,   # deep call chains show what executes at runtime
-            _R.INSTANTIATES: 2,   # object construction is part of execution flow
-            _R.INHERITS:     1,   # abstract base classes for callables
-            _R.IMPORTS:      1,
-            _R.DECORATES:    1,
-            _R.OVERRIDES:    1,
-            _R.CONTAINS:     0,
+            _R.CALLS: 2,  # deep call chains show what executes at runtime
+            _R.INSTANTIATES: 2,  # object construction is part of execution flow
+            _R.INHERITS: 1,  # abstract base classes for callables
+            _R.IMPORTS: 1,
+            _R.DECORATES: 1,
+            _R.OVERRIDES: 1,
+            _R.CONTAINS: 0,
         },
     ),
-
     IntentCategory.ANALYSIS: IntentExpansionPolicy(
         name="analysis",
         edge_hop_limits={
-            _R.INHERITS:     2,   # full class hierarchy is the point of analysis
-            _R.OVERRIDES:    2,   # override chains show MRO impact
-            _R.CALLS:        1,
-            _R.IMPORTS:      1,
+            _R.INHERITS: 2,  # full class hierarchy is the point of analysis
+            _R.OVERRIDES: 2,  # override chains show MRO impact
+            _R.CALLS: 1,
+            _R.IMPORTS: 1,
             _R.INSTANTIATES: 1,
-            _R.DECORATES:    1,
-            _R.CONTAINS:     0,
+            _R.DECORATES: 1,
+            _R.CONTAINS: 0,
         },
     ),
-
     IntentCategory.GRAPH_TRAVERSAL: IntentExpansionPolicy(
         name="graph_traversal",
         edge_hop_limits={
-            _R.INHERITS:     2,   # hierarchy IS the subject of graph traversal
-            _R.OVERRIDES:    2,
-            _R.CALLS:        1,
-            _R.IMPORTS:      1,
+            _R.INHERITS: 2,  # hierarchy IS the subject of graph traversal
+            _R.OVERRIDES: 2,
+            _R.CALLS: 1,
+            _R.IMPORTS: 1,
             _R.INSTANTIATES: 1,
-            _R.DECORATES:    0,
-            _R.CONTAINS:     0,
+            _R.DECORATES: 0,
+            _R.CONTAINS: 0,
         },
     ),
-
     IntentCategory.PARSING: IntentExpansionPolicy(
         name="parsing",
         edge_hop_limits={
-            _R.CALLS:        2,   # parsing pipelines are linear call chains
-            _R.IMPORTS:      1,
-            _R.CONTAINS:     1,   # parsers operate on file/AST containers
-            _R.INHERITS:     1,
+            _R.CALLS: 2,  # parsing pipelines are linear call chains
+            _R.IMPORTS: 1,
+            _R.CONTAINS: 1,  # parsers operate on file/AST containers
+            _R.INHERITS: 1,
             _R.INSTANTIATES: 1,
-            _R.DECORATES:    0,
-            _R.OVERRIDES:    1,
+            _R.DECORATES: 0,
+            _R.OVERRIDES: 1,
         },
     ),
-
     IntentCategory.LOADING: IntentExpansionPolicy(
         name="loading",
         edge_hop_limits={
-            _R.IMPORTS:      2,   # import chains reveal transitive dependencies
-            _R.CALLS:        1,
-            _R.INHERITS:     1,
+            _R.IMPORTS: 2,  # import chains reveal transitive dependencies
+            _R.CALLS: 1,
+            _R.INHERITS: 1,
             _R.INSTANTIATES: 1,
-            _R.DECORATES:    0,
-            _R.OVERRIDES:    0,
-            _R.CONTAINS:     0,
+            _R.DECORATES: 0,
+            _R.OVERRIDES: 0,
+            _R.CONTAINS: 0,
         },
     ),
-
     IntentCategory.GENERATION: IntentExpansionPolicy(
         name="generation",
         edge_hop_limits={
-            _R.CALLS:        1,
-            _R.INSTANTIATES: 1,   # generators often instantiate response objects
-            _R.IMPORTS:      1,
-            _R.INHERITS:     1,
-            _R.DECORATES:    1,
-            _R.OVERRIDES:    0,
-            _R.CONTAINS:     0,
+            _R.CALLS: 1,
+            _R.INSTANTIATES: 1,  # generators often instantiate response objects
+            _R.IMPORTS: 1,
+            _R.INHERITS: 1,
+            _R.DECORATES: 1,
+            _R.OVERRIDES: 0,
+            _R.CONTAINS: 0,
         },
     ),
-
     IntentCategory.RETRIEVAL: IntentExpansionPolicy(
         name="retrieval",
         edge_hop_limits={
-            _R.CALLS:        1,
-            _R.INHERITS:     1,   # abstract base classes for retrievers
-            _R.IMPORTS:      1,
+            _R.CALLS: 1,
+            _R.INHERITS: 1,  # abstract base classes for retrievers
+            _R.IMPORTS: 1,
             _R.INSTANTIATES: 1,
-            _R.DECORATES:    0,
-            _R.OVERRIDES:    1,
-            _R.CONTAINS:     0,
+            _R.DECORATES: 0,
+            _R.OVERRIDES: 1,
+            _R.CONTAINS: 0,
         },
     ),
-
     IntentCategory.AUTHENTICATION: IntentExpansionPolicy(
         name="authentication",
         edge_hop_limits={
-            _R.CALLS:        1,
+            _R.CALLS: 1,
             _R.INSTANTIATES: 1,
-            _R.IMPORTS:      1,
-            _R.INHERITS:     1,
-            _R.DECORATES:    1,
-            _R.OVERRIDES:    0,
-            _R.CONTAINS:     0,
+            _R.IMPORTS: 1,
+            _R.INHERITS: 1,
+            _R.DECORATES: 1,
+            _R.OVERRIDES: 0,
+            _R.CONTAINS: 0,
         },
     ),
-
     IntentCategory.VALIDATION: IntentExpansionPolicy(
         name="validation",
         edge_hop_limits={
-            _R.CALLS:        1,
-            _R.INHERITS:     1,
-            _R.DECORATES:    1,   # validators use decorators
-            _R.IMPORTS:      1,
+            _R.CALLS: 1,
+            _R.INHERITS: 1,
+            _R.DECORATES: 1,  # validators use decorators
+            _R.IMPORTS: 1,
             _R.INSTANTIATES: 0,
-            _R.OVERRIDES:    0,
-            _R.CONTAINS:     0,
+            _R.OVERRIDES: 0,
+            _R.CONTAINS: 0,
         },
     ),
-
     IntentCategory.CONFIGURATION: IntentExpansionPolicy(
         name="configuration",
         edge_hop_limits={
-            _R.IMPORTS:      1,
-            _R.CONTAINS:     1,   # config modules contain settings
-            _R.CALLS:        0,
-            _R.INHERITS:     1,
+            _R.IMPORTS: 1,
+            _R.CONTAINS: 1,  # config modules contain settings
+            _R.CALLS: 0,
+            _R.INHERITS: 1,
             _R.INSTANTIATES: 0,
-            _R.DECORATES:    0,
-            _R.OVERRIDES:    0,
+            _R.DECORATES: 0,
+            _R.OVERRIDES: 0,
         },
     ),
-
     IntentCategory.STATISTICS: IntentExpansionPolicy(
         name="statistics",
         edge_hop_limits={
-            _R.CALLS:        1,
-            _R.IMPORTS:      1,
-            _R.INHERITS:     1,
+            _R.CALLS: 1,
+            _R.IMPORTS: 1,
+            _R.INHERITS: 1,
             _R.INSTANTIATES: 0,
-            _R.DECORATES:    0,
-            _R.OVERRIDES:    0,
-            _R.CONTAINS:     0,
+            _R.DECORATES: 0,
+            _R.OVERRIDES: 0,
+            _R.CONTAINS: 0,
         },
     ),
-
     IntentCategory.AGGREGATION: IntentExpansionPolicy(
         name="aggregation",
         edge_hop_limits={
-            _R.CALLS:        1,
-            _R.IMPORTS:      1,
-            _R.INHERITS:     1,
+            _R.CALLS: 1,
+            _R.IMPORTS: 1,
+            _R.INHERITS: 1,
             _R.INSTANTIATES: 0,
-            _R.DECORATES:    0,
-            _R.OVERRIDES:    0,
-            _R.CONTAINS:     0,
+            _R.DECORATES: 0,
+            _R.OVERRIDES: 0,
+            _R.CONTAINS: 0,
         },
     ),
-
     IntentCategory.TRANSFORMATION: IntentExpansionPolicy(
         name="transformation",
         edge_hop_limits={
-            _R.CALLS:        2,   # transformation pipelines chain calls
-            _R.IMPORTS:      1,
-            _R.INHERITS:     1,
+            _R.CALLS: 2,  # transformation pipelines chain calls
+            _R.IMPORTS: 1,
+            _R.INHERITS: 1,
             _R.INSTANTIATES: 1,
-            _R.DECORATES:    0,
-            _R.OVERRIDES:    0,
-            _R.CONTAINS:     0,
+            _R.DECORATES: 0,
+            _R.OVERRIDES: 0,
+            _R.CONTAINS: 0,
         },
     ),
-
     IntentCategory.SAVING: IntentExpansionPolicy(
         name="saving",
         edge_hop_limits={
-            _R.CALLS:        1,
+            _R.CALLS: 1,
             _R.INSTANTIATES: 1,
-            _R.IMPORTS:      1,
-            _R.INHERITS:     1,
-            _R.DECORATES:    0,
-            _R.OVERRIDES:    0,
-            _R.CONTAINS:     0,
+            _R.IMPORTS: 1,
+            _R.INHERITS: 1,
+            _R.DECORATES: 0,
+            _R.OVERRIDES: 0,
+            _R.CONTAINS: 0,
         },
     ),
-
     IntentCategory.UNKNOWN: DEFAULT_EXPANSION_POLICY,
 }
 
@@ -435,8 +421,7 @@ def _policy_for_intent(categories: list[IntentCategory]) -> IntentExpansionPolic
 
     # Collect all candidate policies
     candidates = [
-        _INTENT_EXPANSION_POLICIES.get(cat, DEFAULT_EXPANSION_POLICY)
-        for cat in categories
+        _INTENT_EXPANSION_POLICIES.get(cat, DEFAULT_EXPANSION_POLICY) for cat in categories
     ]
 
     if len(candidates) == 1:
@@ -462,6 +447,7 @@ def _policy_for_intent(categories: list[IntentCategory]) -> IntentExpansionPolic
 # ContextPackage — the output model
 # ===========================================================================
 
+
 class ResolvedNode(BaseModel):
     """
     A single node resolved from the query, with its query-match metadata.
@@ -470,20 +456,20 @@ class ResolvedNode(BaseModel):
     logged, or streamed to a frontend without extra processing.
     """
 
-    node_id:   str
-    node_type: str          # NodeType.value — kept as str for JSON friendliness
-    label:     str
-    score:     float
-    reason:    str          # human-readable scoring explanation from QueryResolver
+    node_id: str
+    node_type: str  # NodeType.value — kept as str for JSON friendliness
+    label: str
+    score: float
+    reason: str  # human-readable scoring explanation from QueryResolver
 
-    file_path:    Optional[str] = None
-    line_number:  Optional[int] = None
-    docstring:    Optional[str] = None
+    file_path: Optional[str] = None
+    line_number: Optional[int] = None
+    docstring: Optional[str] = None
 
     # Relationship summary (populated by ContextBuilder)
     outgoing_count: int = 0
     incoming_count: int = 0
-    neighbour_ids:  list[str] = field(default_factory=list)
+    neighbour_ids: list[str] = field(default_factory=list)
 
 
 class SubgraphSummary(BaseModel):
@@ -494,10 +480,10 @@ class SubgraphSummary(BaseModel):
     callers that need it; this summary is for logging and diagnostics.
     """
 
-    node_count:    int
-    edge_count:    int
-    nodes_by_type: dict[str, int]   # NodeType.value → count
-    edge_types:    list[str]        # RelationshipType.value, deduplicated, sorted
+    node_count: int
+    edge_count: int
+    nodes_by_type: dict[str, int]  # NodeType.value → count
+    edge_types: list[str]  # RelationshipType.value, deduplicated, sorted
 
 
 class ContextPackage(BaseModel):
@@ -539,19 +525,19 @@ class ContextPackage(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)  # for QueryResolutionResult dataclass
 
-    question:            str
-    intent_categories:   list[str]
-    keywords:            list[str]
+    question: str
+    intent_categories: list[str]
+    keywords: list[str]
 
-    resolved_nodes:      list[ResolvedNode]
+    resolved_nodes: list[ResolvedNode]
 
     subgraph_node_count: int
     subgraph_edge_count: int
-    subgraph_summary:    SubgraphSummary
+    subgraph_summary: SubgraphSummary
 
-    llm_context:         str
+    llm_context: str
 
-    traversal_strategy:  str = "default"
+    traversal_strategy: str = "default"
     """
     Name of the ``IntentExpansionPolicy`` used for subgraph expansion.
     One of the policy names defined in ``_INTENT_EXPANSION_POLICIES``, or
@@ -592,6 +578,7 @@ class ContextPackage(BaseModel):
 # ContextBuilder
 # ===========================================================================
 
+
 class ContextBuilder:
     """
     Orchestrates QueryResolver → RepositoryRetriever → ContextPackage.
@@ -625,20 +612,20 @@ class ContextBuilder:
 
     def __init__(
         self,
-        resolver:  QueryResolver,
+        resolver: QueryResolver,
         retriever: RepositoryRetriever,
         *,
-        top_k:               int = 10,
-        max_hops:            int = 1,
-        max_llm_neighbours:  int = 20,
-        max_context_tokens:  int = 24_000,
+        top_k: int = 10,
+        max_hops: int = 1,
+        max_llm_neighbours: int = 20,
+        max_context_tokens: int = 24_000,
     ) -> None:
-        self._resolver  = resolver
+        self._resolver = resolver
         self._retriever = retriever
-        self._top_k                = top_k
-        self._max_hops             = max_hops
-        self._max_llm_neighbours   = max_llm_neighbours
-        self._max_context_tokens   = max_context_tokens
+        self._top_k = top_k
+        self._max_hops = max_hops
+        self._max_llm_neighbours = max_llm_neighbours
+        self._max_context_tokens = max_context_tokens
 
     # ------------------------------------------------------------------
     # Public API
@@ -648,7 +635,7 @@ class ContextBuilder:
         self,
         question: str,
         *,
-        top_k:    Optional[int] = None,
+        top_k: Optional[int] = None,
         max_hops: Optional[int] = None,
     ) -> ContextPackage:
         """
@@ -667,7 +654,7 @@ class ContextBuilder:
         -------
         ContextPackage
         """
-        effective_k    = top_k    if top_k    is not None else self._top_k
+        effective_k = top_k if top_k is not None else self._top_k
         effective_hops = max_hops if max_hops is not None else self._max_hops
 
         # --- Step 1: resolve query to ranked node IDs --------------------
@@ -678,16 +665,13 @@ class ContextBuilder:
 
         # --- Step 3: intent-aware subgraph expansion ---------------------
         seed_ids = {m.node_id for m in resolution.matches}
-        policy   = _policy_for_intent(resolution.intent.categories)
+        policy = _policy_for_intent(resolution.intent.categories)
 
-        if (
-            policy is DEFAULT_EXPANSION_POLICY
-            or resolution.intent.categories == [IntentCategory.UNKNOWN]
-        ):
+        if policy is DEFAULT_EXPANSION_POLICY or resolution.intent.categories == [
+            IntentCategory.UNKNOWN
+        ]:
             # Fall back to uniform expansion when intent is unknown
-            subgraph = self._retriever.get_subgraph(
-                seed_ids, max_hops=effective_hops
-            )
+            subgraph = self._retriever.get_subgraph(seed_ids, max_hops=effective_hops)
         else:
             # Scale the per-edge-type budgets by effective_hops.
             # effective_hops is normally 1; callers that pass max_hops=2
@@ -707,25 +691,23 @@ class ContextBuilder:
             )
 
         # --- Step 4: build output models ---------------------------------
-        resolved_nodes = self._build_resolved_nodes(
-            resolution.matches, retrieval_results
-        )
+        resolved_nodes = self._build_resolved_nodes(resolution.matches, retrieval_results)
         subgraph_summary = _build_subgraph_summary(subgraph)
         llm_context = self._build_llm_context_text(
             question, resolution, resolved_nodes, retrieval_results, subgraph
         )
 
         return ContextPackage(
-            question            = question,
-            intent_categories   = [c.value for c in resolution.intent.categories],
-            keywords            = resolution.keywords,
-            resolved_nodes      = resolved_nodes,
-            subgraph_node_count = len(subgraph.nodes),
-            subgraph_edge_count = len(subgraph.edges),
-            subgraph_summary    = subgraph_summary,
-            llm_context         = llm_context,
-            traversal_strategy  = policy.name,
-            raw_resolution      = resolution,
+            question=question,
+            intent_categories=[c.value for c in resolution.intent.categories],
+            keywords=resolution.keywords,
+            resolved_nodes=resolved_nodes,
+            subgraph_node_count=len(subgraph.nodes),
+            subgraph_edge_count=len(subgraph.edges),
+            subgraph_summary=subgraph_summary,
+            llm_context=llm_context,
+            traversal_strategy=policy.name,
+            raw_resolution=resolution,
         )
 
     # ------------------------------------------------------------------
@@ -745,7 +727,7 @@ class ContextBuilder:
         results: dict[str, RetrievalResult] = {}
 
         for match in matches:
-            node_id   = match.node_id
+            node_id = match.node_id
             node_type = match.node_type
 
             try:
@@ -768,7 +750,7 @@ class ContextBuilder:
 
     @staticmethod
     def _build_resolved_nodes(
-        matches:          list[QueryMatch],
+        matches: list[QueryMatch],
         retrieval_results: dict[str, RetrievalResult],
     ) -> list[ResolvedNode]:
         """Convert QueryMatch + RetrievalResult pairs into ResolvedNode objects."""
@@ -785,29 +767,31 @@ class ContextBuilder:
             outgoing_count = sum(len(g.edges) for g in rr.outgoing)
             incoming_count = sum(len(g.edges) for g in rr.incoming)
 
-            resolved.append(ResolvedNode(
-                node_id        = node.id,
-                node_type      = node.type.value,
-                label          = node.label,
-                score          = match.score,
-                reason         = match.reason,
-                file_path      = node.file_path,
-                line_number    = node.line_number,
-                docstring      = node.docstring,
-                outgoing_count = outgoing_count,
-                incoming_count = incoming_count,
-                neighbour_ids  = sorted(rr.neighbour_ids()),
-            ))
+            resolved.append(
+                ResolvedNode(
+                    node_id=node.id,
+                    node_type=node.type.value,
+                    label=node.label,
+                    score=match.score,
+                    reason=match.reason,
+                    file_path=node.file_path,
+                    line_number=node.line_number,
+                    docstring=node.docstring,
+                    outgoing_count=outgoing_count,
+                    incoming_count=incoming_count,
+                    neighbour_ids=sorted(rr.neighbour_ids()),
+                )
+            )
 
         return resolved
 
     def _build_llm_context_text(
         self,
-        question:         str,
-        resolution:       QueryResolutionResult,
-        resolved_nodes:   list[ResolvedNode],
+        question: str,
+        resolution: QueryResolutionResult,
+        resolved_nodes: list[ResolvedNode],
         retrieval_results: dict[str, RetrievalResult],
-        subgraph:         RepositoryGraph,
+        subgraph: RepositoryGraph,
     ) -> str:
         """
         Assemble the multi-section plain-text context block.
@@ -856,9 +840,7 @@ class ContextBuilder:
 
         # Subgraph relationship summary
         lines.append(sep)
-        lines.append(
-            f"SUBGRAPH  ({len(subgraph.nodes)} nodes, {len(subgraph.edges)} edges)"
-        )
+        lines.append(f"SUBGRAPH  ({len(subgraph.nodes)} nodes, {len(subgraph.edges)} edges)")
         lines.append(sep)
 
         if subgraph.edges:
@@ -883,12 +865,15 @@ class ContextBuilder:
         # This prevents silent truncation by the LLM API and avoids 400 errors
         # from models with smaller context windows.
         from app.core.token_utils import count_tokens, trim_to_token_limit
+
         token_count = count_tokens(raw_context)
         if token_count > self._max_context_tokens:
             import logging
+
             logging.getLogger(__name__).warning(
                 "LLM context (%d tokens) exceeds limit (%d); trimming.",
-                token_count, self._max_context_tokens,
+                token_count,
+                self._max_context_tokens,
             )
             return trim_to_token_limit(raw_context, self._max_context_tokens)
 
@@ -898,6 +883,7 @@ class ContextBuilder:
 # ===========================================================================
 # Private helpers
 # ===========================================================================
+
 
 def _build_subgraph_summary(subgraph: RepositoryGraph) -> SubgraphSummary:
     """Derive a SubgraphSummary from a RepositoryGraph."""
@@ -909,10 +895,10 @@ def _build_subgraph_summary(subgraph: RepositoryGraph) -> SubgraphSummary:
     edge_types = sorted({edge.relationship.value for edge in subgraph.edges})
 
     return SubgraphSummary(
-        node_count    = len(subgraph.nodes),
-        edge_count    = len(subgraph.edges),
-        nodes_by_type = nodes_by_type,
-        edge_types    = edge_types,
+        node_count=len(subgraph.nodes),
+        edge_count=len(subgraph.edges),
+        nodes_by_type=nodes_by_type,
+        edge_types=edge_types,
     )
 
 
@@ -920,13 +906,14 @@ def _build_subgraph_summary(subgraph: RepositoryGraph) -> SubgraphSummary:
 # Factory convenience
 # ===========================================================================
 
+
 def build_context_builder(
     graph: RepositoryGraph,
     *,
-    top_k:               int = 10,
-    max_hops:            int = 1,
-    max_llm_neighbours:  int = 20,
-    max_context_tokens:  int = 24_000,
+    top_k: int = 10,
+    max_hops: int = 1,
+    max_llm_neighbours: int = 20,
+    max_context_tokens: int = 24_000,
 ) -> ContextBuilder:
     """
     One-call factory: build a ContextBuilder from a RepositoryGraph.
@@ -950,7 +937,7 @@ def build_context_builder(
     -------
     ContextBuilder
     """
-    resolver  = QueryResolver(graph)
+    resolver = QueryResolver(graph)
     retriever = RepositoryRetriever(graph)
     return ContextBuilder(
         resolver,

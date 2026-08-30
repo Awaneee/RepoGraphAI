@@ -40,7 +40,7 @@ import os
 import sqlite3
 import threading
 import uuid
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Optional
 
@@ -66,11 +66,11 @@ CREATE INDEX IF NOT EXISTS idx_jobs_created ON jobs(created_at);
 @dataclass
 class Job:
     id: str
-    status: str                        # "queued" | "running" | "done" | "error"
-    request: dict                      # serialised QARequest
-    result: Optional[dict] = None      # serialised QAResponse (when done)
-    error: Optional[str]  = None
-    created_at: datetime  = field(default_factory=lambda: datetime.now(timezone.utc))
+    status: str  # "queued" | "running" | "done" | "error"
+    request: dict  # serialised QARequest
+    result: Optional[dict] = None  # serialised QAResponse (when done)
+    error: Optional[str] = None
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     completed_at: Optional[datetime] = None
 
 
@@ -135,13 +135,13 @@ class PersistentJobStore:
 
     def _row_to_job(self, row: sqlite3.Row) -> Job:
         return Job(
-            id           = row["id"],
-            status       = row["status"],
-            request      = json.loads(row["request_json"]),
-            result       = json.loads(row["result_json"]) if row["result_json"] else None,
-            error        = row["error"],
-            created_at   = self._dt_parse(row["created_at"]) or datetime.now(timezone.utc),
-            completed_at = self._dt_parse(row["completed_at"]),
+            id=row["id"],
+            status=row["status"],
+            request=json.loads(row["request_json"]),
+            result=json.loads(row["result_json"]) if row["result_json"] else None,
+            error=row["error"],
+            created_at=self._dt_parse(row["created_at"]) or datetime.now(timezone.utc),
+            completed_at=self._dt_parse(row["completed_at"]),
         )
 
     # ------------------------------------------------------------------
@@ -151,7 +151,7 @@ class PersistentJobStore:
     def create(self, request: Any) -> Job:
         """Create a new job and persist it. Returns the Job dataclass."""
         job_id = str(uuid.uuid4())
-        now    = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc)
         req_json = json.dumps(
             request.model_dump() if hasattr(request, "model_dump") else dict(request)
         )
@@ -165,9 +165,7 @@ class PersistentJobStore:
 
     def get(self, job_id: str) -> Optional[Job]:
         """Return the Job for ``job_id``, or None if not found."""
-        row = self._conn().execute(
-            "SELECT * FROM jobs WHERE id = ?", (job_id,)
-        ).fetchone()
+        row = self._conn().execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
         return self._row_to_job(row) if row else None
 
     def update(self, job_id: str, **kwargs: Any) -> None:
@@ -193,16 +191,15 @@ class PersistentJobStore:
 
     def cleanup_expired(self) -> int:
         """Delete jobs older than ``ttl_days``. Returns number deleted."""
-        cutoff = datetime.now(timezone.utc).replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
+        cutoff = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
         from datetime import timedelta
+
         cutoff -= timedelta(days=self._ttl_days)
         conn = self._conn()
-        cur = conn.execute(
-            "DELETE FROM jobs WHERE created_at < ?", (self._dt_str(cutoff),)
-        )
+        cur = conn.execute("DELETE FROM jobs WHERE created_at < ?", (self._dt_str(cutoff),))
         conn.commit()
         if cur.rowcount:
-            logger.info("Pruned %d expired jobs (older than %d days).", cur.rowcount, self._ttl_days)
+            logger.info(
+                "Pruned %d expired jobs (older than %d days).", cur.rowcount, self._ttl_days
+            )
         return cur.rowcount

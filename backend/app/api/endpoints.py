@@ -79,6 +79,7 @@ router = APIRouter()
 # Dependency factories (FastAPI Depends)
 # ---------------------------------------------------------------------------
 
+
 def get_repository_service() -> RepositoryService:
     """Dependency: return a fresh RepositoryService for this request."""
     return RepositoryService()
@@ -92,6 +93,7 @@ def get_graph_service() -> GraphService:
 # ---------------------------------------------------------------------------
 # Request / Response models
 # ---------------------------------------------------------------------------
+
 
 class QARequest(BaseModel):
     repo_url: str
@@ -138,14 +140,15 @@ class QAResponse(BaseModel):
 
 
 class JobStatus(str, Enum):
-    QUEUED  = "queued"
+    QUEUED = "queued"
     RUNNING = "running"
-    DONE    = "done"
-    ERROR   = "error"
+    DONE = "done"
+    ERROR = "error"
 
 
 class JobSubmittedResponse(BaseModel):
     """Returned immediately from POST /qa/async (HTTP 202)."""
+
     job_id: str
     status: JobStatus
     poll_url: str
@@ -153,6 +156,7 @@ class JobSubmittedResponse(BaseModel):
 
 class JobStatusResponse(BaseModel):
     """Returned from GET /qa/jobs/{job_id}."""
+
     job_id: str
     status: JobStatus
     created_at: datetime
@@ -182,6 +186,7 @@ class SessionQARequest(BaseModel):
 # ---------------------------------------------------------------------------
 # In-process job store
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class _QAJob:
@@ -232,13 +237,14 @@ _job_store = _JobStore()
 # In-process session store (for multi-turn Q&A)
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class _Session:
     id: str
     repo_url: str
-    graph: object               # RepositoryGraph
-    context_builder: object     # ContextBuilder
-    history: list[dict]         # list of {question, answer}
+    graph: object  # RepositoryGraph
+    context_builder: object  # ContextBuilder
+    history: list[dict]  # list of {question, answer}
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -271,6 +277,7 @@ _session_store = _SessionStore()
 # LLM provider factory
 # ---------------------------------------------------------------------------
 
+
 def _build_llm_provider():
     """
     Build the configured LLM provider from environment variables.
@@ -283,7 +290,7 @@ def _build_llm_provider():
 
     provider_name = os.getenv("DEFAULT_LLM_PROVIDER", "anthropic").lower()
     anthropic_key = os.getenv("ANTHROPIC_API_KEY", "")
-    google_key    = os.getenv("GOOGLE_API_KEY", "")
+    google_key = os.getenv("GOOGLE_API_KEY", "")
 
     if provider_name == "gemini" and google_key:
         return GeminiLLMProvider(api_key=google_key)
@@ -299,9 +306,11 @@ def _build_llm_provider():
 # Shared pipeline helpers
 # ---------------------------------------------------------------------------
 
+
 def _validate_qa_request(request: QARequest) -> None:
     """Raise ValueError for invalid QARequest fields (including URL)."""
     from app.services.repository_service import validate_clone_url
+
     validate_clone_url(request.repo_url)
     if not request.question or not request.question.strip():
         raise ValueError("question must be a non-empty string.")
@@ -314,9 +323,11 @@ def _validate_qa_request(request: QARequest) -> None:
 def _build_context_builder_for_request(graph, request: QARequest, repo_path: str = ""):
     """Build the appropriate ContextBuilder based on request parameters."""
     from app.rag.context_builder import build_context_builder
+
     if getattr(request, "use_embeddings", False):
         from app.cache.repository_cache import RepositoryCache
         from app.retrievers.hybrid_retriever import build_hybrid_context_builder
+
         cache = RepositoryCache(repo_path) if repo_path else None
         return build_hybrid_context_builder(
             graph,
@@ -332,32 +343,32 @@ def _package_to_qa_response(question: str, context_package, llm_provider) -> QAR
 
     source_nodes = [
         SourceNodeResponse(
-            node_id    = rn.node_id,
-            node_type  = rn.node_type,
-            label      = rn.label,
-            score      = rn.score,
-            file_path  = rn.file_path,
-            line_number = rn.line_number,
+            node_id=rn.node_id,
+            node_type=rn.node_type,
+            label=rn.label,
+            score=rn.score,
+            file_path=rn.file_path,
+            line_number=rn.line_number,
         )
         for rn in context_package.resolved_nodes
     ]
     retrieval_metadata = RetrievalMetadataResponse(
-        intent_categories   = context_package.intent_categories,
-        keywords            = context_package.keywords,
-        resolved_node_count = len(context_package.resolved_nodes),
-        subgraph_node_count = context_package.subgraph_node_count,
-        subgraph_edge_count = context_package.subgraph_edge_count,
-        traversal_strategy  = context_package.traversal_strategy,
+        intent_categories=context_package.intent_categories,
+        keywords=context_package.keywords,
+        resolved_node_count=len(context_package.resolved_nodes),
+        subgraph_node_count=context_package.subgraph_node_count,
+        subgraph_edge_count=context_package.subgraph_edge_count,
+        traversal_strategy=context_package.traversal_strategy,
     )
 
     if llm_provider is None:
         return QAResponse(
-            question           = question,
-            answer             = None,
-            source_nodes       = source_nodes,
-            retrieval_metadata = retrieval_metadata,
-            intent_categories  = context_package.intent_categories,
-            llm_context        = context_package.llm_context,
+            question=question,
+            answer=None,
+            source_nodes=source_nodes,
+            retrieval_metadata=retrieval_metadata,
+            intent_categories=context_package.intent_categories,
+            llm_context=context_package.llm_context,
         )
 
     # Rebuild context_builder from context_package is not possible here;
@@ -366,12 +377,12 @@ def _package_to_qa_response(question: str, context_package, llm_provider) -> QAR
     # For the LLM path, the caller uses GraphRAGEngine directly.
     # This function returns offline-mode response only.
     return QAResponse(
-        question           = question,
-        answer             = None,
-        source_nodes       = source_nodes,
-        retrieval_metadata = retrieval_metadata,
-        intent_categories  = context_package.intent_categories,
-        llm_context        = context_package.llm_context,
+        question=question,
+        answer=None,
+        source_nodes=source_nodes,
+        retrieval_metadata=retrieval_metadata,
+        intent_categories=context_package.intent_categories,
+        llm_context=context_package.llm_context,
     )
 
 
@@ -396,45 +407,45 @@ def _run_qa_pipeline(
         graph_service = GraphService()
 
     repo_path = repo_service.clone_repository(request.repo_url)
-    graph     = graph_service.generate_graph(repo_path)
+    graph = graph_service.generate_graph(repo_path)
 
     context_builder = _build_context_builder_for_request(graph, request, repo_path)
     context_package = context_builder.build(request.question)
 
     source_nodes = [
         SourceNodeResponse(
-            node_id    = rn.node_id,
-            node_type  = rn.node_type,
-            label      = rn.label,
-            score      = rn.score,
-            file_path  = rn.file_path,
-            line_number = rn.line_number,
+            node_id=rn.node_id,
+            node_type=rn.node_type,
+            label=rn.label,
+            score=rn.score,
+            file_path=rn.file_path,
+            line_number=rn.line_number,
         )
         for rn in context_package.resolved_nodes
     ]
     retrieval_metadata = RetrievalMetadataResponse(
-        intent_categories   = context_package.intent_categories,
-        keywords            = context_package.keywords,
-        resolved_node_count = len(context_package.resolved_nodes),
-        subgraph_node_count = context_package.subgraph_node_count,
-        subgraph_edge_count = context_package.subgraph_edge_count,
-        traversal_strategy  = context_package.traversal_strategy,
+        intent_categories=context_package.intent_categories,
+        keywords=context_package.keywords,
+        resolved_node_count=len(context_package.resolved_nodes),
+        subgraph_node_count=context_package.subgraph_node_count,
+        subgraph_edge_count=context_package.subgraph_edge_count,
+        traversal_strategy=context_package.traversal_strategy,
     )
 
     llm_provider = _build_llm_provider()
 
     if llm_provider is None:
         return QAResponse(
-            question           = request.question,
-            answer             = None,
-            source_nodes       = source_nodes,
-            retrieval_metadata = retrieval_metadata,
-            intent_categories  = context_package.intent_categories,
-            llm_context        = context_package.llm_context,
+            question=request.question,
+            answer=None,
+            source_nodes=source_nodes,
+            retrieval_metadata=retrieval_metadata,
+            intent_categories=context_package.intent_categories,
+            llm_context=context_package.llm_context,
         )
 
     try:
-        engine   = GraphRAGEngine(context_builder, llm_provider)
+        engine = GraphRAGEngine(context_builder, llm_provider)
         response = engine.answer(
             request.question,
             top_k=request.top_k,
@@ -444,17 +455,18 @@ def _run_qa_pipeline(
         raise RuntimeError(f"LLM provider error: {exc}") from exc
 
     return QAResponse(
-        question           = request.question,
-        answer             = response.answer,
-        source_nodes       = source_nodes,
-        retrieval_metadata = retrieval_metadata,
-        intent_categories  = context_package.intent_categories,
+        question=request.question,
+        answer=response.answer,
+        source_nodes=source_nodes,
+        retrieval_metadata=retrieval_metadata,
+        intent_categories=context_package.intent_categories,
     )
 
 
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
+
 
 @router.get("/health")
 def health_check():
@@ -466,17 +478,25 @@ def health_check():
     """
     from app.embeddings.embedding_model import EmbeddingModel
 
-    cache_ok = os.access(settings.CACHE_DIR, os.W_OK) if os.path.isdir(settings.CACHE_DIR) else os.access(".", os.W_OK)
-    repos_ok = os.access(settings.REPOS_DIR, os.W_OK) if os.path.isdir(settings.REPOS_DIR) else os.access(".", os.W_OK)
-    llm_ok   = bool(settings.ANTHROPIC_API_KEY or settings.GOOGLE_API_KEY)
-    emb_ok   = EmbeddingModel.is_available()
-    status   = "ok" if (cache_ok and repos_ok) else "degraded"
+    cache_ok = (
+        os.access(settings.CACHE_DIR, os.W_OK)
+        if os.path.isdir(settings.CACHE_DIR)
+        else os.access(".", os.W_OK)
+    )
+    repos_ok = (
+        os.access(settings.REPOS_DIR, os.W_OK)
+        if os.path.isdir(settings.REPOS_DIR)
+        else os.access(".", os.W_OK)
+    )
+    llm_ok = bool(settings.ANTHROPIC_API_KEY or settings.GOOGLE_API_KEY)
+    emb_ok = EmbeddingModel.is_available()
+    status = "ok" if (cache_ok and repos_ok) else "degraded"
 
     return {
-        "status":              status,
-        "cache_dir_writable":  cache_ok,
-        "repos_dir_writable":  repos_ok,
-        "llm_configured":      llm_ok,
+        "status": status,
+        "cache_dir_writable": cache_ok,
+        "repos_dir_writable": repos_ok,
+        "llm_configured": llm_ok,
         "embedding_available": emb_ok,
     }
 
@@ -603,24 +623,24 @@ async def qa_repository_async(request: QARequest):
             result = await asyncio.to_thread(_run_qa_pipeline, request)
             _job_store.update(
                 job.id,
-                status       = JobStatus.DONE,
-                result       = result,
-                completed_at = datetime.now(timezone.utc),
+                status=JobStatus.DONE,
+                result=result,
+                completed_at=datetime.now(timezone.utc),
             )
         except Exception as exc:
             _job_store.update(
                 job.id,
-                status       = JobStatus.ERROR,
-                error        = str(exc),
-                completed_at = datetime.now(timezone.utc),
+                status=JobStatus.ERROR,
+                error=str(exc),
+                completed_at=datetime.now(timezone.utc),
             )
 
     asyncio.create_task(_execute())
 
     return JobSubmittedResponse(
-        job_id   = job.id,
-        status   = JobStatus.QUEUED,
-        poll_url = f"/qa/jobs/{job.id}",
+        job_id=job.id,
+        status=JobStatus.QUEUED,
+        poll_url=f"/qa/jobs/{job.id}",
     )
 
 
@@ -660,14 +680,14 @@ def qa_repository_stream(
 
     try:
         repo_path = repository_service.clone_repository(request.repo_url)
-        graph     = graph_service.generate_graph(repo_path)
+        graph = graph_service.generate_graph(repo_path)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
     context_builder = _build_context_builder_for_request(graph, request, repo_path)
-    llm_provider    = _build_llm_provider()
+    llm_provider = _build_llm_provider()
 
     def _event_generator():
         def _sse(payload: dict) -> str:
@@ -681,17 +701,23 @@ def qa_repository_stream(
                 return
 
             source_nodes = [
-                {"node_id": rn.node_id, "node_type": rn.node_type,
-                 "label": rn.label, "score": rn.score}
+                {
+                    "node_id": rn.node_id,
+                    "node_type": rn.node_type,
+                    "label": rn.label,
+                    "score": rn.score,
+                }
                 for rn in package.resolved_nodes
             ]
-            yield _sse({
-                "type":             "metadata",
-                "intent_categories": package.intent_categories,
-                "keywords":          package.keywords,
-                "source_nodes":      source_nodes,
-                "offline":           True,
-            })
+            yield _sse(
+                {
+                    "type": "metadata",
+                    "intent_categories": package.intent_categories,
+                    "keywords": package.keywords,
+                    "source_nodes": source_nodes,
+                    "offline": True,
+                }
+            )
             yield _sse({"type": "token", "text": package.llm_context})
             yield _sse({"type": "done", "full_answer": package.llm_context, "no_context": False})
             return
@@ -731,18 +757,19 @@ async def get_job_status(job_id: str):
             detail=f"Job {job_id!r} not found. It may have been lost on server restart.",
         )
     return JobStatusResponse(
-        job_id       = job.id,
-        status       = job.status,
-        created_at   = job.created_at,
-        completed_at = job.completed_at,
-        result       = job.result,
-        error        = job.error,
+        job_id=job.id,
+        status=job.status,
+        created_at=job.created_at,
+        completed_at=job.completed_at,
+        result=job.result,
+        error=job.error,
     )
 
 
 # ---------------------------------------------------------------------------
 # Multi-turn session endpoints
 # ---------------------------------------------------------------------------
+
 
 @router.post(
     "/sessions",
@@ -778,7 +805,7 @@ def create_session(
 
     try:
         repo_path = repository_service.clone_repository(request.repo_url)
-        graph     = graph_service.generate_graph(repo_path)
+        graph = graph_service.generate_graph(repo_path)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e)) from e
     except Exception as e:
@@ -796,19 +823,19 @@ def create_session(
     )
 
     session = _Session(
-        id              = str(uuid.uuid4()),
-        repo_url        = request.repo_url,
-        graph           = graph,
-        context_builder = context_builder,
-        history         = [],
+        id=str(uuid.uuid4()),
+        repo_url=request.repo_url,
+        graph=graph,
+        context_builder=context_builder,
+        history=[],
     )
     _session_store.create(session)
 
     return SessionCreatedResponse(
-        session_id = session.id,
-        repo_url   = request.repo_url,
-        node_count = len(graph.nodes),
-        edge_count = len(graph.edges),
+        session_id=session.id,
+        repo_url=request.repo_url,
+        node_count=len(graph.nodes),
+        edge_count=len(graph.edges),
     )
 
 
@@ -862,32 +889,32 @@ def session_qa(session_id: str, request: SessionQARequest):
 
     source_nodes = [
         SourceNodeResponse(
-            node_id    = rn.node_id,
-            node_type  = rn.node_type,
-            label      = rn.label,
-            score      = rn.score,
-            file_path  = rn.file_path,
-            line_number = rn.line_number,
+            node_id=rn.node_id,
+            node_type=rn.node_type,
+            label=rn.label,
+            score=rn.score,
+            file_path=rn.file_path,
+            line_number=rn.line_number,
         )
         for rn in context_package.resolved_nodes
     ]
     retrieval_metadata = RetrievalMetadataResponse(
-        intent_categories   = context_package.intent_categories,
-        keywords            = context_package.keywords,
-        resolved_node_count = len(context_package.resolved_nodes),
-        subgraph_node_count = context_package.subgraph_node_count,
-        subgraph_edge_count = context_package.subgraph_edge_count,
-        traversal_strategy  = context_package.traversal_strategy,
+        intent_categories=context_package.intent_categories,
+        keywords=context_package.keywords,
+        resolved_node_count=len(context_package.resolved_nodes),
+        subgraph_node_count=context_package.subgraph_node_count,
+        subgraph_edge_count=context_package.subgraph_edge_count,
+        traversal_strategy=context_package.traversal_strategy,
     )
 
     if llm_provider is None:
         return QAResponse(
-            question           = request.question,
-            answer             = None,
-            source_nodes       = source_nodes,
-            retrieval_metadata = retrieval_metadata,
-            intent_categories  = context_package.intent_categories,
-            llm_context        = history_prefix + context_package.llm_context,
+            question=request.question,
+            answer=None,
+            source_nodes=source_nodes,
+            retrieval_metadata=retrieval_metadata,
+            intent_categories=context_package.intent_categories,
+            llm_context=history_prefix + context_package.llm_context,
         )
 
     # Inject history into prompt via a custom PromptBuilder
@@ -896,15 +923,15 @@ def session_qa(session_id: str, request: SessionQARequest):
             bundle = super().build(package)
             if history_prefix:
                 return bundle.__class__(
-                    system_prompt = bundle.system_prompt,
-                    user_prompt   = history_prefix + bundle.user_prompt,
+                    system_prompt=bundle.system_prompt,
+                    user_prompt=history_prefix + bundle.user_prompt,
                 )
             return bundle
 
     try:
-        engine   = GraphRAGEngine(session.context_builder, llm_provider, _HistoryPromptBuilder())
+        engine = GraphRAGEngine(session.context_builder, llm_provider, _HistoryPromptBuilder())
         response = engine.answer(request.question)
-        answer   = response.answer
+        answer = response.answer
     except LLMProviderError as exc:
         raise HTTPException(status_code=500, detail=f"LLM provider error: {exc}") from exc
     except Exception as exc:
@@ -913,9 +940,9 @@ def session_qa(session_id: str, request: SessionQARequest):
     _session_store.append_history(session_id, request.question, answer or "")
 
     return QAResponse(
-        question           = request.question,
-        answer             = answer,
-        source_nodes       = source_nodes,
-        retrieval_metadata = retrieval_metadata,
-        intent_categories  = context_package.intent_categories,
+        question=request.question,
+        answer=answer,
+        source_nodes=source_nodes,
+        retrieval_metadata=retrieval_metadata,
+        intent_categories=context_package.intent_categories,
     )

@@ -58,8 +58,8 @@ class EmbeddingModel:
         device: Optional[str] = "cpu",
     ) -> None:
         self._model_name = model_name
-        self._device     = device
-        self._model      = None   # lazy-loaded on first encode call
+        self._device = device
+        self._model = None  # lazy-loaded on first encode call
 
     # ------------------------------------------------------------------
     # Availability check (no import side-effects)
@@ -69,6 +69,7 @@ class EmbeddingModel:
     def is_available() -> bool:
         """Return True if ``sentence_transformers`` is installed."""
         import importlib.util
+
         return importlib.util.find_spec("sentence_transformers") is not None
 
     # ------------------------------------------------------------------

@@ -62,14 +62,14 @@ import logging
 from dataclasses import dataclass
 from typing import Optional
 
-logger = logging.getLogger(__name__)
-
-from app.models.pydantic_models import (
+from app.models.pydantic_models import (  # noqa: E402
     RepositoryGraph,
 )
-from app.rag.context_builder import ContextBuilder
-from app.retrievers.code_retriever import RepositoryRetriever
-from app.retrievers.query_resolver import QueryMatch, QueryResolver
+from app.rag.context_builder import ContextBuilder  # noqa: E402
+from app.retrievers.code_retriever import RepositoryRetriever  # noqa: E402
+from app.retrievers.query_resolver import QueryMatch, QueryResolver  # noqa: E402
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # RRF constant
@@ -88,6 +88,7 @@ works well empirically across a wide range of retrieval tasks.
 # Semantic index (dual-backend)
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class SemanticIndex:
     """
@@ -102,9 +103,9 @@ class SemanticIndex:
     backend_name: str
     """'sentence-transformers' or 'tfidf'."""
 
-    _matrix: object          # np.ndarray (dense) or sparse matrix
-    _encoder: object         # SentenceTransformer | TfidfVectorizer
-    _is_dense: bool          # True → cosine via matrix multiply; False → sparse cosine
+    _matrix: object  # np.ndarray (dense) or sparse matrix
+    _encoder: object  # SentenceTransformer | TfidfVectorizer
+    _is_dense: bool  # True → cosine via matrix multiply; False → sparse cosine
 
     # ------------------------------------------------------------------
     # Factory
@@ -167,18 +168,18 @@ class SemanticIndex:
                         logger.info("Loaded %d node embeddings from disk cache.", len(cached_ids))
                     # Determine backend from matrix shape (dense → sentence-transformers)
                     return cls(
-                        node_ids     = cached_ids,
-                        backend_name = "sentence-transformers (cached)",
-                        _matrix      = cached_matrix,
-                        _encoder     = None,       # not needed for cached queries
-                        _is_dense    = True,
+                        node_ids=cached_ids,
+                        backend_name="sentence-transformers (cached)",
+                        _matrix=cached_matrix,
+                        _encoder=None,  # not needed for cached queries
+                        _is_dense=True,
                     )
             except Exception as exc:
                 logger.warning("Embedding cache load failed (%s); re-encoding.", exc)
 
         # --- Collect node IDs and their context texts ---
         node_ids: list[str] = []
-        texts:    list[str] = []
+        texts: list[str] = []
 
         for node in graph.nodes:
             try:
@@ -197,12 +198,16 @@ class SemanticIndex:
         # --- Try SentenceTransformer backend first ---
         try:
             import importlib.util
-            if importlib.util.find_spec("sentence_transformers") and importlib.util.find_spec("torch"):
+
+            if importlib.util.find_spec("sentence_transformers") and importlib.util.find_spec(
+                "torch"
+            ):
                 from sentence_transformers import SentenceTransformer
+
                 model = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
                 matrix = model.encode(texts, show_progress_bar=show_progress, convert_to_numpy=True)
                 # L2-normalise for cosine via dot product
-                norms  = np.linalg.norm(matrix, axis=1, keepdims=True)
+                norms = np.linalg.norm(matrix, axis=1, keepdims=True)
                 norms[norms == 0] = 1.0
                 matrix = matrix / norms
                 if show_progress:
@@ -228,6 +233,7 @@ class SemanticIndex:
 
         # --- TF-IDF fallback (no caching — sparse matrices don't np.save cleanly) ---
         from sklearn.feature_extraction.text import TfidfVectorizer
+
         vectorizer = TfidfVectorizer(
             analyzer="word",
             ngram_range=(1, 2),
@@ -264,29 +270,28 @@ class SemanticIndex:
         if self._is_dense:
             # SentenceTransformer — encode + dot product (cosine on L2-normed vecs)
             q_vec = self._encoder.encode([question], convert_to_numpy=True)[0]
-            norm  = np.linalg.norm(q_vec)
+            norm = np.linalg.norm(q_vec)
             if norm > 0:
                 q_vec = q_vec / norm
-            scores = self._matrix @ q_vec        # shape: (N,)
+            scores = self._matrix @ q_vec  # shape: (N,)
         else:
             # TF-IDF — sparse cosine
             from sklearn.metrics.pairwise import cosine_similarity
-            q_vec  = self._encoder.transform([question])
+
+            q_vec = self._encoder.transform([question])
             scores = cosine_similarity(q_vec, self._matrix)[0]  # shape: (N,)
 
         k = min(top_k, len(self.node_ids))
         top_indices = np.argpartition(scores, -k)[-k:]
         top_indices = top_indices[np.argsort(-scores[top_indices])]
 
-        return {
-            self.node_ids[i]: rank + 1
-            for rank, i in enumerate(top_indices)
-        }
+        return {self.node_ids[i]: rank + 1 for rank, i in enumerate(top_indices)}
 
 
 # ---------------------------------------------------------------------------
 # HybridQueryResolver
 # ---------------------------------------------------------------------------
+
 
 class HybridQueryResolver:
     """
@@ -345,13 +350,13 @@ class HybridQueryResolver:
         keyword_weight: float = 3.0,
         semantic_weight: float = 1.0,
     ) -> None:
-        self._resolver            = QueryResolver(graph, default_top_k=default_top_k)
-        self._semantic_index      = semantic_index
-        self._default_top_k       = default_top_k
+        self._resolver = QueryResolver(graph, default_top_k=default_top_k)
+        self._semantic_index = semantic_index
+        self._default_top_k = default_top_k
         self._semantic_candidates = semantic_candidates
-        self._kw_weight           = keyword_weight
-        self._sem_weight          = semantic_weight
-        self._n_nodes             = len(graph.nodes)
+        self._kw_weight = keyword_weight
+        self._sem_weight = semantic_weight
+        self._n_nodes = len(graph.nodes)
 
     def resolve_query(
         self,
@@ -370,16 +375,16 @@ class HybridQueryResolver:
 
         # --- Keyword ranking (full result set for worst-case rank) ---
         kw_result = self._resolver.resolve_query(question, top_k=self._n_nodes)
-        kw_ranks  = {m.node_id: i + 1 for i, m in enumerate(kw_result.matches)}
+        kw_ranks = {m.node_id: i + 1 for i, m in enumerate(kw_result.matches)}
 
         # --- Semantic ranking (top-N candidates) ---
         sem_ranks = self._semantic_index.query(question, top_k=self._semantic_candidates)
 
         # --- RRF fusion ---
         all_ids = set(kw_ranks) | set(sem_ranks)
-        worst   = self._n_nodes + 1
+        worst = self._n_nodes + 1
 
-        kw_w  = self._kw_weight
+        kw_w = self._kw_weight
         sem_w = self._sem_weight
 
         def rrf(node_id: str) -> float:
@@ -393,30 +398,33 @@ class HybridQueryResolver:
         merged = sorted(all_ids, key=rrf, reverse=True)[:k]
 
         from app.retrievers.query_resolver import QueryResolutionResult
+
         matches = []
         for node_id in merged:
             node = node_lookup.get(node_id)
             if node is None:
                 continue
-            kr   = kw_ranks.get(node_id, worst)
-            sr   = sem_ranks.get(node_id, worst)
+            kr = kw_ranks.get(node_id, worst)
+            sr = sem_ranks.get(node_id, worst)
             score = rrf(node_id)
-            matches.append(QueryMatch(
-                node_id   = node_id,
-                node_type = node.type,
-                score     = score,
-                reason    = (
-                    f"Weighted-RRF(kw×{kw_w}): keyword_rank={kr}, "
-                    f"semantic_rank={sr}, rrf_score={score:.4f}"
-                ),
-            ))
+            matches.append(
+                QueryMatch(
+                    node_id=node_id,
+                    node_type=node.type,
+                    score=score,
+                    reason=(
+                        f"Weighted-RRF(kw×{kw_w}): keyword_rank={kr}, "
+                        f"semantic_rank={sr}, rrf_score={score:.4f}"
+                    ),
+                )
+            )
 
         return QueryResolutionResult(
-            query             = kw_result.query,
-            keywords          = kw_result.keywords,
-            expanded_keywords = kw_result.expanded_keywords,
-            intent            = kw_result.intent,
-            matches           = matches,
+            query=kw_result.query,
+            keywords=kw_result.keywords,
+            expanded_keywords=kw_result.expanded_keywords,
+            intent=kw_result.intent,
+            matches=matches,
         )
 
     # Forward attribute access to underlying QueryResolver for compatibility
@@ -434,13 +442,14 @@ class HybridQueryResolver:
 # Factory convenience
 # ---------------------------------------------------------------------------
 
+
 def build_hybrid_context_builder(
     graph: RepositoryGraph,
     *,
-    top_k:              int = 10,
-    max_hops:           int = 1,
+    top_k: int = 10,
+    max_hops: int = 1,
     max_llm_neighbours: int = 20,
-    show_progress:      bool = False,
+    show_progress: bool = False,
     cache: "Optional[object]" = None,
 ) -> ContextBuilder:
     """
@@ -468,7 +477,8 @@ def build_hybrid_context_builder(
     """
     retriever = RepositoryRetriever(graph)
     sem_index = SemanticIndex.build(
-        graph, retriever,
+        graph,
+        retriever,
         show_progress=show_progress,
         cache=cache,
     )
@@ -489,6 +499,7 @@ def build_hybrid_context_builder(
 # ---------------------------------------------------------------------------
 # Benchmark helper
 # ---------------------------------------------------------------------------
+
 
 def run_hybrid_benchmark(
     graph: RepositoryGraph,
@@ -515,9 +526,9 @@ def run_hybrid_benchmark(
         "hybrid":       {"top1": float, "top3": float, "top5": float, "mrr": float}
         "semantic_backend": str
     """
-    retriever       = RepositoryRetriever(graph)
-    kw_resolver     = QueryResolver(graph, default_top_k=top_k)
-    sem_index       = SemanticIndex.build(graph, retriever, show_progress=show_progress)
+    retriever = RepositoryRetriever(graph)
+    kw_resolver = QueryResolver(graph, default_top_k=top_k)
+    sem_index = SemanticIndex.build(graph, retriever, show_progress=show_progress)
     hybrid_resolver = HybridQueryResolver(graph, sem_index, default_top_k=top_k)
 
     def _eval(resolver, label: str) -> dict:
@@ -532,7 +543,7 @@ def run_hybrid_benchmark(
                 n -= 1
                 continue
 
-            result  = resolver.resolve_query(question, top_k=5)
+            result = resolver.resolve_query(question, top_k=5)
             node_ids = [m.node_id for m in result.matches]
 
             hit_rank = None
@@ -555,13 +566,13 @@ def run_hybrid_benchmark(
             "top1": round(top1_hits / denom, 4),
             "top3": round(top3_hits / denom, 4),
             "top5": round(top5_hits / denom, 4),
-            "mrr":  round(rr_sum    / denom, 4),
+            "mrr": round(rr_sum / denom, 4),
         }
 
     return {
-        "keyword_only":     _eval(kw_resolver, "keyword"),
-        "hybrid":           _eval(hybrid_resolver, "hybrid"),
+        "keyword_only": _eval(kw_resolver, "keyword"),
+        "hybrid": _eval(hybrid_resolver, "hybrid"),
         "semantic_backend": sem_index.backend_name,
-        "n_questions":      len(questions),
-        "n_nodes":          len(graph.nodes),
+        "n_questions": len(questions),
+        "n_nodes": len(graph.nodes),
     }

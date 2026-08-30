@@ -32,7 +32,7 @@ import time
 
 # Adjust this if your project layout differs — mirrors retrieval_benchmark.py's
 # own sys.path handling so this script can be dropped next to it.
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..","..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from app.cache.repository_cache import RepositoryCache
 from app.graph.graph_builder import GraphBuilder
@@ -124,11 +124,19 @@ def build_engine(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Ask GraphRAG v1 questions about a Python repository.")
+    parser = argparse.ArgumentParser(
+        description="Ask GraphRAG v1 questions about a Python repository."
+    )
     parser.add_argument("repository_path", help="Path to the repository to analyze.")
-    parser.add_argument("--model", help="Model id to use (defaults to gemini-2.5-flash for Gemini).")
-    parser.add_argument("--echo", action="store_true", help="Use EchoLLMProvider instead of a real LLM.")
-    parser.add_argument("--gemini", action="store_true", help="Use GeminiLLMProvider instead of Anthropic.")
+    parser.add_argument(
+        "--model", help="Model id to use (defaults to gemini-2.5-flash for Gemini)."
+    )
+    parser.add_argument(
+        "--echo", action="store_true", help="Use EchoLLMProvider instead of a real LLM."
+    )
+    parser.add_argument(
+        "--gemini", action="store_true", help="Use GeminiLLMProvider instead of Anthropic."
+    )
     parser.add_argument(
         "--no-cache",
         action="store_true",

@@ -72,6 +72,7 @@ from app.rag.context_builder import (
 # Exceptions
 # ===========================================================================
 
+
 class GraphRAGError(Exception):
     """Base class for all errors raised by the GraphRAG engine."""
 
@@ -87,6 +88,7 @@ class LLMProviderError(GraphRAGError):
 # ===========================================================================
 # Abstract LLM interface
 # ===========================================================================
+
 
 class LLMProvider(ABC):
     """
@@ -251,9 +253,7 @@ class AnthropicLLMProvider(LLMProvider):
             messages=[{"role": "user", "content": user_prompt}],
         )
         text_blocks = [
-            block.text
-            for block in response.content
-            if getattr(block, "type", None) == "text"
+            block.text for block in response.content if getattr(block, "type", None) == "text"
         ]
         return "".join(text_blocks)
 
@@ -311,6 +311,7 @@ class GeminiLLMProvider(LLMProvider):
                 ) from exc
 
             import os
+
             api_key = self._api_key or os.getenv("GOOGLE_API_KEY")
             if not api_key:
                 raise ValueError(
@@ -367,6 +368,7 @@ class GeminiLLMProvider(LLMProvider):
 # ===========================================================================
 # Prompt construction strategy
 # ===========================================================================
+
 
 @dataclass(frozen=True)
 class PromptBundle:
@@ -473,7 +475,7 @@ class GraphRAGPromptBuilder(PromptBuilder):
         *,
         include_examples: bool = True,
     ) -> None:
-        self._system_prompt    = system_prompt or DEFAULT_SYSTEM_PROMPT
+        self._system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
         self._include_examples = include_examples
 
     def build(self, package: ContextPackage) -> PromptBundle:
@@ -497,6 +499,7 @@ class GraphRAGPromptBuilder(PromptBuilder):
 # ===========================================================================
 # Output models
 # ===========================================================================
+
 
 class SourceNode(BaseModel):
     """
@@ -685,9 +688,7 @@ class GraphRAGEngine:
             ) from exc
 
         if not isinstance(raw_answer, str) or not raw_answer.strip():
-            raise LLMProviderError(
-                "LLM provider returned an empty or non-string response."
-            )
+            raise LLMProviderError("LLM provider returned an empty or non-string response.")
 
         return GraphRAGResponse(
             question=question,
@@ -746,7 +747,7 @@ class GraphRAGEngine:
         if not question or not question.strip():
             raise ValueError("question must be a non-empty string")
 
-        package  = self._context_builder.build(question, top_k=top_k, max_hops=max_hops)
+        package = self._context_builder.build(question, top_k=top_k, max_hops=max_hops)
         metadata = self._build_metadata(package, top_k, max_hops)
         source_nodes = self._build_source_nodes(package)
 
@@ -760,10 +761,10 @@ class GraphRAGEngine:
             "traversal_strategy": metadata.traversal_strategy,
             "source_nodes": [
                 {
-                    "node_id":   sn.node_id,
+                    "node_id": sn.node_id,
                     "node_type": sn.node_type,
-                    "label":     sn.label,
-                    "score":     sn.score,
+                    "label": sn.label,
+                    "score": sn.score,
                     "file_path": sn.file_path,
                 }
                 for sn in source_nodes
@@ -776,7 +777,7 @@ class GraphRAGEngine:
             yield {"type": "done", "full_answer": NO_CONTEXT_ANSWER, "no_context": True}
             return
 
-        prompt      = self._prompt_builder.build(package)
+        prompt = self._prompt_builder.build(package)
         accumulated = []
 
         try:
@@ -855,6 +856,7 @@ class GraphRAGEngine:
 # ===========================================================================
 # Factory convenience
 # ===========================================================================
+
 
 def build_graphrag_engine(
     graph: RepositoryGraph,

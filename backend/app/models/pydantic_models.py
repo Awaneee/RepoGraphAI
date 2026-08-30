@@ -6,6 +6,7 @@ from pydantic import BaseModel
 # Repository request
 # ---------------------------------------------------------------------------
 
+
 class RepositoryRequest(BaseModel):
     repo_url: str
 
@@ -14,8 +15,8 @@ class RepositoryRequest(BaseModel):
 # Repository summary (filesystem level — unchanged)
 # ---------------------------------------------------------------------------
 
-class RepositorySummary(BaseModel):
 
+class RepositorySummary(BaseModel):
     repository_name: str
     repository_path: str
 
@@ -38,6 +39,7 @@ class RepositorySummary(BaseModel):
 # ---------------------------------------------------------------------------
 # Node types
 # ---------------------------------------------------------------------------
+
 
 class NodeType(str, Enum):
     """
@@ -67,6 +69,7 @@ class ModuleOrigin(str, Enum):
     Lets consumers filter "only internal" or "only third-party" without
     running an extra resolver pass.
     """
+
     STDLIB = "stdlib"
     THIRD_PARTY = "third_party"
     INTERNAL = "internal"
@@ -76,6 +79,7 @@ class ModuleOrigin(str, Enum):
 # ---------------------------------------------------------------------------
 # Edge / relationship types
 # ---------------------------------------------------------------------------
+
 
 class RelationshipType(str, Enum):
     """
@@ -137,6 +141,7 @@ class RelationshipType(str, Enum):
 # Parsed AST models (output of CodeParser)
 # ---------------------------------------------------------------------------
 
+
 class ParsedDecorator(BaseModel):
     """A single decorator applied to a function, method, or class."""
 
@@ -155,7 +160,6 @@ class ParsedDecorator(BaseModel):
 
 
 class ParsedFunction(BaseModel):
-
     name: str
     line_number: int
     line_end: int | None = None
@@ -182,7 +186,6 @@ class ParsedFunction(BaseModel):
 
 
 class ParsedClass(BaseModel):
-
     name: str
     line_number: int
     line_end: int | None = None
@@ -199,7 +202,6 @@ class ParsedClass(BaseModel):
 
 
 class ParsedFile(BaseModel):
-
     file_path: str
 
     imports: list[str]
@@ -213,7 +215,6 @@ class ParsedFile(BaseModel):
 
 
 class ParsedRepository(BaseModel):
-
     repository_name: str
     total_python_files: int
     files: list[ParsedFile]
@@ -222,6 +223,7 @@ class ParsedRepository(BaseModel):
 # ---------------------------------------------------------------------------
 # Graph models (output of GraphBuilder)
 # ---------------------------------------------------------------------------
+
 
 class GraphNode(BaseModel):
     """
@@ -287,7 +289,6 @@ class GraphEdge(BaseModel):
 
 
 class RepositoryGraph(BaseModel):
-
     nodes: list[GraphNode]
     edges: list[GraphEdge]
 
@@ -296,14 +297,15 @@ class RepositoryGraph(BaseModel):
 # Graph statistics
 # ---------------------------------------------------------------------------
 
+
 class NodeDegree(BaseModel):
     """A node ID paired with its total degree (in + out edges)."""
+
     node_id: str
     degree: int
 
 
 class GraphStatistics(BaseModel):
-
     total_nodes: int
     total_edges: int
 
@@ -350,6 +352,7 @@ class GraphStatistics(BaseModel):
 # ---------------------------------------------------------------------------
 # Import edge (lightweight, for import-only consumers)
 # ---------------------------------------------------------------------------
+
 
 class ImportEdge(BaseModel):
     source_file: str

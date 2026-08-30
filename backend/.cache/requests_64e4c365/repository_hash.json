@@ -1,0 +1,107 @@
+{
+  "repository_path": "/mnt/c/Users/awane/RepoGraphAI/backend/repos/requests",
+  "file_count": 20,
+  "digest": "a3fcf2631cb715e3e56bf2bb1c7d1dfb2ae16d74c35777d2473a03992a978456",
+  "entries": [
+    {
+      "path": "setup.py",
+      "mtime": 1788028864.0661247,
+      "size": 179
+    },
+    {
+      "path": "src/requests/__init__.py",
+      "mtime": 1788028864.0897884,
+      "size": 5637
+    },
+    {
+      "path": "src/requests/__version__.py",
+      "mtime": 1788028864.1018746,
+      "size": 435
+    },
+    {
+      "path": "src/requests/_internal_utils.py",
+      "mtime": 1788028864.112103,
+      "size": 1542
+    },
+    {
+      "path": "src/requests/_types.py",
+      "mtime": 1788028864.123814,
+      "size": 6041
+    },
+    {
+      "path": "src/requests/adapters.py",
+      "mtime": 1788028864.1360493,
+      "size": 27992
+    },
+    {
+      "path": "src/requests/api.py",
+      "mtime": 1788028864.1513858,
+      "size": 7152
+    },
+    {
+      "path": "src/requests/auth.py",
+      "mtime": 1788028864.166366,
+      "size": 12107
+    },
+    {
+      "path": "src/requests/certs.py",
+      "mtime": 1788028864.1780791,
+      "size": 430
+    },
+    {
+      "path": "src/requests/compat.py",
+      "mtime": 1788028864.187472,
+      "size": 2494
+    },
+    {
+      "path": "src/requests/cookies.py",
+      "mtime": 1788028864.1990116,
+      "size": 21504
+    },
+    {
+      "path": "src/requests/exceptions.py",
+      "mtime": 1788028864.2105596,
+      "size": 4564
+    },
+    {
+      "path": "src/requests/help.py",
+      "mtime": 1788028864.2199695,
+      "size": 4068
+    },
+    {
+      "path": "src/requests/hooks.py",
+      "mtime": 1788028864.231296,
+      "size": 1138
+    },
+    {
+      "path": "src/requests/models.py",
+      "mtime": 1788028864.2437527,
+      "size": 41462
+    },
+    {
+      "path": "src/requests/packages.py",
+      "mtime": 1788028864.2583265,
+      "size": 904
+    },
+    {
+      "path": "src/requests/sessions.py",
+      "mtime": 1788028864.285366,
+      "size": 34072
+    },
+    {
+      "path": "src/requests/status_codes.py",
+      "mtime": 1788028864.2976346,
+      "size": 4351
+    },
+    {
+      "path": "src/requests/structures.py",
+      "mtime": 1788028864.3080816,
+      "size": 4134
+    },
+    {
+      "path": "src/requests/utils.py",
+      "mtime": 1788028864.3331091,
+      "size": 36061
+    }
+  ]
+}

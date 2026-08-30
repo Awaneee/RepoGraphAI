@@ -44,6 +44,7 @@ from app.core.config import settings
 # API key authentication
 # ---------------------------------------------------------------------------
 
+
 async def require_api_key(x_api_key: Optional[str] = Header(default=None)) -> None:
     """
     FastAPI dependency that enforces API key authentication.
@@ -63,7 +64,7 @@ async def require_api_key(x_api_key: Optional[str] = Header(default=None)) -> No
     """
     configured_key = settings.API_KEY
     if not configured_key:
-        return   # Auth disabled — allow all requests
+        return  # Auth disabled — allow all requests
 
     if x_api_key != configured_key:
         raise HTTPException(
@@ -76,6 +77,7 @@ async def require_api_key(x_api_key: Optional[str] = Header(default=None)) -> No
 # ---------------------------------------------------------------------------
 # Sliding-window rate limiter
 # ---------------------------------------------------------------------------
+
 
 class _SlidingWindowLimiter:
     """
@@ -91,10 +93,10 @@ class _SlidingWindowLimiter:
     """
 
     def __init__(self, max_requests: int, window_seconds: int) -> None:
-        self._max       = max_requests
-        self._window    = window_seconds
+        self._max = max_requests
+        self._window = window_seconds
         self._store: dict[str, deque] = {}
-        self._lock      = threading.Lock()
+        self._lock = threading.Lock()
 
     def check(self, client_key: str) -> tuple[bool, int]:
         """

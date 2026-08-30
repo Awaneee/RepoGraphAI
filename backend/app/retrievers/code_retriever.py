@@ -78,9 +78,11 @@ from app.models.pydantic_models import (
 # Result models
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class EdgeGroup:
     """A set of edges sharing the same relationship type."""
+
     relationship: RelationshipType
     edges: list[GraphEdge] = field(default_factory=list)
 
@@ -140,6 +142,7 @@ class RetrievalResult:
 # RepositoryRetriever
 # ---------------------------------------------------------------------------
 
+
 class RepositoryRetriever:
     """
     Graph-based retrieval over a RepositoryGraph.
@@ -172,13 +175,11 @@ class RepositoryRetriever:
         self._graph = graph
 
         # O(N) node index
-        self._nodes: dict[str, GraphNode] = {
-            node.id: node for node in graph.nodes
-        }
+        self._nodes: dict[str, GraphNode] = {node.id: node for node in graph.nodes}
 
         # O(E) adjacency indices
         self._out_index: dict[str, list[GraphEdge]] = defaultdict(list)
-        self._in_index:  dict[str, list[GraphEdge]] = defaultdict(list)
+        self._in_index: dict[str, list[GraphEdge]] = defaultdict(list)
 
         for edge in graph.edges:
             self._out_index[edge.source].append(edge)
@@ -265,32 +266,28 @@ class RepositoryRetriever:
         parent_classes = [
             self._nodes[e.target]
             for e in self._out_index.get(class_id, [])
-            if e.relationship == RelationshipType.INHERITS
-            and e.target in self._nodes
+            if e.relationship == RelationshipType.INHERITS and e.target in self._nodes
         ]
 
         # Child classes — incoming INHERITS
         child_classes = [
             self._nodes[e.source]
             for e in self._in_index.get(class_id, [])
-            if e.relationship == RelationshipType.INHERITS
-            and e.source in self._nodes
+            if e.relationship == RelationshipType.INHERITS and e.source in self._nodes
         ]
 
         # Classes this class instantiates — outgoing INSTANTIATES
         instantiates = [
             self._nodes[e.target]
             for e in self._out_index.get(class_id, [])
-            if e.relationship == RelationshipType.INSTANTIATES
-            and e.target in self._nodes
+            if e.relationship == RelationshipType.INSTANTIATES and e.target in self._nodes
         ]
 
         # Classes / functions that instantiate this one — incoming INSTANTIATES
         instantiated_by = [
             self._nodes[e.source]
             for e in self._in_index.get(class_id, [])
-            if e.relationship == RelationshipType.INSTANTIATES
-            and e.source in self._nodes
+            if e.relationship == RelationshipType.INSTANTIATES and e.source in self._nodes
         ]
 
         # Decorators — incoming DECORATES (source may not be a graph node)
@@ -301,13 +298,13 @@ class RepositoryRetriever:
         ]
 
         result.metadata = {
-            "methods":         methods,
-            "file":            file_node,
-            "parent_classes":  parent_classes,
-            "child_classes":   child_classes,
-            "instantiates":    instantiates,
+            "methods": methods,
+            "file": file_node,
+            "parent_classes": parent_classes,
+            "child_classes": child_classes,
+            "instantiates": instantiates,
             "instantiated_by": instantiated_by,
-            "decorators":      decorators,
+            "decorators": decorators,
         }
 
         return result
@@ -334,16 +331,14 @@ class RepositoryRetriever:
         callers = [
             self._nodes[e.source]
             for e in self._in_index.get(node_id, [])
-            if e.relationship == RelationshipType.CALLS
-            and e.source in self._nodes
+            if e.relationship == RelationshipType.CALLS and e.source in self._nodes
         ]
 
         # Callees — outgoing CALLS edges
         callees = [
             self._nodes[e.target]
             for e in self._out_index.get(node_id, [])
-            if e.relationship == RelationshipType.CALLS
-            and e.target in self._nodes
+            if e.relationship == RelationshipType.CALLS and e.target in self._nodes
         ]
 
         # Owning class — incoming CONTAINS from a CLASS node (METHOD only)
@@ -370,15 +365,14 @@ class RepositoryRetriever:
         overridden_by = [
             self._nodes[e.source]
             for e in self._in_index.get(node_id, [])
-            if e.relationship == RelationshipType.OVERRIDES
-            and e.source in self._nodes
+            if e.relationship == RelationshipType.OVERRIDES and e.source in self._nodes
         ]
 
         result.metadata = {
-            "callers":       callers,
-            "callees":       callees,
-            "owning_class":  owning_class,
-            "overrides":     overrides,
+            "callers": callers,
+            "callees": callees,
+            "owning_class": owning_class,
+            "overrides": overrides,
             "overridden_by": overridden_by,
         }
 
@@ -444,10 +438,7 @@ class RepositoryRetriever:
 
         # --- Source code (for FUNCTION/METHOD nodes) ---
         source_code = getattr(node, "source_code", None)
-        if (
-            node_type in (NodeType.FUNCTION, NodeType.METHOD)
-            and source_code
-        ):
+        if node_type in (NodeType.FUNCTION, NodeType.METHOD) and source_code:
             lines.append("Source:")
             for src_line in source_code.splitlines():
                 lines.append(f"  {src_line}")
@@ -456,20 +447,22 @@ class RepositoryRetriever:
         meta = result.metadata
 
         if node_type == NodeType.CLASS:
-            _emit_nodes(lines, "Defined in file",   [meta["file"]] if meta.get("file") else [])
-            _emit_nodes(lines, "Methods",            meta.get("methods", []))
-            _emit_nodes(lines, "Inherits from",      meta.get("parent_classes", []))
-            _emit_nodes(lines, "Subclassed by",      meta.get("child_classes", []))
-            _emit_nodes(lines, "Instantiates",       meta.get("instantiates", []))
-            _emit_nodes(lines, "Instantiated by",    meta.get("instantiated_by", []))
+            _emit_nodes(lines, "Defined in file", [meta["file"]] if meta.get("file") else [])
+            _emit_nodes(lines, "Methods", meta.get("methods", []))
+            _emit_nodes(lines, "Inherits from", meta.get("parent_classes", []))
+            _emit_nodes(lines, "Subclassed by", meta.get("child_classes", []))
+            _emit_nodes(lines, "Instantiates", meta.get("instantiates", []))
+            _emit_nodes(lines, "Instantiated by", meta.get("instantiated_by", []))
             decorators = meta.get("decorators", [])
             if decorators:
                 lines.append(f"Decorators: {', '.join(decorators)}")
 
         elif node_type in (NodeType.FUNCTION, NodeType.METHOD):
-            _emit_nodes(lines, "Owning class", [meta["owning_class"]] if meta.get("owning_class") else [])
-            _emit_nodes(lines, "Callers",      meta.get("callers", []))
-            _emit_nodes(lines, "Calls",        meta.get("callees", []))
+            _emit_nodes(
+                lines, "Owning class", [meta["owning_class"]] if meta.get("owning_class") else []
+            )
+            _emit_nodes(lines, "Callers", meta.get("callers", []))
+            _emit_nodes(lines, "Calls", meta.get("callees", []))
             if meta.get("overrides"):
                 lines.append(f"Overrides: {meta['overrides'].id}")
             _emit_nodes(lines, "Overridden by", meta.get("overridden_by", []))
@@ -491,7 +484,9 @@ class RepositoryRetriever:
         # --- Neighbours summary ---
         neighbours = result.neighbours[:max_neighbours]
         if neighbours:
-            lines.append(f"\nNeighbours ({len(result.neighbours)} total, showing {len(neighbours)}):")
+            lines.append(
+                f"\nNeighbours ({len(result.neighbours)} total, showing {len(neighbours)}):"
+            )
             for n in neighbours:
                 lines.append(f"  [{n.type.value}] {n.id}")
 
@@ -525,8 +520,7 @@ class RepositoryRetriever:
         results = [
             node
             for node in self._nodes.values()
-            if query in node.label.lower()
-            and (node_types is None or node.type in node_types)
+            if query in node.label.lower() and (node_types is None or node.type in node_types)
         ]
         return sorted(results, key=lambda n: (n.type.value, n.label))
 
@@ -661,9 +655,7 @@ class RepositoryRetriever:
         # Initial seeds have 0 hops taken along any edge type.
         # frontier: list of (node_id, hops_by_rel) where hops_by_rel is a
         # dict[RelationshipType, int] — hops taken to reach this node.
-        frontier: list[tuple[str, dict[RelationshipType, int]]] = [
-            (nid, {}) for nid in valid_seeds
-        ]
+        frontier: list[tuple[str, dict[RelationshipType, int]]] = [(nid, {}) for nid in valid_seeds]
 
         # Track which (node_id, rel_type, depth) combinations we've already
         # expanded to avoid redundant BFS work.
@@ -746,10 +738,7 @@ class RepositoryRetriever:
         node = self._nodes.get(node_id)
         if node is None:
             known = sorted(self._nodes.keys())[:10]
-            raise KeyError(
-                f"Node '{node_id}' not found in graph. "
-                f"Sample known IDs: {known}"
-            )
+            raise KeyError(f"Node '{node_id}' not found in graph. Sample known IDs: {known}")
         return node
 
     def _group_edges(self, edges: list[GraphEdge]) -> list[EdgeGroup]:
@@ -783,6 +772,7 @@ class RepositoryRetriever:
 # ---------------------------------------------------------------------------
 # Private text-emission helper
 # ---------------------------------------------------------------------------
+
 
 def _emit_nodes(lines: list[str], label: str, nodes: list[GraphNode]) -> None:
     if not nodes:

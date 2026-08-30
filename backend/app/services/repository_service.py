@@ -10,20 +10,22 @@ from urllib.parse import urlparse
 
 from git import Repo
 
-logger = logging.getLogger(__name__)
+from app.models.pydantic_models import RepositorySummary  # noqa: E402
 
-from app.models.pydantic_models import RepositorySummary
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Security: URL allowlist
 # Prevents SSRF attacks — only well-known public git hosts are allowed.
 # ---------------------------------------------------------------------------
 
-_ALLOWED_CLONE_HOSTS = frozenset({
-    "github.com",
-    "gitlab.com",
-    "bitbucket.org",
-})
+_ALLOWED_CLONE_HOSTS = frozenset(
+    {
+        "github.com",
+        "gitlab.com",
+        "bitbucket.org",
+    }
+)
 
 # Repo name sanitization: only alphanumeric, hyphens, underscores, dots.
 _SAFE_REPO_NAME_RE = re.compile(r"^[A-Za-z0-9._-]+$")
@@ -167,7 +169,7 @@ def _auth_url(repo_url: str) -> str:
     from app.core.config import settings
 
     parsed = urlparse(repo_url)
-    host   = parsed.hostname or ""
+    host = parsed.hostname or ""
 
     if "github.com" in host and settings.GITHUB_TOKEN:
         return _inject_token(repo_url, settings.GITHUB_TOKEN)
@@ -176,11 +178,10 @@ def _auth_url(repo_url: str) -> str:
     if "bitbucket.org" in host and settings.BITBUCKET_TOKEN:
         return _inject_token(repo_url, settings.BITBUCKET_TOKEN)
 
-    return repo_url   # public repo — no token needed
+    return repo_url  # public repo — no token needed
 
 
 class RepositoryService:
-
     EXTENSION_LANGUAGE_MAP = {
         ".py": "Python",
         ".java": "Java",
@@ -205,7 +206,7 @@ class RepositoryService:
         ".json": "JSON",
         ".xml": "XML",
         ".md": "Markdown",
-        ".toml": "TOML"
+        ".toml": "TOML",
     }
 
     EXCLUDED_DIRECTORIES = {
@@ -215,7 +216,7 @@ class RepositoryService:
         ".venv",
         "node_modules",
         ".idea",
-        ".vscode"
+        ".vscode",
     }
 
     SOURCE_CODE_EXTENSIONS = {
@@ -233,51 +234,25 @@ class RepositoryService:
         ".php",
         ".rb",
         ".scala",
-        ".dart"
+        ".dart",
     }
 
-    DOCUMENTATION_EXTENSIONS = {
-        ".md"
-    }
+    DOCUMENTATION_EXTENSIONS = {".md"}
 
-    CONFIGURATION_EXTENSIONS = {
-        ".yaml",
-        ".yml",
-        ".json",
-        ".toml",
-        ".xml"
-    }
+    CONFIGURATION_EXTENSIONS = {".yaml", ".yml", ".json", ".toml", ".xml"}
 
-    ASSET_EXTENSIONS = {
-        ".png",
-        ".jpg",
-        ".jpeg",
-        ".svg",
-        ".gif",
-        ".webp"
-    }
+    ASSET_EXTENSIONS = {".png", ".jpg", ".jpeg", ".svg", ".gif", ".webp"}
 
-    def remove_readonly(
-        self,
-        func,
-        path,
-        _
-    ):
+    def remove_readonly(self, func, path, _):
         """
         Fix Windows permission issues when deleting files.
         """
 
-        os.chmod(
-            path,
-            stat.S_IWRITE
-        )
+        os.chmod(path, stat.S_IWRITE)
 
         func(path)
 
-    def clone_repository(
-        self,
-        repo_url: str
-    ) -> str:
+    def clone_repository(self, repo_url: str) -> str:
         """
         Clone a repository from a public git host to a local path.
 
@@ -329,7 +304,7 @@ class RepositoryService:
                     with existing.remotes.origin.config_writer as cw:
                         cw.set("url", clone_url)
                     existing.remotes.origin.fetch()
-                    local_commit  = existing.head.commit.hexsha
+                    local_commit = existing.head.commit.hexsha
                     remote_commit = existing.remotes.origin.refs[0].commit.hexsha
                     if local_commit == remote_commit:
                         logger.debug("Repository %s is up to date; skipping re-clone.", repo_name)
@@ -341,14 +316,13 @@ class RepositoryService:
                 except Exception as exc:
                     logger.warning(
                         "Could not update existing repo %s (%s); falling back to re-clone.",
-                        repo_name, exc,
+                        repo_name,
+                        exc,
                     )
                     try:
                         shutil.rmtree(local_path, onerror=self.remove_readonly)
                     except Exception as e:
-                        raise Exception(
-                            f"Failed to remove existing repository: {e}"
-                        ) from e
+                        raise Exception(f"Failed to remove existing repository: {e}") from e
 
             # Fresh clone (no existing repo at local_path)
             logger.info("Cloning %s → %s", repo_url, local_path)
@@ -366,11 +340,13 @@ class RepositoryService:
                 )
 
                 if _use_alarm:
+
                     def _timeout_handler(signum, frame):
                         raise TimeoutError(
                             f"Git clone timed out after {_CLONE_TIMEOUT_SECONDS}s. "
                             f"Repository may be too large or network too slow."
                         )
+
                     old_handler = signal.signal(signal.SIGALRM, _timeout_handler)
                     signal.alarm(_CLONE_TIMEOUT_SECONDS)
 
@@ -386,9 +362,7 @@ class RepositoryService:
                     shutil.rmtree(local_path, onerror=self.remove_readonly)
                 raise
             except Exception as e:
-                raise Exception(
-                    f"Failed to clone repository: {e}"
-                ) from e
+                raise Exception(f"Failed to clone repository: {e}") from e
 
             # --- Security: repo size limit ---
             total_size_mb = self._directory_size_mb(local_path)
@@ -412,31 +386,15 @@ class RepositoryService:
                     pass
         return total / (1024 * 1024)
 
-    def detect_framework(
-        self,
-        repo_path: str
-    ) -> str | None:
+    def detect_framework(self, repo_path: str) -> str | None:
 
-        pyproject_path = os.path.join(
-            repo_path,
-            "pyproject.toml"
-        )
+        pyproject_path = os.path.join(repo_path, "pyproject.toml")
 
-        requirements_path = os.path.join(
-            repo_path,
-            "requirements.txt"
-        )
+        requirements_path = os.path.join(repo_path, "requirements.txt")
 
         try:
-
             if os.path.exists(pyproject_path):
-
-                with open(
-                    pyproject_path,
-                    "r",
-                    encoding="utf-8"
-                ) as file:
-
+                with open(pyproject_path, "r", encoding="utf-8") as file:
                     content = file.read().lower()
 
                     if "fastapi" in content:
@@ -449,13 +407,7 @@ class RepositoryService:
                         return "Flask"
 
             if os.path.exists(requirements_path):
-
-                with open(
-                    requirements_path,
-                    "r",
-                    encoding="utf-8"
-                ) as file:
-
+                with open(requirements_path, "r", encoding="utf-8") as file:
                     content = file.read().lower()
 
                     if "fastapi" in content:
@@ -472,24 +424,14 @@ class RepositoryService:
 
         return None
 
-    def classify_repository_type(
-        self,
-        framework: str | None
-    ) -> str:
+    def classify_repository_type(self, framework: str | None) -> str:
 
-        if framework in {
-            "FastAPI",
-            "Django",
-            "Flask"
-        }:
+        if framework in {"FastAPI", "Django", "Flask"}:
             return "Backend API"
 
         return "General Software Project"
 
-    def scan_repository(
-        self,
-        repo_path: str
-    ) -> dict:
+    def scan_repository(self, repo_path: str) -> dict:
 
         total_files = 0
         total_directories = 0
@@ -503,213 +445,96 @@ class RepositoryService:
         top_level_directories = []
 
         for item in os.listdir(repo_path):
+            item_path = os.path.join(repo_path, item)
 
-            item_path = os.path.join(
-                repo_path,
-                item
-            )
-
-            if (
-                os.path.isdir(item_path)
-                and item not in self.EXCLUDED_DIRECTORIES
-            ):
+            if os.path.isdir(item_path) and item not in self.EXCLUDED_DIRECTORIES:
                 top_level_directories.append(item)
 
         for root, dirs, files in os.walk(repo_path):
-
-            dirs[:] = [
-                d
-                for d in dirs
-                if d not in self.EXCLUDED_DIRECTORIES
-            ]
+            dirs[:] = [d for d in dirs if d not in self.EXCLUDED_DIRECTORIES]
 
             total_directories += len(dirs)
 
             for file in files:
-
-                file_path = os.path.join(
-                    root,
-                    file
-                )
+                file_path = os.path.join(root, file)
 
                 try:
-
-                    file_size = os.path.getsize(
-                        file_path
-                    )
+                    file_size = os.path.getsize(file_path)
 
                     total_files += 1
                     repository_size_bytes += file_size
 
-                    relative_path = os.path.relpath(
-                        file_path,
-                        repo_path
-                    )
+                    relative_path = os.path.relpath(file_path, repo_path)
 
-                    largest_files.append(
-                        {
-                            "file": relative_path,
-                            "size_bytes": file_size
-                        }
-                    )
+                    largest_files.append({"file": relative_path, "size_bytes": file_size})
 
-                    extension = (
-                        os.path.splitext(file)[1]
-                        .lower()
-                    )
+                    extension = os.path.splitext(file)[1].lower()
 
                     if not extension:
                         extension = "NO_EXTENSION"
 
-                    extension_distribution[
-                        extension
-                    ] += 1
+                    extension_distribution[extension] += 1
 
-                    if (
-                        extension
-                        in self.EXTENSION_LANGUAGE_MAP
-                    ):
-                        language = (
-                            self
-                            .EXTENSION_LANGUAGE_MAP[
-                                extension
-                            ]
-                        )
+                    if extension in self.EXTENSION_LANGUAGE_MAP:
+                        language = self.EXTENSION_LANGUAGE_MAP[extension]
 
-                        language_distribution[
-                            language
-                        ] += 1
+                        language_distribution[language] += 1
 
-                    if (
-                        extension
-                        in self.SOURCE_CODE_EXTENSIONS
-                    ):
-                        file_category_distribution[
-                            "source_code"
-                        ] += 1
+                    if extension in self.SOURCE_CODE_EXTENSIONS:
+                        file_category_distribution["source_code"] += 1
 
-                    elif (
-                        extension
-                        in self.DOCUMENTATION_EXTENSIONS
-                    ):
-                        file_category_distribution[
-                            "documentation"
-                        ] += 1
+                    elif extension in self.DOCUMENTATION_EXTENSIONS:
+                        file_category_distribution["documentation"] += 1
 
-                    elif (
-                        extension
-                        in self.CONFIGURATION_EXTENSIONS
-                    ):
-                        file_category_distribution[
-                            "configuration"
-                        ] += 1
+                    elif extension in self.CONFIGURATION_EXTENSIONS:
+                        file_category_distribution["configuration"] += 1
 
-                    elif (
-                        extension
-                        in self.ASSET_EXTENSIONS
-                    ):
-                        file_category_distribution[
-                            "assets"
-                        ] += 1
+                    elif extension in self.ASSET_EXTENSIONS:
+                        file_category_distribution["assets"] += 1
 
                     elif "test" in relative_path.lower():
-
-                        file_category_distribution[
-                            "tests"
-                        ] += 1
+                        file_category_distribution["tests"] += 1
 
                     else:
+                        file_category_distribution["other"] += 1
 
-                        file_category_distribution[
-                            "other"
-                        ] += 1
-
-                except (
-                    PermissionError,
-                    FileNotFoundError,
-                    OSError
-                ):
+                except (PermissionError, FileNotFoundError, OSError):
                     continue
 
-        framework = self.detect_framework(
-            repo_path
-        )
+        framework = self.detect_framework(repo_path)
 
-        repository_type = (
-            self.classify_repository_type(
-                framework
-            )
-        )
+        repository_type = self.classify_repository_type(framework)
 
-        largest_files = heapq.nlargest(
-            10,
-            largest_files,
-            key=lambda x: x["size_bytes"]
-        )
+        largest_files = heapq.nlargest(10, largest_files, key=lambda x: x["size_bytes"])
 
         return {
             "total_files": total_files,
             "total_directories": total_directories,
             "repository_size_bytes": repository_size_bytes,
-            "language_distribution": dict(
-                language_distribution
-            ),
-            "file_extension_distribution": dict(
-                extension_distribution
-            ),
-            "file_category_distribution": dict(
-                file_category_distribution
-            ),
-            "top_level_directories": sorted(
-                top_level_directories
-            ),
+            "language_distribution": dict(language_distribution),
+            "file_extension_distribution": dict(extension_distribution),
+            "file_category_distribution": dict(file_category_distribution),
+            "top_level_directories": sorted(top_level_directories),
             "framework": framework,
             "repository_type": repository_type,
-            "largest_files": largest_files
+            "largest_files": largest_files,
         }
 
-    def generate_summary(
-        self,
-        repo_path: str
-    ) -> RepositorySummary:
+    def generate_summary(self, repo_path: str) -> RepositorySummary:
 
-        scan_result = self.scan_repository(
-            repo_path
-        )
+        scan_result = self.scan_repository(repo_path)
 
         return RepositorySummary(
-            repository_name=os.path.basename(
-                repo_path
-            ),
+            repository_name=os.path.basename(repo_path),
             repository_path=repo_path,
-            repository_type=scan_result[
-                "repository_type"
-            ],
-            framework=scan_result[
-                "framework"
-            ],
-            total_files=scan_result[
-                "total_files"
-            ],
-            total_directories=scan_result[
-                "total_directories"
-            ],
-            repository_size_bytes=scan_result[
-                "repository_size_bytes"
-            ],
-            language_distribution=scan_result[
-                "language_distribution"
-            ],
-            file_extension_distribution=scan_result[
-                "file_extension_distribution"
-            ],
-            file_category_distribution=scan_result[
-                "file_category_distribution"
-            ],
-            top_level_directories=scan_result[
-                "top_level_directories"
-            ],
-            largest_files=scan_result[
-                "largest_files"
-            ]
+            repository_type=scan_result["repository_type"],
+            framework=scan_result["framework"],
+            total_files=scan_result["total_files"],
+            total_directories=scan_result["total_directories"],
+            repository_size_bytes=scan_result["repository_size_bytes"],
+            language_distribution=scan_result["language_distribution"],
+            file_extension_distribution=scan_result["file_extension_distribution"],
+            file_category_distribution=scan_result["file_category_distribution"],
+            top_level_directories=scan_result["top_level_directories"],
+            largest_files=scan_result["largest_files"],
         )

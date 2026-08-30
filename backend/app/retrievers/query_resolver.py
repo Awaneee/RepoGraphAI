@@ -155,22 +155,128 @@ from app.models.pydantic_models import (
 # Stop words
 # ===========================================================================
 
-_STOP_WORDS: frozenset[str] = frozenset({
-    "a", "an", "the", "is", "are", "was", "were", "be", "been", "being",
-    "have", "has", "had", "do", "does", "did", "will", "would", "could",
-    "should", "may", "might", "shall", "can", "need", "dare", "ought",
-    "how", "what", "when", "where", "which", "who", "whom", "why",
-    "this", "that", "these", "those", "it", "its",
-    "i", "you", "he", "she", "we", "they", "me", "him", "her", "us", "them",
-    "in", "on", "at", "by", "for", "with", "about", "against", "between",
-    "into", "through", "during", "before", "after", "to", "from", "up",
-    "down", "out", "of", "off", "over", "under", "again", "then", "once",
-    "and", "but", "or", "nor", "so", "yet", "both", "either", "neither",
-    "not", "no", "only", "own", "same", "than", "too", "very",
-    "just", "because", "as", "until", "while", "though", "although",
-    "get", "gets", "got", "getting", "work", "works", "working",
-    "make", "makes", "made", "use", "used", "using", "done", "way", "ways",
-})
+_STOP_WORDS: frozenset[str] = frozenset(
+    {
+        "a",
+        "an",
+        "the",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "have",
+        "has",
+        "had",
+        "do",
+        "does",
+        "did",
+        "will",
+        "would",
+        "could",
+        "should",
+        "may",
+        "might",
+        "shall",
+        "can",
+        "need",
+        "dare",
+        "ought",
+        "how",
+        "what",
+        "when",
+        "where",
+        "which",
+        "who",
+        "whom",
+        "why",
+        "this",
+        "that",
+        "these",
+        "those",
+        "it",
+        "its",
+        "i",
+        "you",
+        "he",
+        "she",
+        "we",
+        "they",
+        "me",
+        "him",
+        "her",
+        "us",
+        "them",
+        "in",
+        "on",
+        "at",
+        "by",
+        "for",
+        "with",
+        "about",
+        "against",
+        "between",
+        "into",
+        "through",
+        "during",
+        "before",
+        "after",
+        "to",
+        "from",
+        "up",
+        "down",
+        "out",
+        "of",
+        "off",
+        "over",
+        "under",
+        "again",
+        "then",
+        "once",
+        "and",
+        "but",
+        "or",
+        "nor",
+        "so",
+        "yet",
+        "both",
+        "either",
+        "neither",
+        "not",
+        "no",
+        "only",
+        "own",
+        "same",
+        "than",
+        "too",
+        "very",
+        "just",
+        "because",
+        "as",
+        "until",
+        "while",
+        "though",
+        "although",
+        "get",
+        "gets",
+        "got",
+        "getting",
+        "work",
+        "works",
+        "working",
+        "make",
+        "makes",
+        "made",
+        "use",
+        "used",
+        "using",
+        "done",
+        "way",
+        "ways",
+    }
+)
 
 
 # ===========================================================================
@@ -179,17 +285,17 @@ _STOP_WORDS: frozenset[str] = frozenset({
 
 _STEM_RULES: list[tuple[str, int]] = [
     ("pping", 3),
-    ("ning",  3),
-    ("ing",   3),
+    ("ning", 3),
+    ("ing", 3),
     ("ation", 3),
     ("ations", 3),
-    ("tion",  3),
+    ("tion", 3),
     ("tions", 3),
-    ("ed",    3),
-    ("er",    3),
-    ("ers",   3),
-    ("es",    3),
-    ("s",     3),
+    ("ed", 3),
+    ("er", 3),
+    ("ers", 3),
+    ("es", 3),
+    ("s", 3),
 ]
 
 
@@ -205,6 +311,7 @@ def _stem(token: str) -> str | None:
 # Intent detection
 # ===========================================================================
 
+
 class IntentCategory(str, Enum):
     """
     Repository-agnostic query intent categories.
@@ -212,23 +319,24 @@ class IntentCategory(str, Enum):
     These describe *what a developer is asking about* in terms of generic
     software-engineering concerns, not in terms of any specific codebase.
     """
-    PARSING          = "parsing"
-    GENERATION       = "generation"
-    RETRIEVAL        = "retrieval"
-    LOADING          = "loading"
-    SAVING           = "saving"
-    VISUALIZATION    = "visualization"
-    STATISTICS       = "statistics"
-    ANALYSIS         = "analysis"
-    AUTHENTICATION   = "authentication"
-    ROUTING          = "routing"
-    VALIDATION       = "validation"
-    EXECUTION        = "execution"
-    CONFIGURATION    = "configuration"
-    TRANSFORMATION   = "transformation"
-    GRAPH_TRAVERSAL  = "graph_traversal"   # v4 NEW: subgraph, walk, traverse
-    AGGREGATION      = "aggregation"       # v4 NEW: count, rank, aggregate, compute
-    UNKNOWN          = "unknown"
+
+    PARSING = "parsing"
+    GENERATION = "generation"
+    RETRIEVAL = "retrieval"
+    LOADING = "loading"
+    SAVING = "saving"
+    VISUALIZATION = "visualization"
+    STATISTICS = "statistics"
+    ANALYSIS = "analysis"
+    AUTHENTICATION = "authentication"
+    ROUTING = "routing"
+    VALIDATION = "validation"
+    EXECUTION = "execution"
+    CONFIGURATION = "configuration"
+    TRANSFORMATION = "transformation"
+    GRAPH_TRAVERSAL = "graph_traversal"  # v4 NEW: subgraph, walk, traverse
+    AGGREGATION = "aggregation"  # v4 NEW: count, rank, aggregate, compute
+    UNKNOWN = "unknown"
 
 
 # ---------------------------------------------------------------------------
@@ -246,90 +354,310 @@ class IntentCategory(str, Enum):
 # ---------------------------------------------------------------------------
 
 _INTENT_LEXICONS: dict[IntentCategory, frozenset[str]] = {
-    IntentCategory.PARSING: frozenset({
-        "parse", "pars", "parsing", "parsed", "parser", "parsers",
-        "read", "decode", "deserialise", "deserialize", "interpret",
-        "tokenize", "tokenise", "lex", "lexer",
-        "extract", "scan", "walk", "traverse",
-    }),
-    IntentCategory.GENERATION: frozenset({
-        "generate", "generat", "generation", "construct",
-        "produce", "render", "emit", "output", "synthesize",
-        "format", "serialise", "serialize", "encode",
-        "write", "compile",
-    }),
-    IntentCategory.RETRIEVAL: frozenset({
-        "retriev", "retrieve", "retrieval", "search", "find", "lookup", "look",
-        "fetch", "query", "filter", "select", "resolve", "index", "scan",
-        # Explicit "get" kept out of stop words context but present here:
-        "getter", "getsource", "getnode",
-    }),
-    IntentCategory.LOADING: frozenset({
-        "load", "import", "read", "open", "ingest", "stream",
-        "fetch", "download", "pull",
-    }),
-    IntentCategory.SAVING: frozenset({
-        "save", "write", "store", "persist", "export", "dump",
-        "upload", "push", "commit", "flush",
-    }),
-    IntentCategory.VISUALIZATION: frozenset({
-        "visualize", "visualis", "plot", "chart", "graph", "draw",
-        "render", "display", "show", "diagram", "view",
-    }),
-    IntentCategory.STATISTICS: frozenset({
-        "statistic", "stats", "metric", "analytics", "analytic",
-        "count", "measure", "aggregate", "histogram", "distribution",
-        "summary", "report", "degree", "hotspot",
-    }),
-    IntentCategory.ANALYSIS: frozenset({
-        "analys", "analyze", "analyse", "inspect", "detect",
-        "identify", "profile", "audit", "check", "scan",
-        "evaluate", "assess", "dependency", "dependencies",
-        "impact", "blast", "radius",
-    }),
-    IntentCategory.AUTHENTICATION: frozenset({
-        "auth", "authenticat", "login", "signin", "logout", "signout",
-        "token", "permission", "authoriz", "authoris", "credential",
-        "session", "oauth", "jwt",
-    }),
-    IntentCategory.ROUTING: frozenset({
-        "route", "router", "endpoint", "url", "path", "dispatch",
-        "handler", "middleware", "request",
-        "register", "registr", "mount", "include", "add_route",
-    }),
-    IntentCategory.VALIDATION: frozenset({
-        "validat", "validate", "check", "verify", "sanitiz", "sanitise",
-        "schema", "constraint", "rule", "enforce",
-    }),
-    IntentCategory.EXECUTION: frozenset({
-        "run", "execut", "invoke", "call", "trigger", "dispatch",
-        "start", "launch", "schedule", "task",
-    }),
-    IntentCategory.CONFIGURATION: frozenset({
-        "config", "configur", "setting", "option", "parameter",
-        "env", "environment", "setup", "init", "initializ",
-    }),
-    IntentCategory.TRANSFORMATION: frozenset({
-        "transform", "convert", "map", "translate", "normalize",
-        "normalise", "clean", "process", "pipeline", "enrich",
-    }),
+    IntentCategory.PARSING: frozenset(
+        {
+            "parse",
+            "pars",
+            "parsing",
+            "parsed",
+            "parser",
+            "parsers",
+            "read",
+            "decode",
+            "deserialise",
+            "deserialize",
+            "interpret",
+            "tokenize",
+            "tokenise",
+            "lex",
+            "lexer",
+            "extract",
+            "scan",
+            "walk",
+            "traverse",
+        }
+    ),
+    IntentCategory.GENERATION: frozenset(
+        {
+            "generate",
+            "generat",
+            "generation",
+            "construct",
+            "produce",
+            "render",
+            "emit",
+            "output",
+            "synthesize",
+            "format",
+            "serialise",
+            "serialize",
+            "encode",
+            "write",
+            "compile",
+        }
+    ),
+    IntentCategory.RETRIEVAL: frozenset(
+        {
+            "retriev",
+            "retrieve",
+            "retrieval",
+            "search",
+            "find",
+            "lookup",
+            "look",
+            "fetch",
+            "query",
+            "filter",
+            "select",
+            "resolve",
+            "index",
+            "scan",
+            # Explicit "get" kept out of stop words context but present here:
+            "getter",
+            "getsource",
+            "getnode",
+        }
+    ),
+    IntentCategory.LOADING: frozenset(
+        {
+            "load",
+            "import",
+            "read",
+            "open",
+            "ingest",
+            "stream",
+            "fetch",
+            "download",
+            "pull",
+        }
+    ),
+    IntentCategory.SAVING: frozenset(
+        {
+            "save",
+            "write",
+            "store",
+            "persist",
+            "export",
+            "dump",
+            "upload",
+            "push",
+            "commit",
+            "flush",
+        }
+    ),
+    IntentCategory.VISUALIZATION: frozenset(
+        {
+            "visualize",
+            "visualis",
+            "plot",
+            "chart",
+            "graph",
+            "draw",
+            "render",
+            "display",
+            "show",
+            "diagram",
+            "view",
+        }
+    ),
+    IntentCategory.STATISTICS: frozenset(
+        {
+            "statistic",
+            "stats",
+            "metric",
+            "analytics",
+            "analytic",
+            "count",
+            "measure",
+            "aggregate",
+            "histogram",
+            "distribution",
+            "summary",
+            "report",
+            "degree",
+            "hotspot",
+        }
+    ),
+    IntentCategory.ANALYSIS: frozenset(
+        {
+            "analys",
+            "analyze",
+            "analyse",
+            "inspect",
+            "detect",
+            "identify",
+            "profile",
+            "audit",
+            "check",
+            "scan",
+            "evaluate",
+            "assess",
+            "dependency",
+            "dependencies",
+            "impact",
+            "blast",
+            "radius",
+        }
+    ),
+    IntentCategory.AUTHENTICATION: frozenset(
+        {
+            "auth",
+            "authenticat",
+            "login",
+            "signin",
+            "logout",
+            "signout",
+            "token",
+            "permission",
+            "authoriz",
+            "authoris",
+            "credential",
+            "session",
+            "oauth",
+            "jwt",
+        }
+    ),
+    IntentCategory.ROUTING: frozenset(
+        {
+            "route",
+            "router",
+            "endpoint",
+            "url",
+            "path",
+            "dispatch",
+            "handler",
+            "middleware",
+            "request",
+            "register",
+            "registr",
+            "mount",
+            "include",
+            "add_route",
+        }
+    ),
+    IntentCategory.VALIDATION: frozenset(
+        {
+            "validat",
+            "validate",
+            "check",
+            "verify",
+            "sanitiz",
+            "sanitise",
+            "schema",
+            "constraint",
+            "rule",
+            "enforce",
+        }
+    ),
+    IntentCategory.EXECUTION: frozenset(
+        {
+            "run",
+            "execut",
+            "invoke",
+            "call",
+            "trigger",
+            "dispatch",
+            "start",
+            "launch",
+            "schedule",
+            "task",
+        }
+    ),
+    IntentCategory.CONFIGURATION: frozenset(
+        {
+            "config",
+            "configur",
+            "setting",
+            "option",
+            "parameter",
+            "env",
+            "environment",
+            "setup",
+            "init",
+            "initializ",
+        }
+    ),
+    IntentCategory.TRANSFORMATION: frozenset(
+        {
+            "transform",
+            "convert",
+            "map",
+            "translate",
+            "normalize",
+            "normalise",
+            "clean",
+            "process",
+            "pipeline",
+            "enrich",
+        }
+    ),
     # v4: Graph traversal — questions about walking/extracting the graph itself
-    IntentCategory.GRAPH_TRAVERSAL: frozenset({
-        "subgraph", "traverse", "traversal", "walk", "visit", "hop",
-        "neighbour", "neighbor", "adjacent", "reachable", "path",
-        "chain", "ancestry", "ancestor", "descendant", "connected",
-        "extract", "expand", "explore", "bfs", "dfs", "breadth", "depth",
-        "spanning", "topology", "topological",
-        "inherit", "inheritance", "hierarchy", "subclass", "parent",
-    }),
+    IntentCategory.GRAPH_TRAVERSAL: frozenset(
+        {
+            "subgraph",
+            "traverse",
+            "traversal",
+            "walk",
+            "visit",
+            "hop",
+            "neighbour",
+            "neighbor",
+            "adjacent",
+            "reachable",
+            "path",
+            "chain",
+            "ancestry",
+            "ancestor",
+            "descendant",
+            "connected",
+            "extract",
+            "expand",
+            "explore",
+            "bfs",
+            "dfs",
+            "breadth",
+            "depth",
+            "spanning",
+            "topology",
+            "topological",
+            "inherit",
+            "inheritance",
+            "hierarchy",
+            "subclass",
+            "parent",
+        }
+    ),
     # v4: Aggregation — questions about computing metrics, rankings, summaries
-    IntentCategory.AGGREGATION: frozenset({
-        "aggregat", "aggregate", "count", "rank", "ranking", "ranked",
-        "compute", "calculat", "calculate", "sum", "total", "average",
-        "mean", "median", "top", "bottom", "most", "least",
-        "distribution", "frequency", "histogram", "percentile",
-        "hotspot", "hotspots", "degree", "centrality",
-    }),
+    IntentCategory.AGGREGATION: frozenset(
+        {
+            "aggregat",
+            "aggregate",
+            "count",
+            "rank",
+            "ranking",
+            "ranked",
+            "compute",
+            "calculat",
+            "calculate",
+            "sum",
+            "total",
+            "average",
+            "mean",
+            "median",
+            "top",
+            "bottom",
+            "most",
+            "least",
+            "distribution",
+            "frequency",
+            "histogram",
+            "percentile",
+            "hotspot",
+            "hotspots",
+            "degree",
+            "centrality",
+        }
+    ),
 }
 
 # ---------------------------------------------------------------------------
@@ -340,49 +668,50 @@ _INTENT_LEXICONS: dict[IntentCategory, frozenset[str]] = {
 # classes, not from data containers.
 # ---------------------------------------------------------------------------
 
-_IMPLEMENTATION_INTENTS: frozenset[IntentCategory] = frozenset({
-    IntentCategory.PARSING,
-    IntentCategory.GENERATION,
-    IntentCategory.RETRIEVAL,
-    IntentCategory.LOADING,
-    IntentCategory.SAVING,
-    IntentCategory.ANALYSIS,
-    IntentCategory.AUTHENTICATION,
-    IntentCategory.ROUTING,
-    IntentCategory.EXECUTION,
-    IntentCategory.TRANSFORMATION,
-    IntentCategory.GRAPH_TRAVERSAL,  # v4: traversal is always an operation
-})
+_IMPLEMENTATION_INTENTS: frozenset[IntentCategory] = frozenset(
+    {
+        IntentCategory.PARSING,
+        IntentCategory.GENERATION,
+        IntentCategory.RETRIEVAL,
+        IntentCategory.LOADING,
+        IntentCategory.SAVING,
+        IntentCategory.ANALYSIS,
+        IntentCategory.AUTHENTICATION,
+        IntentCategory.ROUTING,
+        IntentCategory.EXECUTION,
+        IntentCategory.TRANSFORMATION,
+        IntentCategory.GRAPH_TRAVERSAL,  # v4: traversal is always an operation
+    }
+)
 
 # v4: Intents for which callable-supremacy also fires (extends
 # IMPLEMENTATION_INTENTS to include analytics/aggregation where the
 # "how is X computed" question should surface the computing function,
 # not the result data model).
-_CALLABLE_SUPREMACY_INTENTS: frozenset[IntentCategory] = (
-    _IMPLEMENTATION_INTENTS
-    | frozenset({IntentCategory.STATISTICS, IntentCategory.AGGREGATION})
+_CALLABLE_SUPREMACY_INTENTS: frozenset[IntentCategory] = _IMPLEMENTATION_INTENTS | frozenset(
+    {IntentCategory.STATISTICS, IntentCategory.AGGREGATION}
 )
 
 _INTENT_PREFERRED_TYPES: dict[IntentCategory, frozenset[NodeType]] = {
     # Implementation intents strongly prefer callables and service classes
-    IntentCategory.PARSING:         frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.GENERATION:      frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.RETRIEVAL:       frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.LOADING:         frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.SAVING:          frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.ANALYSIS:        frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.AUTHENTICATION:  frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.ROUTING:         frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.EXECUTION:       frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.TRANSFORMATION:  frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.PARSING: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.GENERATION: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.RETRIEVAL: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.LOADING: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.SAVING: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.ANALYSIS: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.AUTHENTICATION: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.ROUTING: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.EXECUTION: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.TRANSFORMATION: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
     IntentCategory.GRAPH_TRAVERSAL: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
     # Data-oriented intents may legitimately return schema / model nodes,
     # but callables still score at least as well.
-    IntentCategory.STATISTICS:      frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.AGGREGATION:     frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
-    IntentCategory.VALIDATION:      frozenset({NodeType.CLASS, NodeType.METHOD, NodeType.FUNCTION}),
-    IntentCategory.VISUALIZATION:   frozenset({NodeType.FUNCTION, NodeType.METHOD, NodeType.CLASS}),
-    IntentCategory.CONFIGURATION:   frozenset({NodeType.CLASS, NodeType.FUNCTION, NodeType.METHOD}),
+    IntentCategory.STATISTICS: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.AGGREGATION: frozenset({NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS}),
+    IntentCategory.VALIDATION: frozenset({NodeType.CLASS, NodeType.METHOD, NodeType.FUNCTION}),
+    IntentCategory.VISUALIZATION: frozenset({NodeType.FUNCTION, NodeType.METHOD, NodeType.CLASS}),
+    IntentCategory.CONFIGURATION: frozenset({NodeType.CLASS, NodeType.FUNCTION, NodeType.METHOD}),
 }
 
 # ---------------------------------------------------------------------------
@@ -398,62 +727,186 @@ _INTENT_PREFERRED_TYPES: dict[IntentCategory, frozenset[NodeType]] = {
 # ---------------------------------------------------------------------------
 
 _INTENT_VERB_COMPONENTS: dict[IntentCategory, frozenset[str]] = {
-    IntentCategory.RETRIEVAL: frozenset({
-        "fetch", "retrieve", "retriev", "find", "search", "lookup",
-        "resolve", "query", "filter", "select", "get",
-    }),
-    IntentCategory.PARSING: frozenset({
-        "parse", "pars", "read", "decode", "extract", "lex",
-        "tokenize", "tokenise", "scan", "load",
-    }),
-    IntentCategory.GENERATION: frozenset({
-        "generate", "generat", "construct",
-        "produce", "render", "emit", "format", "compile",
-        "serialize", "serialise", "encode",
-    }),
-    IntentCategory.GRAPH_TRAVERSAL: frozenset({
-        "traverse", "walk", "visit", "explore", "expand",
-        "extract", "subgraph", "hop", "reach", "bfs", "dfs",
-    }),
-    IntentCategory.STATISTICS: frozenset({
-        "compute", "calculat", "calculate", "aggregate", "count",
-        "rank", "measure", "summarize", "summarise",
-    }),
-    IntentCategory.AGGREGATION: frozenset({
-        "compute", "calculat", "calculate", "aggregate", "count",
-        "rank", "sum", "total", "average",
-    }),
-    IntentCategory.ANALYSIS: frozenset({
-        "analyze", "analyse", "inspect", "detect", "identify",
-        "evaluate", "assess", "profile",
-    }),
-    IntentCategory.TRANSFORMATION: frozenset({
-        "transform", "convert", "map", "translate", "normalize",
-        "normalise", "clean", "process",
-    }),
-    IntentCategory.LOADING: frozenset({
-        "load", "import", "ingest", "stream", "fetch", "download",
-    }),
-    IntentCategory.SAVING: frozenset({
-        "save", "store", "persist", "export", "dump", "write",
-    }),
-    IntentCategory.EXECUTION: frozenset({
-        "run", "execut", "invoke", "trigger", "dispatch", "launch",
-        "send", "perform", "call", "execute",
-    }),
+    IntentCategory.RETRIEVAL: frozenset(
+        {
+            "fetch",
+            "retrieve",
+            "retriev",
+            "find",
+            "search",
+            "lookup",
+            "resolve",
+            "query",
+            "filter",
+            "select",
+            "get",
+        }
+    ),
+    IntentCategory.PARSING: frozenset(
+        {
+            "parse",
+            "pars",
+            "read",
+            "decode",
+            "extract",
+            "lex",
+            "tokenize",
+            "tokenise",
+            "scan",
+            "load",
+        }
+    ),
+    IntentCategory.GENERATION: frozenset(
+        {
+            "generate",
+            "generat",
+            "construct",
+            "produce",
+            "render",
+            "emit",
+            "format",
+            "compile",
+            "serialize",
+            "serialise",
+            "encode",
+        }
+    ),
+    IntentCategory.GRAPH_TRAVERSAL: frozenset(
+        {
+            "traverse",
+            "walk",
+            "visit",
+            "explore",
+            "expand",
+            "extract",
+            "subgraph",
+            "hop",
+            "reach",
+            "bfs",
+            "dfs",
+        }
+    ),
+    IntentCategory.STATISTICS: frozenset(
+        {
+            "compute",
+            "calculat",
+            "calculate",
+            "aggregate",
+            "count",
+            "rank",
+            "measure",
+            "summarize",
+            "summarise",
+        }
+    ),
+    IntentCategory.AGGREGATION: frozenset(
+        {
+            "compute",
+            "calculat",
+            "calculate",
+            "aggregate",
+            "count",
+            "rank",
+            "sum",
+            "total",
+            "average",
+        }
+    ),
+    IntentCategory.ANALYSIS: frozenset(
+        {
+            "analyze",
+            "analyse",
+            "inspect",
+            "detect",
+            "identify",
+            "evaluate",
+            "assess",
+            "profile",
+        }
+    ),
+    IntentCategory.TRANSFORMATION: frozenset(
+        {
+            "transform",
+            "convert",
+            "map",
+            "translate",
+            "normalize",
+            "normalise",
+            "clean",
+            "process",
+        }
+    ),
+    IntentCategory.LOADING: frozenset(
+        {
+            "load",
+            "import",
+            "ingest",
+            "stream",
+            "fetch",
+            "download",
+        }
+    ),
+    IntentCategory.SAVING: frozenset(
+        {
+            "save",
+            "store",
+            "persist",
+            "export",
+            "dump",
+            "write",
+        }
+    ),
+    IntentCategory.EXECUTION: frozenset(
+        {
+            "run",
+            "execut",
+            "invoke",
+            "trigger",
+            "dispatch",
+            "launch",
+            "send",
+            "perform",
+            "call",
+            "execute",
+        }
+    ),
     # v5: Added routing and authentication verb components
-    IntentCategory.ROUTING: frozenset({
-        "route", "register", "registr", "mount", "include",
-        "handle", "dispatch", "redirect", "forward",
-    }),
-    IntentCategory.AUTHENTICATION: frozenset({
-        "auth", "authenticat", "login", "logout", "verify",
-        "validate", "token", "session",
-    }),
-    IntentCategory.VALIDATION: frozenset({
-        "validat", "validate", "verify", "check", "sanitiz",
-        "enforce", "constrain",
-    }),
+    IntentCategory.ROUTING: frozenset(
+        {
+            "route",
+            "register",
+            "registr",
+            "mount",
+            "include",
+            "handle",
+            "dispatch",
+            "redirect",
+            "forward",
+        }
+    ),
+    IntentCategory.AUTHENTICATION: frozenset(
+        {
+            "auth",
+            "authenticat",
+            "login",
+            "logout",
+            "verify",
+            "validate",
+            "token",
+            "session",
+        }
+    ),
+    IntentCategory.VALIDATION: frozenset(
+        {
+            "validat",
+            "validate",
+            "verify",
+            "check",
+            "sanitiz",
+            "enforce",
+            "constrain",
+        }
+    ),
 }
 
 
@@ -474,9 +927,10 @@ class QueryIntent:
         Multi-word phrases detected in the raw query (v4 NEW).
         Stored for reason-string annotation; not used for scoring directly.
     """
-    categories:             list[IntentCategory]
+
+    categories: list[IntentCategory]
     is_implementation_query: bool
-    phrase_hints:           list[str] = field(default_factory=list)
+    phrase_hints: list[str] = field(default_factory=list)
 
 
 # ===========================================================================
@@ -492,12 +946,14 @@ class QueryIntent:
 # No repository-specific terms.
 # ===========================================================================
 
+
 @dataclass(frozen=True)
 class _PhraseEntry:
     """A recognised multi-word phrase and the intents it implies."""
-    phrase:        str                   # lowercase, space-separated
-    intents:       frozenset[IntentCategory]
-    node_forms:    frozenset[str]        # how this phrase appears in node labels/ids
+
+    phrase: str  # lowercase, space-separated
+    intents: frozenset[IntentCategory]
+    node_forms: frozenset[str]  # how this phrase appears in node labels/ids
 
 
 _PHRASE_TABLE: list[_PhraseEntry] = [
@@ -530,8 +986,9 @@ _PHRASE_TABLE: list[_PhraseEntry] = [
     _PhraseEntry(
         phrase="subgraph extracted",
         intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.RETRIEVAL}),
-        node_forms=frozenset({"extract_subgraph", "subgraph_extract", "get_subgraph",
-                               "build_subgraph", "subgraph"}),
+        node_forms=frozenset(
+            {"extract_subgraph", "subgraph_extract", "get_subgraph", "build_subgraph", "subgraph"}
+        ),
     ),
     _PhraseEntry(
         phrase="import chain",
@@ -572,8 +1029,15 @@ _PHRASE_TABLE: list[_PhraseEntry] = [
     _PhraseEntry(
         phrase="graph statistics",
         intents=frozenset({IntentCategory.STATISTICS, IntentCategory.AGGREGATION}),
-        node_forms=frozenset({"graph_statistics", "graphstatistics", "graph_stats",
-                               "compute_statistics", "calculate_statistics"}),
+        node_forms=frozenset(
+            {
+                "graph_statistics",
+                "graphstatistics",
+                "graph_stats",
+                "compute_statistics",
+                "calculate_statistics",
+            }
+        ),
     ),
     _PhraseEntry(
         phrase="top files",
@@ -607,70 +1071,135 @@ _PHRASE_TABLE: list[_PhraseEntry] = [
     _PhraseEntry(
         phrase="graph generated",
         intents=frozenset({IntentCategory.GENERATION, IntentCategory.GRAPH_TRAVERSAL}),
-        node_forms=frozenset({"generate_graph", "construct_graph", "create_graph",
-                               "make_graph", "build_graph"}),
+        node_forms=frozenset(
+            {"generate_graph", "construct_graph", "create_graph", "make_graph", "build_graph"}
+        ),
     ),
     _PhraseEntry(
         phrase="graph built",
         intents=frozenset({IntentCategory.GENERATION, IntentCategory.GRAPH_TRAVERSAL}),
-        node_forms=frozenset({"build_graph", "construct_graph", "create_graph",
-                               "graph_builder", "graph_build"}),
+        node_forms=frozenset(
+            {"build_graph", "construct_graph", "create_graph", "graph_builder", "graph_build"}
+        ),
     ),
     _PhraseEntry(
         phrase="graph nodes",
         intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.GENERATION}),
-        node_forms=frozenset({"add_node", "create_node", "insert_node",
-                               "build_graph", "construct_graph",
-                               "graph_node", "node_create", "node_add"}),
+        node_forms=frozenset(
+            {
+                "add_node",
+                "create_node",
+                "insert_node",
+                "build_graph",
+                "construct_graph",
+                "graph_node",
+                "node_create",
+                "node_add",
+            }
+        ),
     ),
     _PhraseEntry(
         phrase="graph edges",
         intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.GENERATION}),
-        node_forms=frozenset({"add_edge", "create_edge", "insert_edge",
-                               "build_graph", "construct_graph",
-                               "graph_edge", "edge_create", "edge_add"}),
+        node_forms=frozenset(
+            {
+                "add_edge",
+                "create_edge",
+                "insert_edge",
+                "build_graph",
+                "construct_graph",
+                "graph_edge",
+                "edge_create",
+                "edge_add",
+            }
+        ),
     ),
     # v5.1: Generic inheritance phrases
     _PhraseEntry(
         phrase="inheritance represented",
         intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.ANALYSIS}),
-        node_forms=frozenset({"inherits", "inheritance", "inherit", "class_hierarchy",
-                               "build_class_graph", "class_graph", "hierarchy_graph",
-                               "inheritance_tree"}),
+        node_forms=frozenset(
+            {
+                "inherits",
+                "inheritance",
+                "inherit",
+                "class_hierarchy",
+                "build_class_graph",
+                "class_graph",
+                "hierarchy_graph",
+                "inheritance_tree",
+            }
+        ),
     ),
     _PhraseEntry(
         phrase="inheritance",
         intents=frozenset({IntentCategory.GRAPH_TRAVERSAL, IntentCategory.ANALYSIS}),
-        node_forms=frozenset({"inherits", "inheritance", "inherit",
-                               "class_hierarchy", "hierarchy",
-                               "build_class_graph", "class_graph"}),
+        node_forms=frozenset(
+            {
+                "inherits",
+                "inheritance",
+                "inherit",
+                "class_hierarchy",
+                "hierarchy",
+                "build_class_graph",
+                "class_graph",
+            }
+        ),
     ),
     # v5.1: Generic analytics / hotspot phrases
     _PhraseEntry(
         phrase="hotspots calculated",
         intents=frozenset({IntentCategory.AGGREGATION, IntentCategory.STATISTICS}),
-        node_forms=frozenset({"generate_statistics", "compute_statistics",
-                               "calculate_statistics", "calculate_hotspots",
-                               "compute_hotspots", "hotspot_analysis"}),
+        node_forms=frozenset(
+            {
+                "generate_statistics",
+                "compute_statistics",
+                "calculate_statistics",
+                "calculate_hotspots",
+                "compute_hotspots",
+                "hotspot_analysis",
+            }
+        ),
     ),
     _PhraseEntry(
         phrase="hotspots computed",
         intents=frozenset({IntentCategory.AGGREGATION, IntentCategory.STATISTICS}),
-        node_forms=frozenset({"generate_statistics", "compute_statistics",
-                               "calculate_statistics", "hotspot_analysis"}),
+        node_forms=frozenset(
+            {
+                "generate_statistics",
+                "compute_statistics",
+                "calculate_statistics",
+                "hotspot_analysis",
+            }
+        ),
     ),
     # v5.1: Generic context-building phrases
     _PhraseEntry(
         phrase="context built",
         intents=frozenset({IntentCategory.GENERATION, IntentCategory.RETRIEVAL}),
-        node_forms=frozenset({"build_context", "context_builder", "build_llm_context",
-                               "context_build", "create_context", "make_context"}),
+        node_forms=frozenset(
+            {
+                "build_context",
+                "context_builder",
+                "build_llm_context",
+                "context_build",
+                "create_context",
+                "make_context",
+            }
+        ),
     ),
     _PhraseEntry(
         phrase="context build",
         intents=frozenset({IntentCategory.GENERATION, IntentCategory.RETRIEVAL}),
-        node_forms=frozenset({"build_context", "context_builder", "build_llm_context",
-                               "create_context", "make_context"}),
+        node_forms=frozenset(
+            {
+                "build_context",
+                "context_builder",
+                "build_llm_context",
+                "create_context",
+                "make_context",
+            }
+        ),
     ),
 ]
 
@@ -712,151 +1241,153 @@ def _detect_phrases(question: str) -> list[_PhraseEntry]:
 
 _QUERY_EXPANSION: dict[str, list[str]] = {
     # ---- Parsing / reading ----
-    "parse":      ["read", "load", "decode", "deserialise", "deserialize",
-                   "extract", "scan", "lex", "tokenize"],
-    "pars":       ["read", "load", "extract"],   # stemmed form
-    "read":       ["parse", "load", "open", "ingest"],
-    "load":       ["read", "parse", "open", "fetch", "import"],
-    "decode":     ["parse", "deserialise", "deserialize"],
-
+    "parse": [
+        "read",
+        "load",
+        "decode",
+        "deserialise",
+        "deserialize",
+        "extract",
+        "scan",
+        "lex",
+        "tokenize",
+    ],
+    "pars": ["read", "load", "extract"],  # stemmed form
+    "read": ["parse", "load", "open", "ingest"],
+    "load": ["read", "parse", "open", "fetch", "import"],
+    "decode": ["parse", "deserialise", "deserialize"],
     # ---- Building / creating ----
-    "build":      ["create", "construct", "generate", "make", "produce"],
-    "generate":   ["construct", "create", "produce", "emit"],
-    "generat":    ["construct", "create"],   # stemmed form
-    "create":     ["construct", "build", "make", "produce", "add"],
-    "creat":      ["construct", "build", "make", "add", "instantiate"],  # stemmed 'created'
-    "construct":  ["build", "create", "instantiate"],
-
+    "build": ["create", "construct", "generate", "make", "produce"],
+    "generate": ["construct", "create", "produce", "emit"],
+    "generat": ["construct", "create"],  # stemmed form
+    "create": ["construct", "build", "make", "produce", "add"],
+    "creat": ["construct", "build", "make", "add", "instantiate"],  # stemmed 'created'
+    "construct": ["build", "create", "instantiate"],
     # ---- Retrieval / search ----
-    "retrieve":   ["search", "fetch", "find", "lookup", "query"],
-    "retriev":    ["search", "fetch", "find", "lookup"],   # stemmed form
-    "retrieval":  ["retrieve", "search", "fetch", "find"],
-    "search":     ["find", "retrieve", "lookup", "filter", "query"],
-    "find":       ["search", "retrieve", "lookup", "query"],
-    "fetch":      ["retrieve", "load", "download"],
-    "lookup":     ["find", "search", "retrieve", "resolve"],
-    "query":      ["search", "find", "retrieve", "filter"],
-    "resolve":    ["lookup", "find", "fetch", "retrieve"],
-
+    "retrieve": ["search", "fetch", "find", "lookup", "query"],
+    "retriev": ["search", "fetch", "find", "lookup"],  # stemmed form
+    "retrieval": ["retrieve", "search", "fetch", "find"],
+    "search": ["find", "retrieve", "lookup", "filter", "query"],
+    "find": ["search", "retrieve", "lookup", "query"],
+    "fetch": ["retrieve", "load", "download"],
+    "lookup": ["find", "search", "retrieve", "resolve"],
+    "query": ["search", "find", "retrieve", "filter"],
+    "resolve": ["lookup", "find", "fetch", "retrieve"],
     # ---- Saving / persisting ----
-    "save":       ["store", "write", "persist", "export", "dump"],
-    "saved":      ["save", "store", "persist", "write"],   # past-tense form
-    "sav":        ["save", "store", "persist"],            # stemmed form
-    "store":      ["save", "persist", "write", "cache"],
-    "persist":    ["save", "store", "write"],
-    "write":      ["save", "store", "output", "emit"],
-    "export":     ["write", "save", "dump", "output"],
-
+    "save": ["store", "write", "persist", "export", "dump"],
+    "saved": ["save", "store", "persist", "write"],  # past-tense form
+    "sav": ["save", "store", "persist"],  # stemmed form
+    "store": ["save", "persist", "write", "cache"],
+    "persist": ["save", "store", "write"],
+    "write": ["save", "store", "output", "emit"],
+    "export": ["write", "save", "dump", "output"],
     # ---- Traversal / walking ----
-    "walk":       ["traverse", "visit", "iterate", "scan", "explore"],
-    "traverse":   ["walk", "visit", "iterate", "explore", "subgraph"],
-    "traversal":  ["traverse", "walk", "visit", "explore"],
-    "visit":      ["walk", "traverse", "iterate"],
-    "iterate":    ["walk", "traverse", "loop", "enumerate"],
-    "explore":    ["traverse", "walk", "visit", "expand"],
-    "expand":     ["explore", "traverse", "extend", "grow"],
-    "subgraph":   ["traverse", "extract", "subgraph", "walk", "graph"],
-    "hop":        ["traverse", "walk", "step", "neighbour"],
-    "neighbour":  ["adjacent", "connected", "hop", "neighbor"],
-    "neighbor":   ["adjacent", "connected", "hop", "neighbour"],
-
+    "walk": ["traverse", "visit", "iterate", "scan", "explore"],
+    "traverse": ["walk", "visit", "iterate", "explore", "subgraph"],
+    "traversal": ["traverse", "walk", "visit", "explore"],
+    "visit": ["walk", "traverse", "iterate"],
+    "iterate": ["walk", "traverse", "loop", "enumerate"],
+    "explore": ["traverse", "walk", "visit", "expand"],
+    "expand": ["explore", "traverse", "extend", "grow"],
+    "subgraph": ["traverse", "extract", "subgraph", "walk", "graph"],
+    "hop": ["traverse", "walk", "step", "neighbour"],
+    "neighbour": ["adjacent", "connected", "hop", "neighbor"],
+    "neighbor": ["adjacent", "connected", "hop", "neighbour"],
     # ---- Graph concepts ----
-    "graph":      ["network", "topology", "structure"],
-    "node":       ["vertex", "element", "symbol"],
-    "edge":       ["link", "connection", "relationship", "arc"],
-    "degree":     ["centrality", "connectivity", "hotspot", "rank"],
-    "hotspot":    ["degree", "hub", "central", "connected", "statistic"],
-    "hotspots":   ["degree", "hub", "statistic", "statistics"],
+    "graph": ["network", "topology", "structure"],
+    "node": ["vertex", "element", "symbol"],
+    "edge": ["link", "connection", "relationship", "arc"],
+    "degree": ["centrality", "connectivity", "hotspot", "rank"],
+    "hotspot": ["degree", "hub", "central", "connected", "statistic"],
+    "hotspots": ["degree", "hub", "statistic", "statistics"],
     "dependency": ["import", "require", "depend"],
-    "chain":      ["path", "sequence", "pipeline"],
-    "inheritance": ["inherits", "inherit", "hierarchy", "parent", "subclass",
-                    "class_graph", "class_hierarchy"],
-    "inherit":    ["inheritance", "extends", "subclass", "parent", "class_graph"],
-    "inherits":   ["inheritance", "extends", "subclass", "class_graph"],
-    "represent":  ["model", "encode", "capture", "store", "express"],   # stem of 'represented'
-
+    "chain": ["path", "sequence", "pipeline"],
+    "inheritance": [
+        "inherits",
+        "inherit",
+        "hierarchy",
+        "parent",
+        "subclass",
+        "class_graph",
+        "class_hierarchy",
+    ],
+    "inherit": ["inheritance", "extends", "subclass", "parent", "class_graph"],
+    "inherits": ["inheritance", "extends", "subclass", "class_graph"],
+    "represent": ["model", "encode", "capture", "store", "express"],  # stem of 'represented'
     # ---- Context building ----
-    "context":    ["build", "prompt", "llm", "package"],
-    "llm":        ["context", "prompt", "language", "model"],
-
+    "context": ["build", "prompt", "llm", "package"],
+    "llm": ["context", "prompt", "language", "model"],
     # ---- Analysis ----
-    "analyse":    ["analyze", "inspect", "evaluate", "examine"],
-    "analyze":    ["analyse", "inspect", "evaluate", "examine"],
-    "inspect":    ["analyse", "analyze", "examine", "check"],
-    "evaluate":   ["analyse", "analyze", "assess", "check"],
-    "impact":     ["blast", "radius", "effect", "change"],
-
+    "analyse": ["analyze", "inspect", "evaluate", "examine"],
+    "analyze": ["analyse", "inspect", "evaluate", "examine"],
+    "inspect": ["analyse", "analyze", "examine", "check"],
+    "evaluate": ["analyse", "analyze", "assess", "check"],
+    "impact": ["blast", "radius", "effect", "change"],
     # ---- Transformation ----
-    "transform":  ["convert", "map", "translate", "process", "normalize"],
-    "convert":    ["transform", "map", "translate", "cast"],
-    "normalise":  ["normalize", "transform", "clean", "standardise"],
-    "normalize":  ["normalise", "transform", "clean", "standardize"],
-
+    "transform": ["convert", "map", "translate", "process", "normalize"],
+    "convert": ["transform", "map", "translate", "cast"],
+    "normalise": ["normalize", "transform", "clean", "standardise"],
+    "normalize": ["normalise", "transform", "clean", "standardize"],
     # ---- Rendering / visualization ----
-    "render":     ["display", "draw", "show", "visualize", "emit"],
-    "visualize":  ["render", "display", "draw", "plot", "chart"],
-    "display":    ["render", "show", "visualize", "draw"],
-    "plot":       ["visualize", "chart", "render", "draw"],
-
+    "render": ["display", "draw", "show", "visualize", "emit"],
+    "visualize": ["render", "display", "draw", "plot", "chart"],
+    "display": ["render", "show", "visualize", "draw"],
+    "plot": ["visualize", "chart", "render", "draw"],
     # ---- Validation ----
-    "validate":   ["verify", "check", "sanitize", "enforce", "constrain"],
-    "validat":    ["verify", "check", "sanitize"],   # stemmed form
-    "verify":     ["validate", "check", "ensure", "confirm"],
-
+    "validate": ["verify", "check", "sanitize", "enforce", "constrain"],
+    "validat": ["verify", "check", "sanitize"],  # stemmed form
+    "verify": ["validate", "check", "ensure", "confirm"],
     # ---- Statistics / aggregation ----
     "statistics": ["metrics", "analytics", "stats", "summary", "report"],
-    "statistic":  ["metric", "analytic", "stat"],   # stemmed form
-    "metrics":    ["statistics", "analytics", "stats", "measurements"],
-    "analytics":  ["statistics", "metrics", "analysis", "reporting"],
-    "aggregate":  ["count", "sum", "compute", "calculate", "rank"],
-    "aggregat":   ["count", "sum", "compute", "rank"],   # stemmed form
-    "compute":    ["calculate", "aggregate", "rank", "measure"],
-    "calculat":   ["compute", "aggregate", "measure"],   # stemmed form
-    "rank":       ["sort", "order", "top", "degree", "hotspot"],
-    "count":      ["aggregate", "tally", "measure", "total"],
-
+    "statistic": ["metric", "analytic", "stat"],  # stemmed form
+    "metrics": ["statistics", "analytics", "stats", "measurements"],
+    "analytics": ["statistics", "metrics", "analysis", "reporting"],
+    "aggregate": ["count", "sum", "compute", "calculate", "rank"],
+    "aggregat": ["count", "sum", "compute", "rank"],  # stemmed form
+    "compute": ["calculate", "aggregate", "rank", "measure"],
+    "calculat": ["compute", "aggregate", "measure"],  # stemmed form
+    "rank": ["sort", "order", "top", "degree", "hotspot"],
+    "count": ["aggregate", "tally", "measure", "total"],
     # ---- Repository-level ----
     "repository": ["repo", "codebase", "project", "package"],
-    "repo":       ["repository", "codebase", "project"],
-    "file":       ["module", "source", "script"],
-    "module":     ["file", "package", "component"],
-    "class":      ["type", "model", "schema", "entity"],
-    "function":   ["method", "callable", "procedure", "routine"],
-    "method":     ["function", "callable", "procedure"],
-    "callable":   ["function", "method", "routine"],
-    "extract":    ["retrieve", "fetch", "get", "pull", "subgraph"],
-
+    "repo": ["repository", "codebase", "project"],
+    "file": ["module", "source", "script"],
+    "module": ["file", "package", "component"],
+    "class": ["type", "model", "schema", "entity"],
+    "function": ["method", "callable", "procedure", "routine"],
+    "method": ["function", "callable", "procedure"],
+    "callable": ["function", "method", "routine"],
+    "extract": ["retrieve", "fetch", "get", "pull", "subgraph"],
     # ---- HTTP / web domain ----
-    "response":   ["reply", "output", "return"],
-    "responses":  ["reply", "output", "return"],
-    "respons":    ["reply", "output"],   # stemmed form
-    "route":      ["endpoint", "path", "url", "handler"],
-    "routes":     ["route", "endpoints", "paths", "handlers"],
-    "rout":       ["route", "endpoint", "path", "handler"],   # stemmed form
-    "middleware":  ["interceptor", "filter", "hook"],
-    "request":    ["http", "query", "call", "send"],
-    "requests":   ["http", "query", "send"],
-    "http":       ["request", "send", "connection", "transport"],
-    "session":    ["connection", "client", "pool", "send"],
-    "adapter":    ["transport", "connector", "client", "send"],
-    "redirect":   ["forward", "location", "status"],
-    "register":   ["add", "mount", "attach", "include"],
+    "response": ["reply", "output", "return"],
+    "responses": ["reply", "output", "return"],
+    "respons": ["reply", "output"],  # stemmed form
+    "route": ["endpoint", "path", "url", "handler"],
+    "routes": ["route", "endpoints", "paths", "handlers"],
+    "rout": ["route", "endpoint", "path", "handler"],  # stemmed form
+    "middleware": ["interceptor", "filter", "hook"],
+    "request": ["http", "query", "call", "send"],
+    "requests": ["http", "query", "send"],
+    "http": ["request", "send", "connection", "transport"],
+    "session": ["connection", "client", "pool", "send"],
+    "adapter": ["transport", "connector", "client", "send"],
+    "redirect": ["forward", "location", "status"],
+    "register": ["add", "mount", "attach", "include"],
     "registered": ["added", "mounted", "attached"],
-    "registr":    ["add", "mount", "attach"],   # stemmed form
-    "execut":     ["run", "invoke", "send", "call", "perform", "dispatch"],  # stem of 'executed'
-    "execute":    ["run", "invoke", "send", "call", "perform"],
-    "manag":      ["handle", "control", "maintain", "create"],  # stem of 'managed'
-    "manage":     ["handle", "control", "maintain", "create"],
-    "handl":      ["process", "execute", "run", "dispatch"],    # stem of 'handled'
-    "handle":     ["process", "execute", "run", "dispatch"],
-
+    "registr": ["add", "mount", "attach"],  # stemmed form
+    "execut": ["run", "invoke", "send", "call", "perform", "dispatch"],  # stem of 'executed'
+    "execute": ["run", "invoke", "send", "call", "perform"],
+    "manag": ["handle", "control", "maintain", "create"],  # stem of 'managed'
+    "manage": ["handle", "control", "maintain", "create"],
+    "handl": ["process", "execute", "run", "dispatch"],  # stem of 'handled'
+    "handle": ["process", "execute", "run", "dispatch"],
     # ---- CLI domain ----
-    "command":    ["cmd", "subcommand", "cli"],
-    "argument":   ["arg", "param", "option", "flag"],
-    "arguments":  ["args", "params", "options", "flags"],
-    "callback":   ["handler", "hook", "action"],
-    "option":     ["flag", "param", "argument"],
-    "options":    ["flags", "params", "arguments"],
+    "command": ["cmd", "subcommand", "cli"],
+    "argument": ["arg", "param", "option", "flag"],
+    "arguments": ["args", "params", "options", "flags"],
+    "callback": ["handler", "hook", "action"],
+    "option": ["flag", "param", "argument"],
+    "options": ["flags", "params", "arguments"],
 }
 
 
@@ -873,25 +1404,24 @@ _QUERY_EXPANSION: dict[str, list[str]] = {
 # below) will still catch truly inert DTOs that happen to use those names.
 _DTO_NAME_PATTERNS: list[re.Pattern[str]] = [
     # Prefix patterns — past-participle class names are almost always DTOs.
-    re.compile(r"^parsed",     re.IGNORECASE),
-    re.compile(r"^generated",  re.IGNORECASE),
-    re.compile(r"^fetched",    re.IGNORECASE),
-    re.compile(r"^loaded",     re.IGNORECASE),
-    re.compile(r"^saved",      re.IGNORECASE),
-    re.compile(r"^processed",  re.IGNORECASE),
+    re.compile(r"^parsed", re.IGNORECASE),
+    re.compile(r"^generated", re.IGNORECASE),
+    re.compile(r"^fetched", re.IGNORECASE),
+    re.compile(r"^loaded", re.IGNORECASE),
+    re.compile(r"^saved", re.IGNORECASE),
+    re.compile(r"^processed", re.IGNORECASE),
     re.compile(r"^serialized", re.IGNORECASE),
-    re.compile(r"^raw",        re.IGNORECASE),
-    re.compile(r"^dto",        re.IGNORECASE),
-
+    re.compile(r"^raw", re.IGNORECASE),
+    re.compile(r"^dto", re.IGNORECASE),
     # Suffix patterns  (most common DTO naming conventions across frameworks)
-    re.compile(r"(schema|dto|record)$",                   re.IGNORECASE),
+    re.compile(r"(schema|dto|record)$", re.IGNORECASE),
     re.compile(r"(request|response|reply|payload|body)$", re.IGNORECASE),
-    re.compile(r"(result|output|summary|report)$",        re.IGNORECASE),
-    re.compile(r"(entity|document|row|item|entry)$",      re.IGNORECASE),
+    re.compile(r"(result|output|summary|report)$", re.IGNORECASE),
+    re.compile(r"(entity|document|row|item|entry)$", re.IGNORECASE),
     re.compile(r"(config|settings|options|params|args)$", re.IGNORECASE),
     re.compile(r"(event|message|packet|frame|envelope)$", re.IGNORECASE),
-    re.compile(r"(type|types|kind|enum)$",                re.IGNORECASE),
-    re.compile(r"(degree|metric|stat|stats|counter)$",    re.IGNORECASE),  # v5.1: data holder
+    re.compile(r"(type|types|kind|enum)$", re.IGNORECASE),
+    re.compile(r"(degree|metric|stat|stats|counter)$", re.IGNORECASE),  # v5.1: data holder
     # NOTE: "model" is intentionally excluded from the pattern suffix list
     # because many service/manager classes inherit from BaseModel in
     # Pydantic-based codebases.  The decorator signal handles Pydantic DTOs.
@@ -901,30 +1431,42 @@ _DTO_NAME_PATTERNS: list[re.Pattern[str]] = [
 ]
 
 # Decorator names that indicate a data-container class.
-_DTO_DECORATOR_FRAGMENTS: frozenset[str] = frozenset({
-    "dataclass",    # stdlib
-    "basemodel",    # pydantic
-    "model",        # generic
-    "schema",       # marshmallow / generic
-    "dataclasses",
-    "attr",         # attrs
-    "attrs",
-    "frozen",
-    "namedtuple",
-})
+_DTO_DECORATOR_FRAGMENTS: frozenset[str] = frozenset(
+    {
+        "dataclass",  # stdlib
+        "basemodel",  # pydantic
+        "model",  # generic
+        "schema",  # marshmallow / generic
+        "dataclasses",
+        "attr",  # attrs
+        "attrs",
+        "frozen",
+        "namedtuple",
+    }
+)
 
 # v4: Label fragments that suggest graph *infrastructure* (not DTOs).
 # Nodes whose labels contain these fragments are exempt from DTO penalties
 # because they are domain objects, not passive data containers.
-_GRAPH_INFRA_LABEL_FRAGMENTS: frozenset[str] = frozenset({
-    "graphnode", "graphedge", "repositorygraph",
-    "graph_node", "graph_edge", "repository_graph",
-    # camelCase splits:
-    "graphbuilder", "graph_builder",
-    "nodetype", "node_type",
-    "edgetype", "edge_type",
-    "relationshiptype", "relationship_type",
-})
+_GRAPH_INFRA_LABEL_FRAGMENTS: frozenset[str] = frozenset(
+    {
+        "graphnode",
+        "graphedge",
+        "repositorygraph",
+        "graph_node",
+        "graph_edge",
+        "repository_graph",
+        # camelCase splits:
+        "graphbuilder",
+        "graph_builder",
+        "nodetype",
+        "node_type",
+        "edgetype",
+        "edge_type",
+        "relationshiptype",
+        "relationship_type",
+    }
+)
 
 
 def _is_graph_infrastructure(node: GraphNode) -> bool:
@@ -1034,7 +1576,6 @@ def _looks_like_dto(node: GraphNode, graph: RepositoryGraph, dto_fixes: bool = F
 
         if has_no_implementation_outgoing and has_no_callers and has_no_instantiators:
             return True
-        
 
     return False
 
@@ -1043,25 +1584,25 @@ def _looks_like_dto(node: GraphNode, graph: RepositoryGraph, dto_fixes: bool = F
 # Scoring weights
 # ===========================================================================
 
-_W_EXACT_LABEL:      float = 10.0
-_W_EXACT_ID:         float = 8.0
-_W_PARTIAL_LABEL:    float = 4.0
-_W_PARTIAL_ID:       float = 2.0
-_W_NODE_TYPE_BASE:   float = 3.0    # generic code-node boost (CLASS/FN/METHOD)
-_W_HOTSPOT:          float = 1.0    # per edge
-_W_HOTSPOT_CAP:      float = 5.0
-_W_SNAKE:            float = 3.0    # snake_case component match
-_W_INTENT_TYPE:      float = 6.0    # node type matches intent's preferred types
-_W_CALLABLE_BOOST:   float = 5.0    # extra boost for METHOD/FUNCTION in impl queries
-_W_DTO_PENALTY:      float = -15.0  # node looks like a data container
-_W_PHRASE_MATCH:     float = 7.0    # v4: node label/id matches a recognised phrase
-_W_VERB_LABEL_BOOST: float = 4.0    # v4: node label verb component matches intent
+_W_EXACT_LABEL: float = 10.0
+_W_EXACT_ID: float = 8.0
+_W_PARTIAL_LABEL: float = 4.0
+_W_PARTIAL_ID: float = 2.0
+_W_NODE_TYPE_BASE: float = 3.0  # generic code-node boost (CLASS/FN/METHOD)
+_W_HOTSPOT: float = 1.0  # per edge
+_W_HOTSPOT_CAP: float = 5.0
+_W_SNAKE: float = 3.0  # snake_case component match
+_W_INTENT_TYPE: float = 6.0  # node type matches intent's preferred types
+_W_CALLABLE_BOOST: float = 5.0  # extra boost for METHOD/FUNCTION in impl queries
+_W_DTO_PENALTY: float = -15.0  # node looks like a data container
+_W_PHRASE_MATCH: float = 7.0  # v4: node label/id matches a recognised phrase
+_W_VERB_LABEL_BOOST: float = 4.0  # v4: node label verb component matches intent
 
 # v5: New signals
-_W_MULTI_KW_BONUS:   float = 5.0    # v5: node matches 2+ distinct base keywords
-_W_LABEL_COVERAGE:   float = 3.0    # v5: most snake parts of label match query keywords
-_W_GENERIC_PENALTY:  float = -4.0   # v5: node matches only expanded (not base) keywords
-_W_SUBJECT_PRIORITY: float = 4.0    # v5.2: node matches subject (non-verb) query keyword
+_W_MULTI_KW_BONUS: float = 5.0  # v5: node matches 2+ distinct base keywords
+_W_LABEL_COVERAGE: float = 3.0  # v5: most snake parts of label match query keywords
+_W_GENERIC_PENALTY: float = -4.0  # v5: node matches only expanded (not base) keywords
+_W_SUBJECT_PRIORITY: float = 4.0  # v5.2: node matches subject (non-verb) query keyword
 
 # Why these values?
 # -----------------
@@ -1074,16 +1615,19 @@ _W_SUBJECT_PRIORITY: float = 4.0    # v5.2: node matches subject (non-verb) quer
 # exact-label hit (+10), reflecting that phrase containment is stronger than
 # substring matching but the node may not be the primary implementation site.
 
-_CODE_NODE_TYPES: frozenset[NodeType] = frozenset({
-    NodeType.CLASS,
-    NodeType.FUNCTION,
-    NodeType.METHOD,
-})
+_CODE_NODE_TYPES: frozenset[NodeType] = frozenset(
+    {
+        NodeType.CLASS,
+        NodeType.FUNCTION,
+        NodeType.METHOD,
+    }
+)
 
 
 # ===========================================================================
 # Output models
 # ===========================================================================
+
 
 @dataclass
 class QueryMatch:
@@ -1099,16 +1643,15 @@ class QueryMatch:
                               that fired for this node (keyword matches, intent
                               boosts, penalties, etc.)
     """
-    node_id:   str
+
+    node_id: str
     node_type: NodeType
-    score:     float
-    reason:    str
+    score: float
+    reason: str
 
     def __repr__(self) -> str:
         return (
-            f"QueryMatch(id={self.node_id!r}, "
-            f"type={self.node_type.value}, "
-            f"score={self.score:.2f})"
+            f"QueryMatch(id={self.node_id!r}, type={self.node_type.value}, score={self.score:.2f})"
         )
 
 
@@ -1125,11 +1668,12 @@ class QueryResolutionResult:
     intent            : QueryIntent        — detected intent(s)
     matches           : list[QueryMatch]   — top-K candidates, sorted by score desc
     """
-    query:             str
-    keywords:          list[str]
+
+    query: str
+    keywords: list[str]
     expanded_keywords: list[str]
-    intent:            QueryIntent
-    matches:           list[QueryMatch] = field(default_factory=list)
+    intent: QueryIntent
+    matches: list[QueryMatch] = field(default_factory=list)
 
     def top_node_ids(self, k: int | None = None) -> list[str]:
         """Return the node IDs of the top-k matches."""
@@ -1146,14 +1690,26 @@ class QueryResolutionResult:
         )
 
 
-_DEFINITION_WORDS: frozenset[str] = frozenset({
-    "what", "why", "define", "definition", "purpose", "explain", "meaning", 
-    "represent", "represented", "structure", "structured"
-})
+_DEFINITION_WORDS: frozenset[str] = frozenset(
+    {
+        "what",
+        "why",
+        "define",
+        "definition",
+        "purpose",
+        "explain",
+        "meaning",
+        "represent",
+        "represented",
+        "structure",
+        "structured",
+    }
+)
 
 # ===========================================================================
 # QueryResolver
 # ===========================================================================
+
 
 class QueryResolver:
     """
@@ -1243,9 +1799,7 @@ class QueryResolver:
         else:
             self.ablation_toggles = ablation_toggles
 
-        self._nodes: dict[str, GraphNode] = {
-            node.id: node for node in graph.nodes
-        }
+        self._nodes: dict[str, GraphNode] = {node.id: node for node in graph.nodes}
 
         self._degree: dict[str, int] = defaultdict(int)
         for edge in graph.edges:
@@ -1286,9 +1840,9 @@ class QueryResolver:
         k = top_k if top_k is not None else self._default_top_k
 
         base_keywords = self.extract_keywords(question)
-        intent        = self.detect_intent(base_keywords, question)
-        expanded_kws  = self.expand_keywords(base_keywords)
-        matches       = self.rank_candidates(question, expanded_kws, intent)[:k]
+        intent = self.detect_intent(base_keywords, question)
+        expanded_kws = self.expand_keywords(base_keywords)
+        matches = self.rank_candidates(question, expanded_kws, intent)[:k]
 
         return QueryResolutionResult(
             query=question,
@@ -1334,9 +1888,7 @@ class QueryResolver:
                 for part in camel_parts:
                     _add(part)
 
-            token = raw.lower().translate(
-                str.maketrans("", "", punct_no_underscore)
-            )
+            token = raw.lower().translate(str.maketrans("", "", punct_no_underscore))
             if not token:
                 continue
 
@@ -1456,14 +2008,22 @@ class QueryResolver:
             local_expansion["generate"] = list(set(local_expansion.get("generate", []) + ["build"]))
             local_expansion["generat"] = list(set(local_expansion.get("generat", []) + ["build"]))
         if self.ablation_toggles.get("resolution_resolve", False):
-            local_expansion["resolution"] = list(set(local_expansion.get("resolution", []) + ["resolve"]))
+            local_expansion["resolution"] = list(
+                set(local_expansion.get("resolution", []) + ["resolve"])
+            )
             local_expansion["resolu"] = list(set(local_expansion.get("resolu", []) + ["resolve"]))
         if self.ablation_toggles.get("retrieval_synonyms", False):
-            local_expansion["retrieval"] = list(set(local_expansion.get("retrieval", []) + ["retriever", "retrieve"]))
-            local_expansion["retriever"] = list(set(local_expansion.get("retriever", []) + ["retrieval", "retrieve"]))
+            local_expansion["retrieval"] = list(
+                set(local_expansion.get("retrieval", []) + ["retriever", "retrieve"])
+            )
+            local_expansion["retriever"] = list(
+                set(local_expansion.get("retriever", []) + ["retrieval", "retrieve"])
+            )
         if self.ablation_toggles.get("symbol_candidate", False):
             local_expansion["symbol"] = list(set(local_expansion.get("symbol", []) + ["candidate"]))
-            local_expansion["symbols"] = list(set(local_expansion.get("symbols", []) + ["candidate"]))
+            local_expansion["symbols"] = list(
+                set(local_expansion.get("symbols", []) + ["candidate"])
+            )
 
         for kw in base_keywords:
             for expanded in local_expansion.get(kw, []):
@@ -1478,7 +2038,9 @@ class QueryResolver:
     def _precompute_dto_status(self) -> None:
         """Precompute DTO status, taking exceptions and propagation into account."""
         self._is_dto = {
-            node_id: _looks_like_dto(node, self._graph, dto_fixes=self.ablation_toggles.get("dto_fixes", False))
+            node_id: _looks_like_dto(
+                node, self._graph, dto_fixes=self.ablation_toggles.get("dto_fixes", False)
+            )
             for node_id, node in self._nodes.items()
         }
 
@@ -1519,7 +2081,9 @@ class QueryResolver:
                         ancestors = get_ancestors(node_id, set())
                         for ancestor_id in ancestors:
                             ancestor_node = self._nodes.get(ancestor_id)
-                            if ancestor_node and ("Exception" in ancestor_node.label or "Error" in ancestor_node.label):
+                            if ancestor_node and (
+                                "Exception" in ancestor_node.label or "Error" in ancestor_node.label
+                            ):
                                 is_exc = True
                                 break
                 self._is_exception[node_id] = is_exc
@@ -1542,32 +2106,38 @@ class QueryResolver:
         """Return True if the node's entity name is explicitly mentioned in the query."""
         q_lower = question.lower()
         label_lower = node.label.lower()
-        
-        q_clean = re.sub(r'[^a-zA-Z0-9]', '', q_lower)
-        label_clean = re.sub(r'[^a-zA-Z0-9]', '', label_lower)
-        
+
+        q_clean = re.sub(r"[^a-zA-Z0-9]", "", q_lower)
+        label_clean = re.sub(r"[^a-zA-Z0-9]", "", label_lower)
+
         if node.type == NodeType.CLASS or node.type == NodeType.FUNCTION:
             if label_clean in q_clean:
                 return True
             label_parts = _split_camel_case(node.label)
             if label_parts and all(p.lower() in keywords_set for p in label_parts):
                 return True
-                
+
         elif node.type == NodeType.METHOD:
             parts = node.id.split(".")
             if len(parts) == 2:
                 cls_name, method_name = parts
                 cls_parts = [p.lower() for p in _split_camel_case(cls_name)]
-                method_parts = [p.lower() for p in _snake_parts(method_name) if p not in _STOP_WORDS]
+                method_parts = [
+                    p.lower() for p in _snake_parts(method_name) if p not in _STOP_WORDS
+                ]
                 if not method_parts:
                     method_parts = [method_name.lower()]
-                
-                cls_mentioned = all(p in keywords_set for p in cls_parts) or cls_name.lower() in q_lower
-                method_mentioned = all(p in keywords_set for p in method_parts) or method_name.lower() in q_lower
-                
+
+                cls_mentioned = (
+                    all(p in keywords_set for p in cls_parts) or cls_name.lower() in q_lower
+                )
+                method_mentioned = (
+                    all(p in keywords_set for p in method_parts) or method_name.lower() in q_lower
+                )
+
                 if cls_mentioned and method_mentioned:
                     return True
-                    
+
         return False
 
     # ------------------------------------------------------------------
@@ -1605,18 +2175,18 @@ class QueryResolver:
         """
         if keywords is None:
             base_kws = self.extract_keywords(question)
-            intent   = self.detect_intent(base_kws, question)
+            intent = self.detect_intent(base_kws, question)
             keywords = self.expand_keywords(base_kws)
 
         if intent is None:
             base_kws = self.extract_keywords(question)
-            intent   = self.detect_intent(base_kws, question)
+            intent = self.detect_intent(base_kws, question)
 
         if not keywords:
             return []
 
-        scores:  dict[str, float]      = defaultdict(float)
-        reasons: dict[str, list[str]]  = defaultdict(list)
+        scores: dict[str, float] = defaultdict(float)
+        reasons: dict[str, list[str]] = defaultdict(list)
 
         base_kws_set: set[str] = set(self.extract_keywords(question))
 
@@ -1646,7 +2216,10 @@ class QueryResolver:
         for cat in intent.categories:
             vset = _INTENT_VERB_COMPONENTS.get(cat)
             if vset:
-                if self.ablation_toggles.get("verb_lexicon_cleanup", False) and cat == IntentCategory.AUTHENTICATION:
+                if (
+                    self.ablation_toggles.get("verb_lexicon_cleanup", False)
+                    and cat == IntentCategory.AUTHENTICATION
+                ):
                     vset = frozenset(vset - {"session"})
                 active_verb_sets.append(vset)
 
@@ -1660,7 +2233,7 @@ class QueryResolver:
 
             for node_id, node in self._nodes.items():
                 label_lower = node.label.lower()
-                id_lower    = node.id.lower()
+                id_lower = node.id.lower()
 
                 matched_this_kw = False
 
@@ -1677,24 +2250,18 @@ class QueryResolver:
                 else:
                     if kw_lower in label_lower:
                         scores[node_id] += _W_PARTIAL_LABEL
-                        reasons[node_id].append(
-                            f"partial label {kw_tag} +{_W_PARTIAL_LABEL:.0f}"
-                        )
+                        reasons[node_id].append(f"partial label {kw_tag} +{_W_PARTIAL_LABEL:.0f}")
                         matched_this_kw = True
 
                     if kw_lower in id_lower:
                         scores[node_id] += _W_PARTIAL_ID
-                        reasons[node_id].append(
-                            f"partial id {kw_tag} +{_W_PARTIAL_ID:.0f}"
-                        )
+                        reasons[node_id].append(f"partial id {kw_tag} +{_W_PARTIAL_ID:.0f}")
                         matched_this_kw = True
 
                     parts = snake_parts_cache.get(node_id, [])
                     if kw_lower in parts:
                         scores[node_id] += _W_SNAKE
-                        reasons[node_id].append(
-                            f"snake component {kw_tag} +{_W_SNAKE:.0f}"
-                        )
+                        reasons[node_id].append(f"snake component {kw_tag} +{_W_SNAKE:.0f}")
                         matched_this_kw = True
 
                 # v5: track base keyword coverage
@@ -1724,31 +2291,56 @@ class QueryResolver:
             # File/module penalty
             if self.ablation_toggles.get("file_module_penalty", False):
                 if node.type in (NodeType.FILE, NodeType.MODULE):
-                    file_keywords = {"file", "files", "module", "modules", "path", "paths", "folder", "directory"}
+                    file_keywords = {
+                        "file",
+                        "files",
+                        "module",
+                        "modules",
+                        "path",
+                        "paths",
+                        "folder",
+                        "directory",
+                    }
                     if not (base_kws_set & file_keywords):
                         non_file_intents = {
-                            IntentCategory.PARSING, IntentCategory.GENERATION, IntentCategory.RETRIEVAL,
-                            IntentCategory.EXECUTION, IntentCategory.AUTHENTICATION, IntentCategory.ROUTING,
-                            IntentCategory.VALIDATION, IntentCategory.TRANSFORMATION, IntentCategory.GRAPH_TRAVERSAL,
-                            IntentCategory.STATISTICS, IntentCategory.AGGREGATION, IntentCategory.ANALYSIS,
+                            IntentCategory.PARSING,
+                            IntentCategory.GENERATION,
+                            IntentCategory.RETRIEVAL,
+                            IntentCategory.EXECUTION,
+                            IntentCategory.AUTHENTICATION,
+                            IntentCategory.ROUTING,
+                            IntentCategory.VALIDATION,
+                            IntentCategory.TRANSFORMATION,
+                            IntentCategory.GRAPH_TRAVERSAL,
+                            IntentCategory.STATISTICS,
+                            IntentCategory.AGGREGATION,
+                            IntentCategory.ANALYSIS,
                             IntentCategory.UNKNOWN,  # also penalise when intent not detected
                         }
                         if any(c in non_file_intents for c in intent.categories):
                             scores[node_id] -= 12.0
                             reasons[node_id].append("file/module-penalty (intent-aware) -12")
             else:
-                if (
-                    intent.is_implementation_query
-                    and node.type in (NodeType.FILE, NodeType.MODULE)
-                ):
+                if intent.is_implementation_query and node.type in (NodeType.FILE, NodeType.MODULE):
                     scores[node_id] -= 8.0
                     reasons[node_id].append("file/module-penalty (impl query) -8")
 
             # Intent-aware visualization penalty
             if self.ablation_toggles.get("visualization_penalty", False):
                 if not (intent.categories and intent.categories[0] == IntentCategory.VISUALIZATION):
-                    vis_lexicon = {"visualize", "visualis", "plot", "chart", "draw", "diagram", "visualizer", "visualiser"}
-                    node_label_parts_lower = {p.lower() for p in self._label_parts.get(node_id, frozenset())}
+                    vis_lexicon = {
+                        "visualize",
+                        "visualis",
+                        "plot",
+                        "chart",
+                        "draw",
+                        "diagram",
+                        "visualizer",
+                        "visualiser",
+                    }
+                    node_label_parts_lower = {
+                        p.lower() for p in self._label_parts.get(node_id, frozenset())
+                    }
                     if node_label_parts_lower & vis_lexicon:
                         scores[node_id] -= 4.0
                         reasons[node_id].append("visualization-demotion-penalty -4")
@@ -1764,7 +2356,9 @@ class QueryResolver:
                     reasons[node_id].append("private-penalty -4")
                 elif "." in node_id:
                     parts = node_id.split(".")
-                    if any(part.startswith("_") and not part.startswith("__") for part in parts[:-1]):
+                    if any(
+                        part.startswith("_") and not part.startswith("__") for part in parts[:-1]
+                    ):
                         scores[node_id] -= 4.0
                         reasons[node_id].append("private-class-method-penalty -4")
 
@@ -1776,9 +2370,9 @@ class QueryResolver:
                 )
 
             # Callable supremacy boost (v4: extended to STATISTICS + AGGREGATION)
-            if (
-                any(c in _CALLABLE_SUPREMACY_INTENTS for c in intent.categories)
-                and node.type in (NodeType.METHOD, NodeType.FUNCTION)
+            if any(c in _CALLABLE_SUPREMACY_INTENTS for c in intent.categories) and node.type in (
+                NodeType.METHOD,
+                NodeType.FUNCTION,
             ):
                 scores[node_id] += _W_CALLABLE_BOOST
                 reasons[node_id].append(
@@ -1797,7 +2391,9 @@ class QueryResolver:
             if node.type in (NodeType.METHOD, NodeType.FUNCTION, NodeType.CLASS):
                 node_label_parts = self._label_parts.get(node_id, frozenset())
                 # Collect all verb tokens across all active verb sets
-                all_active_verbs: frozenset[str] = frozenset().union(*active_verb_sets) if active_verb_sets else frozenset()
+                all_active_verbs: frozenset[str] = (
+                    frozenset().union(*active_verb_sets) if active_verb_sets else frozenset()
+                )
                 # Node's base hits that are NOT verb tokens = subject hits
                 node_base_hits = base_kw_hits.get(node_id, set())
                 has_subject_hit = bool(node_base_hits - all_active_verbs)
@@ -1816,15 +2412,14 @@ class QueryResolver:
             # a recognised phrase from the query.
             if phrase_matches:
                 label_lower = node.label.lower()
-                id_lower    = node.id.lower()
+                id_lower = node.id.lower()
                 for entry in phrase_matches:
                     for form in entry.node_forms:
                         form_lower = form.lower()
                         if form_lower in label_lower or form_lower in id_lower:
                             scores[node_id] += _W_PHRASE_MATCH
                             reasons[node_id].append(
-                                f"phrase-match '{entry.phrase}' ({form})"
-                                f" +{_W_PHRASE_MATCH:.0f}"
+                                f"phrase-match '{entry.phrase}' ({form}) +{_W_PHRASE_MATCH:.0f}"
                             )
                             break  # one phrase-match boost per phrase per node
 
@@ -1833,9 +2428,7 @@ class QueryResolver:
             hotspot_bonus = min(degree * _W_HOTSPOT, _W_HOTSPOT_CAP)
             if hotspot_bonus > 0:
                 scores[node_id] += hotspot_bonus
-                reasons[node_id].append(
-                    f"degree={degree} hotspot +{hotspot_bonus:.1f}"
-                )
+                reasons[node_id].append(f"degree={degree} hotspot +{hotspot_bonus:.1f}")
 
             # DTO penalty
             is_dto = self._is_dto.get(node_id, False)
@@ -1844,16 +2437,20 @@ class QueryResolver:
                     pass
                 elif self.ablation_toggles.get("adaptive_dto_penalty", True):
                     penalty = _W_DTO_PENALTY
-                    words = set(re.sub(r'[^a-zA-Z\s]', '', question.lower()).split())
+                    words = set(re.sub(r"[^a-zA-Z\s]", "", question.lower()).split())
                     is_def_query = bool(words & _DEFINITION_WORDS)
                     mentioned = self._is_entity_mentioned(node, question, base_kws_set)
                     if mentioned:
                         penalty = 0.0
-                        reasons[node_id].append("dto-penalty-waived (entity explicitly mentioned) +0")
+                        reasons[node_id].append(
+                            "dto-penalty-waived (entity explicitly mentioned) +0"
+                        )
                     elif is_def_query:
                         penalty *= 0.33
                         scores[node_id] += penalty
-                        reasons[node_id].append(f"dto-penalty-softened (definition query) {penalty:.1f}")
+                        reasons[node_id].append(
+                            f"dto-penalty-softened (definition query) {penalty:.1f}"
+                        )
                     else:
                         if intent.is_implementation_query:
                             scores[node_id] += penalty
@@ -1891,7 +2488,9 @@ class QueryResolver:
                     frozenset().union(*active_verb_sets) if active_verb_sets else frozenset()
                 )
                 node_base_hits_for_priority = base_kw_hits.get(node_id, set())
-                subject_hits_for_priority = node_base_hits_for_priority - all_active_verbs_for_priority
+                subject_hits_for_priority = (
+                    node_base_hits_for_priority - all_active_verbs_for_priority
+                )
                 if subject_hits_for_priority:
                     scores[node_id] += _W_SUBJECT_PRIORITY
                     reasons[node_id].append(
@@ -1907,8 +2506,7 @@ class QueryResolver:
                 content_parts = [p for p in snake_parts if p not in _STOP_WORDS and len(p) >= 3]
                 if content_parts:
                     matched_parts = sum(
-                        1 for p in content_parts
-                        if any(p in kw or kw in p for kw in base_kws_set)
+                        1 for p in content_parts if any(p in kw or kw in p for kw in base_kws_set)
                     )
                     coverage = matched_parts / len(content_parts)
                     if coverage >= 0.67:  # most parts match
@@ -1931,12 +2529,14 @@ class QueryResolver:
         for node_id, score in scores.items():
             node = self._nodes[node_id]
             reason_str = "; ".join(dict.fromkeys(reasons[node_id]))
-            matches.append(QueryMatch(
-                node_id=node_id,
-                node_type=node.type,
-                score=round(score, 4),
-                reason=reason_str,
-            ))
+            matches.append(
+                QueryMatch(
+                    node_id=node_id,
+                    node_type=node.type,
+                    score=round(score, 4),
+                    reason=reason_str,
+                )
+            )
 
         matches.sort(key=lambda m: (-m.score, m.node_id))
         return matches
@@ -1968,7 +2568,7 @@ class QueryResolver:
                 match_sign = re.search(r"([-+]\d+(?:\.\d+)?)$", part)
                 if match_sign:
                     val = match_sign.group(1)
-                    desc = part[:match_sign.start()].strip()
+                    desc = part[: match_sign.start()].strip()
                     lines.append(f"{val:>4} {desc}")
                 else:
                     lines.append(f"     {part}")
@@ -1978,6 +2578,7 @@ class QueryResolver:
 # ===========================================================================
 # Private helpers
 # ===========================================================================
+
 
 def _split_camel_case(text: str) -> list[str]:
     """

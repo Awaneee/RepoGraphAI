@@ -13,8 +13,6 @@ from __future__ import annotations
 
 import logging
 import os
-
-import os
 import time
 
 from fastapi import FastAPI, Request
@@ -66,6 +64,7 @@ app.include_router(router)
 # Observability middleware — structured per-request logging
 # ---------------------------------------------------------------------------
 
+
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     """
@@ -77,17 +76,21 @@ async def log_requests(request: Request, call_next):
     Retrieval metadata (intent, node count, etc.) is logged separately inside
     the endpoint handlers via the graphrag_engine module.
     """
-    start   = time.perf_counter()
-    method  = request.method
-    path    = request.url.path
-    client  = request.client.host if request.client else "unknown"
+    start = time.perf_counter()
+    method = request.method
+    path = request.url.path
+    client = request.client.host if request.client else "unknown"
 
     response = await call_next(request)
 
     elapsed_ms = int((time.perf_counter() - start) * 1000)
     logger.info(
         "%s %s %d %dms ip=%s",
-        method, path, response.status_code, elapsed_ms, client,
+        method,
+        path,
+        response.status_code,
+        elapsed_ms,
+        client,
     )
     return response
 

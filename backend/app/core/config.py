@@ -161,9 +161,7 @@ class Settings(BaseSettings):
     def validate_llm_provider(cls, v: str) -> str:
         allowed = {"anthropic", "gemini"}
         if v.lower() not in allowed:
-            raise ValueError(
-                f"DEFAULT_LLM_PROVIDER must be one of {sorted(allowed)}, got {v!r}"
-            )
+            raise ValueError(f"DEFAULT_LLM_PROVIDER must be one of {sorted(allowed)}, got {v!r}")
         return v.lower()
 
 

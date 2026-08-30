@@ -20,10 +20,7 @@ from app.models.pydantic_models import (
 
 
 def compute_pagerank(
-    node_ids: list[str],
-    edges: list[GraphEdge],
-    max_iter: int = 30,
-    d: float = 0.85
+    node_ids: list[str], edges: list[GraphEdge], max_iter: int = 30, d: float = 0.85
 ) -> dict[str, float]:
     """
     Compute PageRank scores deterministically using power iteration.
@@ -35,7 +32,7 @@ def compute_pagerank(
 
     # Initialize pagerank values uniformly
     pr = {nid: 1.0 / N for nid in node_ids}
-    
+
     # Adjacency structures
     out_degree = {nid: 0 for nid in node_ids}
     incoming_links = {nid: [] for nid in node_ids}
@@ -57,12 +54,13 @@ def compute_pagerank(
             for src in incoming_links[nid]:
                 if out_degree[src] > 0:
                     rank_sum += pr[src] / out_degree[src]
-            
+
             next_pr[nid] = (1.0 - d) / N + d * (rank_sum + dangling_sum / N)
-        
+
         pr = next_pr
 
     return pr
+
 
 def is_test_node(node: GraphNode) -> bool:
     """Check if the node is part of test code."""
@@ -71,19 +69,20 @@ def is_test_node(node: GraphNode) -> bool:
         # Check if node id looks like test
         lower_id = node.id.lower()
         return "test" in lower_id or "conftest" in lower_id
-    
+
     normalized_path = file_path.replace("\\", "/").lower()
     path_parts = normalized_path.split("/")
-    
+
     # Check if 'tests' is a directory in the path, or file starts with 'test_'
     if "tests" in path_parts or "test" in path_parts:
         return True
-    
+
     filename = os.path.basename(normalized_path)
     if filename.startswith("test_") or filename.startswith("conftest"):
         return True
-        
+
     return False
+
 
 def is_stable_public_symbol(node: GraphNode) -> bool:
     """
@@ -116,9 +115,20 @@ def is_stable_public_symbol(node: GraphNode) -> bool:
 
     # Filter out common helper/utility/temporary keyword suffixes or names
     generic_patterns = [
-        r"^helper$", r"^helpers$", r"^util$", r"^utils$", r"^wrapper$", r"^wrappers$",
-        r"^temp$", r"^tmp$", r"^dummy$", r"^mock$", r"^test$", r"^tests$",
-        r"^deprecated$", r"^experimental$"
+        r"^helper$",
+        r"^helpers$",
+        r"^util$",
+        r"^utils$",
+        r"^wrapper$",
+        r"^wrappers$",
+        r"^temp$",
+        r"^tmp$",
+        r"^dummy$",
+        r"^mock$",
+        r"^test$",
+        r"^tests$",
+        r"^deprecated$",
+        r"^experimental$",
     ]
     lower_label = label.lower()
     for pattern in generic_patterns:
@@ -132,6 +142,7 @@ def is_stable_public_symbol(node: GraphNode) -> bool:
 
     return True
 
+
 def analyze_graph_importance(graph: RepositoryGraph) -> dict[str, dict[str, float]]:
     """
     Calculate graph-derived importance metrics for every node in the graph.
@@ -143,7 +154,7 @@ def analyze_graph_importance(graph: RepositoryGraph) -> dict[str, dict[str, floa
       - reference_count: incoming calls, inherits, instantiates, or imports
     """
     node_ids = [node.id for node in graph.nodes]
-    
+
     # Adjacency count structures
     in_edges = {nid: 0 for nid in node_ids}
     out_edges = {nid: 0 for nid in node_ids}
@@ -154,7 +165,7 @@ def analyze_graph_importance(graph: RepositoryGraph) -> dict[str, dict[str, floa
         RelationshipType.CALLS,
         RelationshipType.INHERITS,
         RelationshipType.INSTANTIATES,
-        RelationshipType.IMPORTS
+        RelationshipType.IMPORTS,
     }
 
     for edge in graph.edges:
@@ -178,7 +189,7 @@ def analyze_graph_importance(graph: RepositoryGraph) -> dict[str, dict[str, floa
             "in_degree": float(in_d),
             "out_degree": float(out_d),
             "pagerank": pr_scores.get(nid, 0.0),
-            "reference_count": float(ref_count[nid])
+            "reference_count": float(ref_count[nid]),
         }
 
     return metrics

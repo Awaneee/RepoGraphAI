@@ -62,14 +62,14 @@ from typing import TYPE_CHECKING
 
 logger = logging.getLogger(__name__)
 
-import matplotlib
+import matplotlib  # noqa: E402
 
-matplotlib.use("Agg")                           # headless — no display needed
-import matplotlib.patches as mpatches
-import matplotlib.pyplot as plt
-import networkx as nx
+matplotlib.use("Agg")  # headless — no display needed
+import matplotlib.patches as mpatches  # noqa: E402
+import matplotlib.pyplot as plt  # noqa: E402
+import networkx as nx  # noqa: E402
 
-from app.models.pydantic_models import (
+from app.models.pydantic_models import (  # noqa: E402
     NodeType,
     RelationshipType,
     RepositoryGraph,
@@ -84,21 +84,21 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 
 _NODE_COLOURS: dict[NodeType, str] = {
-    NodeType.FILE:     "#4A90D9",
-    NodeType.MODULE:   "#7ED321",
-    NodeType.CLASS:    "#F5A623",
+    NodeType.FILE: "#4A90D9",
+    NodeType.MODULE: "#7ED321",
+    NodeType.CLASS: "#F5A623",
     NodeType.FUNCTION: "#9B59B6",
-    NodeType.METHOD:   "#E74C3C",
+    NodeType.METHOD: "#E74C3C",
 }
 
 _EDGE_COLOURS: dict[RelationshipType, str] = {
-    RelationshipType.IMPORTS:      "#7ED321",
-    RelationshipType.CONTAINS:     "#4A90D9",
-    RelationshipType.INHERITS:     "#E67E22",
+    RelationshipType.IMPORTS: "#7ED321",
+    RelationshipType.CONTAINS: "#4A90D9",
+    RelationshipType.INHERITS: "#E67E22",
     RelationshipType.INSTANTIATES: "#9B59B6",
-    RelationshipType.DECORATES:    "#1ABC9C",
-    RelationshipType.CALLS:        "#E74C3C",
-    RelationshipType.OVERRIDES:    "#F39C12",
+    RelationshipType.DECORATES: "#1ABC9C",
+    RelationshipType.CALLS: "#E74C3C",
+    RelationshipType.OVERRIDES: "#F39C12",
 }
 
 _DEFAULT_NODE_COLOUR = "#95A5A6"
@@ -108,6 +108,7 @@ _DEFAULT_EDGE_COLOUR = "#BDC3C7"
 # ---------------------------------------------------------------------------
 # Layout helpers
 # ---------------------------------------------------------------------------
+
 
 def _best_layout(
     G: nx.DiGraph,
@@ -139,6 +140,7 @@ def _best_layout(
 # ---------------------------------------------------------------------------
 # Core rendering routine
 # ---------------------------------------------------------------------------
+
 
 def _render_graph(
     view: RepositoryGraph,
@@ -208,10 +210,7 @@ def _render_graph(
         node_sizes.append(node_size_base + deg * 60)
 
     # Labels — use the short label stored in the node, not the full ID
-    labels: dict[str, str] = {
-        node.id: node.label
-        for node in view.nodes
-    }
+    labels: dict[str, str] = {node.id: node.label for node in view.nodes}
     # Also add decorator-source nodes that have no GraphNode entry
     for node_id in G.nodes():
         if node_id not in labels:
@@ -263,26 +262,18 @@ def _render_graph(
     # ---------------------------------------------------------------
     # Legend — node types present in this view
     # ---------------------------------------------------------------
-    present_node_types: set[NodeType] = {
-        ntype for ntype in node_type_map.values()
-    }
-    present_edge_types: set[RelationshipType] = {
-        edge.relationship for edge in view.edges
-    }
+    present_node_types: set[NodeType] = {ntype for ntype in node_type_map.values()}
+    present_edge_types: set[RelationshipType] = {edge.relationship for edge in view.edges}
 
     legend_handles: list[mpatches.Patch] = []
 
     for ntype in sorted(present_node_types, key=lambda t: t.value):
         colour = _NODE_COLOURS.get(ntype, _DEFAULT_NODE_COLOUR)
-        legend_handles.append(
-            mpatches.Patch(color=colour, label=f"[N] {ntype.value}")
-        )
+        legend_handles.append(mpatches.Patch(color=colour, label=f"[N] {ntype.value}"))
 
     for rel in sorted(present_edge_types, key=lambda r: r.value):
         colour = _EDGE_COLOURS.get(rel, _DEFAULT_EDGE_COLOUR)
-        legend_handles.append(
-            mpatches.Patch(color=colour, label=f"[E] {rel.value.upper()}")
-        )
+        legend_handles.append(mpatches.Patch(color=colour, label=f"[E] {rel.value.upper()}"))
 
     if legend_handles:
         ax.legend(
@@ -302,13 +293,17 @@ def _render_graph(
     edge_count = len(view.edges)
     logger.info(
         "Saved '%s' → %s (%d nodes, %d edges)",
-        title, output_path, node_count, edge_count,
+        title,
+        output_path,
+        node_count,
+        edge_count,
     )
 
 
 # ---------------------------------------------------------------------------
 # GraphVisualizer — public API
 # ---------------------------------------------------------------------------
+
 
 class GraphVisualizer:
     """

@@ -38,18 +38,28 @@ from app.parsers.code_parser import CodeParser
 
 logger = logging.getLogger(__name__)
 
-_PY_EXTENSIONS: frozenset[str]  = frozenset({".py"})
-_TS_EXTENSIONS: frozenset[str]  = frozenset({".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"})
-_SKIP_DIRS: frozenset[str]      = frozenset({
-    ".git", "__pycache__", "node_modules", "dist", "build",
-    ".venv", "venv", ".next", ".cache",
-})
+_PY_EXTENSIONS: frozenset[str] = frozenset({".py"})
+_TS_EXTENSIONS: frozenset[str] = frozenset({".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"})
+_SKIP_DIRS: frozenset[str] = frozenset(
+    {
+        ".git",
+        "__pycache__",
+        "node_modules",
+        "dist",
+        "build",
+        ".venv",
+        "venv",
+        ".next",
+        ".cache",
+    }
+)
 
 
 def _get_head_commit(repository_path: str) -> Optional[str]:
     """Return the current HEAD commit SHA, or None if not a git repo."""
     try:
-        from git import Repo, InvalidGitRepositoryError
+        from git import Repo
+
         repo = Repo(repository_path)
         return repo.head.commit.hexsha
     except Exception:
@@ -66,17 +76,16 @@ def _changed_files_since(repository_path: str, since_commit: str) -> list[str]:
     """
     try:
         from git import Repo
-        repo   = Repo(repository_path)
-        old    = repo.commit(since_commit)
-        new    = repo.head.commit
-        diffs  = old.diff(new)
+
+        repo = Repo(repository_path)
+        old = repo.commit(since_commit)
+        new = repo.head.commit
+        diffs = old.diff(new)
         changed = []
         for diff in diffs:
             for path_attr in ("a_path", "b_path"):
                 p = getattr(diff, path_attr, None)
-                if p and os.path.splitext(p)[1].lower() in (
-                    _PY_EXTENSIONS | _TS_EXTENSIONS
-                ):
+                if p and os.path.splitext(p)[1].lower() in (_PY_EXTENSIONS | _TS_EXTENSIONS):
                     abs_p = os.path.join(repository_path, p)
                     if os.path.isfile(abs_p):
                         changed.append(abs_p)
@@ -99,7 +108,7 @@ def _detect_language(repository_path: str) -> str:
         dirs[:] = [d for d in dirs if d not in _SKIP_DIRS]
 
         # Limit walk depth to 3 levels
-        depth = root[len(repository_path):].count(os.sep)
+        depth = root[len(repository_path) :].count(os.sep)
         if depth >= 3:
             dirs[:] = []
             continue
@@ -120,7 +129,6 @@ def _detect_language(repository_path: str) -> str:
 
 
 class GraphService:
-
     def __init__(self) -> None:
         self.builder = GraphBuilder()
 
@@ -139,9 +147,9 @@ class GraphService:
         Trust boundary: the pickle cache is written only by this service to
         a controlled .cache/ directory. External input is validated upstream.
         """
-        cache       = RepositoryCache(repository_path)
+        cache = RepositoryCache(repository_path)
         fingerprint = cache.compute_fingerprint()
-        validation  = cache.is_cache_valid(fingerprint)
+        validation = cache.is_cache_valid(fingerprint)
 
         if validation.is_valid:
             try:
@@ -155,7 +163,8 @@ class GraphService:
                     if changed:
                         logger.info(
                             "Incremental update: %d changed files since %s.",
-                            len(changed), cached_commit[:8],
+                            len(changed),
+                            cached_commit[:8],
                         )
                         # Fall through to full rebuild for now; a true incremental
                         # graph update requires removing old nodes for changed files
@@ -179,11 +188,10 @@ class GraphService:
         if lang == "typescript":
             try:
                 from app.parsers.typescript_parser import TypeScriptParser
+
                 ts_parser = TypeScriptParser()
                 parsed = ts_parser.parse_repository(repository_path)
-                logger.info(
-                    "TypeScript parse complete: %d files", parsed.total_python_files
-                )
+                logger.info("TypeScript parse complete: %d files", parsed.total_python_files)
             except ImportError:
                 logger.warning(
                     "tree-sitter-typescript not installed; falling back to Python parser."

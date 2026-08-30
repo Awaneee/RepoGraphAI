@@ -64,7 +64,7 @@ def _get_parser():
         import tree_sitter_typescript as ts_ts
         from tree_sitter import Language, Parser
 
-        _TS_LANGUAGE  = Language(ts_ts.language_typescript())
+        _TS_LANGUAGE = Language(ts_ts.language_typescript())
         _TSX_LANGUAGE = Language(ts_ts.language_tsx())
         _PARSER = Parser(_TS_LANGUAGE)
         logger.debug("tree-sitter TypeScript parser initialized.")
@@ -79,6 +79,7 @@ def _get_parser():
 def is_available() -> bool:
     """Return True if tree-sitter-typescript is installed."""
     import importlib.util
+
     return (
         importlib.util.find_spec("tree_sitter") is not None
         and importlib.util.find_spec("tree_sitter_typescript") is not None
@@ -89,8 +90,9 @@ def is_available() -> bool:
 # Node traversal helpers
 # ---------------------------------------------------------------------------
 
+
 def _text(node, source: bytes) -> str:
-    return source[node.start_byte:node.end_byte].decode("utf-8", errors="replace")
+    return source[node.start_byte : node.end_byte].decode("utf-8", errors="replace")
 
 
 def _child_by_type(node, *types: str):
@@ -115,6 +117,7 @@ def _find_all(node, *types: str):
 # ---------------------------------------------------------------------------
 # Extraction helpers
 # ---------------------------------------------------------------------------
+
 
 def _extract_decorators(node, source: bytes) -> list[ParsedDecorator]:
     """Extract @decorators from a class_declaration or method_definition."""
@@ -151,7 +154,9 @@ def _extract_calls(node, source: bytes) -> list[str]:
 def _method_name(method_node, source: bytes) -> Optional[str]:
     name_node = _child_by_type(
         method_node,
-        "property_identifier", "computed_property_name", "private_property_identifier",
+        "property_identifier",
+        "computed_property_name",
+        "private_property_identifier",
     )
     if name_node:
         return _text(name_node, source)
@@ -164,42 +169,52 @@ def _method_name(method_node, source: bytes) -> Optional[str]:
 def _extract_methods(class_body, source: bytes) -> list[ParsedFunction]:
     methods = []
     for node in class_body.children:
-        if node.type in ("method_definition", "abstract_method_definition",
-                         "public_field_definition"):
+        if node.type in (
+            "method_definition",
+            "abstract_method_definition",
+            "public_field_definition",
+        ):
             name = _method_name(node, source)
             if not name:
                 continue
             body = _child_by_type(node, "statement_block")
             calls = _extract_calls(body, source) if body else []
-            methods.append(ParsedFunction(
-                name        = name,
-                line_number = node.start_point[0] + 1,
-                arguments   = [],
-                return_type = None,
-                docstring   = None,
-                calls       = calls,
-                instantiates = [],
-                decorators  = _extract_decorators(node, source),
-            ))
+            methods.append(
+                ParsedFunction(
+                    name=name,
+                    line_number=node.start_point[0] + 1,
+                    arguments=[],
+                    return_type=None,
+                    docstring=None,
+                    calls=calls,
+                    instantiates=[],
+                    decorators=_extract_decorators(node, source),
+                )
+            )
     return methods
 
 
 def _extract_source_snippet(node, source: bytes, max_lines: int = 50) -> Optional[str]:
     """Extract raw source for a function or class body (bounded)."""
     start = node.start_byte
-    end   = node.end_byte
-    raw   = source[start:end].decode("utf-8", errors="replace")
+    end = node.end_byte
+    raw = source[start:end].decode("utf-8", errors="replace")
     lines = raw.split("\n")
     if len(lines) > max_lines:
         head = lines[:30]
         tail = lines[-5:]
-        return "\n".join(head) + f"\n// ... [{len(lines) - 35} lines truncated] ...\n" + "\n".join(tail)
+        return (
+            "\n".join(head)
+            + f"\n// ... [{len(lines) - 35} lines truncated] ...\n"
+            + "\n".join(tail)
+        )
     return raw
 
 
 # ---------------------------------------------------------------------------
 # TypeScriptParser
 # ---------------------------------------------------------------------------
+
 
 class TypeScriptParser:
     """
@@ -218,15 +233,35 @@ class TypeScriptParser:
         parsed_repo = parser.parse_repository("./my-ts-project")
     """
 
-    _SKIP_DIRS: frozenset[str] = frozenset({
-        ".git", "__pycache__", "node_modules", "dist", "build",
-        ".venv", "venv", ".next", ".nuxt", "out", "coverage",
-        ".github", ".idea", ".vscode",
-    })
+    _SKIP_DIRS: frozenset[str] = frozenset(
+        {
+            ".git",
+            "__pycache__",
+            "node_modules",
+            "dist",
+            "build",
+            ".venv",
+            "venv",
+            ".next",
+            ".nuxt",
+            "out",
+            "coverage",
+            ".github",
+            ".idea",
+            ".vscode",
+        }
+    )
 
-    _TS_EXTENSIONS: frozenset[str] = frozenset({
-        ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs",
-    })
+    _TS_EXTENSIONS: frozenset[str] = frozenset(
+        {
+            ".ts",
+            ".tsx",
+            ".js",
+            ".jsx",
+            ".mjs",
+            ".cjs",
+        }
+    )
 
     def parse_file(self, file_path: str) -> ParsedFile:
         parser = _get_parser()
@@ -236,8 +271,9 @@ class TypeScriptParser:
 
         # Use TSX parser for .tsx/.jsx files
         if file_path.endswith((".tsx", ".jsx")):
-            from tree_sitter import Language, Parser
             import tree_sitter_typescript as ts_ts
+            from tree_sitter import Language, Parser
+
             tsx_lang = Language(ts_ts.language_tsx())
             tsx_parser = Parser(tsx_lang)
             tree = tsx_parser.parse(source)
@@ -246,8 +282,8 @@ class TypeScriptParser:
 
         root = tree.root_node
 
-        imports:   list[str]          = []
-        classes:   list[ParsedClass]  = []
+        imports: list[str] = []
+        classes: list[ParsedClass] = []
         functions: list[ParsedFunction] = []
 
         # --- Imports ---
@@ -279,8 +315,10 @@ class TypeScriptParser:
         # --- Classes, interfaces ---
         for cls_node in _find_all(
             root,
-            "class_declaration", "abstract_class_declaration",
-            "interface_declaration", "class",
+            "class_declaration",
+            "abstract_class_declaration",
+            "interface_declaration",
+            "class",
         ):
             name_node = _child_by_type(cls_node, "type_identifier", "identifier")
             if name_node is None:
@@ -301,71 +339,79 @@ class TypeScriptParser:
             # Source snippet for the class header + method signatures
             source_snippet: Optional[str] = None
             if body:
-                header_end  = body.start_byte
-                class_text  = source[cls_node.start_byte:header_end].decode("utf-8", errors="replace")
-                method_sigs = "\n".join(
-                    f"  {m.name}()" for m in methods
+                header_end = body.start_byte
+                class_text = source[cls_node.start_byte : header_end].decode(
+                    "utf-8", errors="replace"
                 )
+                method_sigs = "\n".join(f"  {m.name}()" for m in methods)
                 source_snippet = class_text + "{\n" + method_sigs + "\n}"
 
-            classes.append(ParsedClass(
-                name          = name,
-                line_number   = cls_node.start_point[0] + 1,
-                inherits_from = parents,
-                docstring     = source_snippet,
-                methods       = methods,
-                decorators    = _extract_decorators(cls_node, source),
-            ))
+            classes.append(
+                ParsedClass(
+                    name=name,
+                    line_number=cls_node.start_point[0] + 1,
+                    inherits_from=parents,
+                    docstring=source_snippet,
+                    methods=methods,
+                    decorators=_extract_decorators(cls_node, source),
+                )
+            )
 
         # --- Top-level functions (function declarations + const fn = () => {}) ---
         for fn_node in _find_all(root, "function_declaration", "generator_function_declaration"):
             name_node = _child_by_type(fn_node, "identifier")
             if name_node is None:
                 continue
-            name  = _text(name_node, source)
-            body  = _child_by_type(fn_node, "statement_block")
+            name = _text(name_node, source)
+            body = _child_by_type(fn_node, "statement_block")
             calls = _extract_calls(body, source) if body else []
-            src   = _extract_source_snippet(fn_node, source) if body else None
-            functions.append(ParsedFunction(
-                name        = name,
-                line_number = fn_node.start_point[0] + 1,
-                arguments   = [],
-                return_type = None,
-                docstring   = src,
-                calls       = calls,
-                instantiates = [],
-                decorators  = [],
-            ))
+            src = _extract_source_snippet(fn_node, source) if body else None
+            functions.append(
+                ParsedFunction(
+                    name=name,
+                    line_number=fn_node.start_point[0] + 1,
+                    arguments=[],
+                    return_type=None,
+                    docstring=src,
+                    calls=calls,
+                    instantiates=[],
+                    decorators=[],
+                )
+            )
 
         # --- const/let/var arrow function or function expression at module scope ---
         for var_decl in _children_by_type(root, "lexical_declaration", "variable_declaration"):
             for declarator in _children_by_type(var_decl, "variable_declarator"):
                 name_node = _child_by_type(declarator, "identifier")
-                val_node  = _child_by_type(
+                val_node = _child_by_type(
                     declarator,
-                    "arrow_function", "function", "function_expression",
+                    "arrow_function",
+                    "function",
+                    "function_expression",
                 )
                 if name_node and val_node:
-                    name  = _text(name_node, source)
-                    body  = _child_by_type(val_node, "statement_block")
+                    name = _text(name_node, source)
+                    body = _child_by_type(val_node, "statement_block")
                     calls = _extract_calls(body, source) if body else []
-                    src   = _extract_source_snippet(val_node, source) if body else None
-                    functions.append(ParsedFunction(
-                        name        = name,
-                        line_number = declarator.start_point[0] + 1,
-                        arguments   = [],
-                        return_type = None,
-                        docstring   = src,
-                        calls       = calls,
-                        instantiates = [],
-                        decorators  = [],
-                    ))
+                    src = _extract_source_snippet(val_node, source) if body else None
+                    functions.append(
+                        ParsedFunction(
+                            name=name,
+                            line_number=declarator.start_point[0] + 1,
+                            arguments=[],
+                            return_type=None,
+                            docstring=src,
+                            calls=calls,
+                            instantiates=[],
+                            decorators=[],
+                        )
+                    )
 
         return ParsedFile(
-            file_path = file_path,
-            imports   = imports,
-            classes   = classes,
-            functions = functions,
+            file_path=file_path,
+            imports=imports,
+            classes=classes,
+            functions=functions,
         )
 
     def parse_repository(self, repository_path: str) -> ParsedRepository:
@@ -378,8 +424,11 @@ class TypeScriptParser:
                 ext = os.path.splitext(filename)[1].lower()
                 if ext not in self._TS_EXTENSIONS:
                     continue
-                if filename.startswith("test_") or filename.endswith(".test.ts") \
-                        or filename.endswith(".spec.ts"):
+                if (
+                    filename.startswith("test_")
+                    or filename.endswith(".test.ts")
+                    or filename.endswith(".spec.ts")
+                ):
                     continue
 
                 file_path = os.path.join(root_dir, filename)
@@ -391,7 +440,7 @@ class TypeScriptParser:
 
         logger.info("Parsed %d TypeScript/JS files from %s", len(parsed_files), repository_path)
         return ParsedRepository(
-            repository_name    = os.path.basename(repository_path.rstrip("/\\")),
-            total_python_files = len(parsed_files),
-            files              = parsed_files,
+            repository_name=os.path.basename(repository_path.rstrip("/\\")),
+            total_python_files=len(parsed_files),
+            files=parsed_files,
         )
