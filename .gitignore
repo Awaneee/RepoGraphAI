@@ -1,2 +1,45 @@
-requirements.txt
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Cache directories
+backend/.cache/
+.cache/
+
+# Git-cloned repos (large, not part of source)
+backend/repos/
+repos/
+
+# Logs
+*.log
+
+# Environment secrets
+.env
+
+# Generated / binary artifacts
+*.pkl
+*.npy
 *.png
+*.jpg
+*.jpeg
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
