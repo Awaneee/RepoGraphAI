@@ -1,0 +1,7 @@
+# Tell GitHub's language detector to ignore these files
+# so the repo shows as primarily Python
+
+frontend/index.html linguist-documentation
+*.md                linguist-documentation
+*.json              linguist-documentation
+*.yml               linguist-vendored
