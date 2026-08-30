@@ -141,7 +141,7 @@ import re
 import string
 from collections import defaultdict
 from dataclasses import dataclass, field
-from enum import Enum, auto
+from enum import Enum
 from typing import Optional
 
 from app.models.pydantic_models import (
@@ -150,7 +150,6 @@ from app.models.pydantic_models import (
     RelationshipType,
     RepositoryGraph,
 )
-
 
 # ===========================================================================
 # Stop words
@@ -167,11 +166,10 @@ _STOP_WORDS: frozenset[str] = frozenset({
     "into", "through", "during", "before", "after", "to", "from", "up",
     "down", "out", "of", "off", "over", "under", "again", "then", "once",
     "and", "but", "or", "nor", "so", "yet", "both", "either", "neither",
-    "not", "no", "nor", "only", "own", "same", "than", "too", "very",
+    "not", "no", "only", "own", "same", "than", "too", "very",
     "just", "because", "as", "until", "while", "though", "although",
     "get", "gets", "got", "getting", "work", "works", "working",
-    "make", "makes", "made", "use", "used", "using", "done", "does",
-    "way", "ways",
+    "make", "makes", "made", "use", "used", "using", "done", "way", "ways",
 })
 
 
@@ -856,7 +854,6 @@ _QUERY_EXPANSION: dict[str, list[str]] = {
     "command":    ["cmd", "subcommand", "cli"],
     "argument":   ["arg", "param", "option", "flag"],
     "arguments":  ["args", "params", "options", "flags"],
-    "argument":   ["arg", "param", "option"],   # type: ignore[dict-overwrite]
     "callback":   ["handler", "hook", "action"],
     "option":     ["flag", "param", "argument"],
     "options":    ["flags", "params", "arguments"],
@@ -1149,6 +1146,11 @@ class QueryResolutionResult:
         )
 
 
+_DEFINITION_WORDS: frozenset[str] = frozenset({
+    "what", "why", "define", "definition", "purpose", "explain", "meaning", 
+    "represent", "represented", "structure", "structured"
+})
+
 # ===========================================================================
 # QueryResolver
 # ===========================================================================
@@ -1208,6 +1210,20 @@ class QueryResolver:
             #   incorrectly penalises execution methods like parse_args and iter_content).
             # generate_build: DISABLED — no isolated gain; with generic-penalty, build_graph
             #   only gets 'build' as an expansion hit and is suppressed, causing Top-5 regression.
+            #
+            # Iteration 1 (v6) — Entity-Aware Ranking:
+            # adaptive_dto_penalty: ENABLED — penalty is query-context sensitive.
+            #   Waived (0) when the node's entity is explicitly named in the query.
+            #   Softened (×0.33) for definition-type queries ("what is", "what is the purpose of").
+            #   Full (−15) only for broad implementation queries without an explicit entity reference.
+            # entity_aware_ranking: ENABLED — nodes whose class/function/method name is explicitly
+            #   named in the query receive a +6 boost.  This is structurally grounded: an explicit
+            #   entity mention is evidence that the querier wants *that* specific symbol, not a
+            #   method that happens to share a keyword.
+            # exception_inheritance_check: ENABLED — classes that inherit (directly or transitively)
+            #   from an Exception/Error class are exempted from the DTO penalty.  Exceptions are
+            #   not data containers; they are distinct class hierarchies detected via the INHERITS
+            #   graph edges, not string matching.
             self.ablation_toggles = {
                 "dto_fixes": False,
                 "private_penalties": True,
@@ -1219,6 +1235,10 @@ class QueryResolver:
                 "file_module_penalty": True,
                 "visualization_penalty": True,
                 "verb_lexicon_cleanup": True,
+                "no_dto_penalty": False,
+                "adaptive_dto_penalty": True,
+                "entity_aware_ranking": True,
+                "exception_inheritance_check": True,
             }
         else:
             self.ablation_toggles = ablation_toggles
@@ -1232,23 +1252,8 @@ class QueryResolver:
             self._degree[edge.source] += 1
             self._degree[edge.target] += 1
 
-        # Pre-compute DTO status for every node — O(N·E) but done once.
-        self._is_dto: dict[str, bool] = {
-            node_id: _looks_like_dto(node, graph, dto_fixes=self.ablation_toggles.get("dto_fixes", False))
-            for node_id, node in self._nodes.items()
-        }
-
-        # Propagation of DTO penalty to methods of DTO classes
-        if self.ablation_toggles.get("dto_fixes", False):
-            for edge in graph.edges:
-                if (
-                    edge.relationship == RelationshipType.CONTAINS
-                    and edge.source in self._is_dto
-                    and self._is_dto[edge.source]
-                    and edge.target in self._nodes
-                    and self._nodes[edge.target].type == NodeType.METHOD
-                ):
-                    self._is_dto[edge.target] = True
+        # Pre-compute DTO status (Exception-aware & propagation)
+        self._precompute_dto_status()
 
         # Pre-compute label components for every node — used by verb-label
         # boost.  Combines snake_case parts and camelCase splits.
@@ -1469,6 +1474,101 @@ class QueryResolver:
                     _try_add(expanded)
 
         return result
+
+    def _precompute_dto_status(self) -> None:
+        """Precompute DTO status, taking exceptions and propagation into account."""
+        self._is_dto = {
+            node_id: _looks_like_dto(node, self._graph, dto_fixes=self.ablation_toggles.get("dto_fixes", False))
+            for node_id, node in self._nodes.items()
+        }
+
+        if self.ablation_toggles.get("dto_fixes", False):
+            for edge in self._graph.edges:
+                if (
+                    edge.relationship == RelationshipType.CONTAINS
+                    and edge.source in self._is_dto
+                    and self._is_dto[edge.source]
+                    and edge.target in self._nodes
+                    and self._nodes[edge.target].type == NodeType.METHOD
+                ):
+                    self._is_dto[edge.target] = True
+
+        self._is_exception = {}
+        if self.ablation_toggles.get("exception_inheritance_check", True):
+            inherits_parents = defaultdict(list)
+            for edge in self._graph.edges:
+                if edge.relationship == RelationshipType.INHERITS:
+                    inherits_parents[edge.source].append(edge.target)
+
+            def get_ancestors(cid: str, visited: set[str]) -> set[str]:
+                if cid in visited:
+                    return set()
+                visited.add(cid)
+                result = set()
+                for parent in inherits_parents[cid]:
+                    result.add(parent)
+                    result.update(get_ancestors(parent, visited))
+                return result
+
+            for node_id, node in self._nodes.items():
+                is_exc = False
+                if node.type == NodeType.CLASS:
+                    if "Exception" in node.label or "Error" in node.label:
+                        is_exc = True
+                    else:
+                        ancestors = get_ancestors(node_id, set())
+                        for ancestor_id in ancestors:
+                            ancestor_node = self._nodes.get(ancestor_id)
+                            if ancestor_node and ("Exception" in ancestor_node.label or "Error" in ancestor_node.label):
+                                is_exc = True
+                                break
+                self._is_exception[node_id] = is_exc
+
+            for edge in self._graph.edges:
+                if (
+                    edge.relationship == RelationshipType.CONTAINS
+                    and edge.source in self._is_exception
+                    and self._is_exception[edge.source]
+                    and edge.target in self._nodes
+                    and self._nodes[edge.target].type == NodeType.METHOD
+                ):
+                    self._is_exception[edge.target] = True
+
+            for node_id in self._is_dto:
+                if self._is_exception.get(node_id, False):
+                    self._is_dto[node_id] = False
+
+    def _is_entity_mentioned(self, node: GraphNode, question: str, keywords_set: set[str]) -> bool:
+        """Return True if the node's entity name is explicitly mentioned in the query."""
+        q_lower = question.lower()
+        label_lower = node.label.lower()
+        
+        q_clean = re.sub(r'[^a-zA-Z0-9]', '', q_lower)
+        label_clean = re.sub(r'[^a-zA-Z0-9]', '', label_lower)
+        
+        if node.type == NodeType.CLASS or node.type == NodeType.FUNCTION:
+            if label_clean in q_clean:
+                return True
+            label_parts = _split_camel_case(node.label)
+            if label_parts and all(p.lower() in keywords_set for p in label_parts):
+                return True
+                
+        elif node.type == NodeType.METHOD:
+            parts = node.id.split(".")
+            if len(parts) == 2:
+                cls_name, method_name = parts
+                cls_parts = [p.lower() for p in _split_camel_case(cls_name)]
+                method_parts = [p.lower() for p in _snake_parts(method_name) if p not in _STOP_WORDS]
+                if not method_parts:
+                    method_parts = [method_name.lower()]
+                
+                cls_mentioned = all(p in keywords_set for p in cls_parts) or cls_name.lower() in q_lower
+                method_mentioned = all(p in keywords_set for p in method_parts) or method_name.lower() in q_lower
+                
+                if cls_mentioned and method_mentioned:
+                    return True
+                    
+        return False
 
     # ------------------------------------------------------------------
     # Step 4 — scoring / ranking
@@ -1737,12 +1837,38 @@ class QueryResolver:
                     f"degree={degree} hotspot +{hotspot_bonus:.1f}"
                 )
 
-            # DTO penalty — only fires for implementation-oriented queries
-            if intent.is_implementation_query and self._is_dto.get(node_id, False):
-                scores[node_id] += _W_DTO_PENALTY
-                reasons[node_id].append(
-                    f"dto-penalty (impl query) {_W_DTO_PENALTY:.0f}"
-                )
+            # DTO penalty
+            is_dto = self._is_dto.get(node_id, False)
+            if is_dto:
+                if self.ablation_toggles.get("no_dto_penalty", False):
+                    pass
+                elif self.ablation_toggles.get("adaptive_dto_penalty", True):
+                    penalty = _W_DTO_PENALTY
+                    words = set(re.sub(r'[^a-zA-Z\s]', '', question.lower()).split())
+                    is_def_query = bool(words & _DEFINITION_WORDS)
+                    mentioned = self._is_entity_mentioned(node, question, base_kws_set)
+                    if mentioned:
+                        penalty = 0.0
+                        reasons[node_id].append("dto-penalty-waived (entity explicitly mentioned) +0")
+                    elif is_def_query:
+                        penalty *= 0.33
+                        scores[node_id] += penalty
+                        reasons[node_id].append(f"dto-penalty-softened (definition query) {penalty:.1f}")
+                    else:
+                        if intent.is_implementation_query:
+                            scores[node_id] += penalty
+                            reasons[node_id].append(f"dto-penalty (impl query) {penalty:.0f}")
+                else:
+                    if intent.is_implementation_query:
+                        scores[node_id] += _W_DTO_PENALTY
+                        reasons[node_id].append(f"dto-penalty (impl query) {_W_DTO_PENALTY:.0f}")
+
+            # Entity-aware ranking boost
+            if self.ablation_toggles.get("entity_aware_ranking", False):
+                if self._is_entity_mentioned(node, question, base_kws_set):
+                    boost = 6.0
+                    scores[node_id] += boost
+                    reasons[node_id].append(f"entity-mention-boost (explicitly named) +{boost:.0f}")
 
             # v5: Multi-keyword bonus — node matches 2+ distinct base keywords
             base_hits = base_kw_hits.get(node_id, set())
