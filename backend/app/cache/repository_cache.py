@@ -48,9 +48,12 @@ from app.models.pydantic_models import RepositoryGraph
 # Constants
 # ---------------------------------------------------------------------------
 
-_CACHE_ROOT_DIRNAME = ".cache"
-_HASH_FILENAME = "repository_hash.json"
-_GRAPH_FILENAME = "repository_graph.pkl"
+_CACHE_ROOT_DIRNAME  = ".cache"
+_HASH_FILENAME       = "repository_hash.json"
+_GRAPH_FILENAME      = "repository_graph.pkl"
+_EMBEDDINGS_FILENAME = "embeddings.npy"
+_EMBED_IDS_FILENAME  = "embedding_node_ids.json"
+_COMMIT_FILENAME     = "last_commit.txt"
 
 # Mirrors CodeParser's directory-skip set and test-file filtering
 # (app/parsers/code_parser.py) so the fingerprint tracks exactly the
@@ -139,6 +142,32 @@ class RepositoryCache:
     @property
     def graph_path(self) -> str:
         return os.path.join(self._cache_dir, _GRAPH_FILENAME)
+
+    @property
+    def embeddings_path(self) -> str:
+        return os.path.join(self._cache_dir, _EMBEDDINGS_FILENAME)
+
+    @property
+    def embed_ids_path(self) -> str:
+        return os.path.join(self._cache_dir, _EMBED_IDS_FILENAME)
+
+    @property
+    def commit_path(self) -> str:
+        return os.path.join(self._cache_dir, _COMMIT_FILENAME)
+
+    def save_commit(self, commit_hash: str) -> None:
+        """Store the git commit hash that corresponds to the cached graph."""
+        os.makedirs(self._cache_dir, exist_ok=True)
+        with open(self.commit_path, "w", encoding="utf-8") as fh:
+            fh.write(commit_hash.strip())
+
+    def load_commit(self) -> Optional[str]:
+        """Return the stored commit hash, or None if not available."""
+        try:
+            with open(self.commit_path, encoding="utf-8") as fh:
+                return fh.read().strip() or None
+        except OSError:
+            return None
 
     # ------------------------------------------------------------------
     # Fingerprint
@@ -239,12 +268,66 @@ class RepositoryCache:
             return pickle.load(fh)
 
     # ------------------------------------------------------------------
+    # Embedding cache  (optional — requires numpy)
+    # ------------------------------------------------------------------
+
+    def has_embeddings(self) -> bool:
+        """Return True if a cached embedding matrix exists for this repo."""
+        return (
+            os.path.isfile(self.embeddings_path)
+            and os.path.isfile(self.embed_ids_path)
+        )
+
+    def save_embeddings(
+        self,
+        node_ids: list[str],
+        matrix: "np.ndarray",  # type: ignore[name-defined]
+    ) -> None:
+        """
+        Persist the embedding matrix and corresponding node_ids to disk.
+
+        The matrix must be a 2-D numpy float32 array of shape
+        (len(node_ids), embedding_dim).  The node_ids list provides the
+        ordered mapping from row index → graph node ID.
+
+        The cache directory must already exist (call save() first).
+        """
+        import numpy as np  # noqa: PLC0415
+
+        os.makedirs(self._cache_dir, exist_ok=True)
+        np.save(self.embeddings_path, matrix.astype(np.float32))
+        with open(self.embed_ids_path, "w", encoding="utf-8") as fh:
+            json.dump(node_ids, fh)
+
+    def load_embeddings(self) -> "tuple[list[str], np.ndarray]":  # type: ignore[name-defined]
+        """
+        Load the cached embedding matrix and node_ids from disk.
+
+        Returns
+        -------
+        (node_ids, matrix)
+            node_ids : list[str] — ordered node IDs (row → node_id)
+            matrix   : np.ndarray of shape (N, embedding_dim), float32
+        """
+        import numpy as np  # noqa: PLC0415
+
+        with open(self.embed_ids_path, encoding="utf-8") as fh:
+            node_ids: list[str] = json.load(fh)
+        matrix: np.ndarray = np.load(self.embeddings_path)
+        return node_ids, matrix
+
+    # ------------------------------------------------------------------
     # Maintenance
     # ------------------------------------------------------------------
 
     def clear(self) -> None:
-        """Remove this repository's cached fingerprint and graph, if any."""
-        for path in (self.hash_path, self.graph_path):
+        """Remove this repository's cached graph, fingerprint, and embeddings."""
+        for path in (
+            self.hash_path,
+            self.graph_path,
+            self.embeddings_path,
+            self.embed_ids_path,
+        ):
             try:
                 os.remove(path)
             except OSError:
