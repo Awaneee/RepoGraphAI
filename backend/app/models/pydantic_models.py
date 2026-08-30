@@ -1,6 +1,6 @@
 from enum import Enum
-from pydantic import BaseModel
 
+from pydantic import BaseModel
 
 # ---------------------------------------------------------------------------
 # Repository request
@@ -158,9 +158,13 @@ class ParsedFunction(BaseModel):
 
     name: str
     line_number: int
+    line_end: int | None = None
+    """Last line of the function/method body."""
     arguments: list[str]
     return_type: str | None
     docstring: str | None
+    source_code: str | None = None
+    """Extracted source code body (truncated if > 50 lines)."""
 
     calls: list[str]
     """Names of callables invoked inside this function body."""
@@ -181,8 +185,12 @@ class ParsedClass(BaseModel):
 
     name: str
     line_number: int
+    line_end: int | None = None
+    """Last line of the class body."""
     inherits_from: list[str] = []
     docstring: str | None = None
+    source_code: str | None = None
+    """Class signature + docstring + method signatures (not full body)."""
 
     methods: list[ParsedFunction]
 
@@ -243,8 +251,23 @@ class GraphNode(BaseModel):
     # Optional enrichment fields — present when available
     file_path: str | None = None
     line_number: int | None = None
+    line_end: int | None = None
+    """Last line of the node's source code (populated for Function/Method nodes)."""
     docstring: str | None = None
     module_origin: ModuleOrigin | None = None  # Only for MODULE nodes
+    source_code: str | None = None
+    """
+    Actual source code body for FUNCTION and METHOD nodes.
+
+    For functions/methods: the `def` block (signature + body).
+    For classes: signature + docstring + method signatures (not full body).
+
+    Bodies longer than 50 lines are truncated to the first 30 + last 5 lines
+    with a '[... N lines truncated ...]' marker. This keeps LLM context
+    bounded without losing the function signature and return structure.
+
+    Not populated for FILE or MODULE nodes.
+    """
 
 
 class GraphEdge(BaseModel):

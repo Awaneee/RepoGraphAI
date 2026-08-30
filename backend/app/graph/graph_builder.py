@@ -71,7 +71,6 @@ from app.models.pydantic_models import (
     RepositoryGraph,
 )
 
-
 # ---------------------------------------------------------------------------
 # Stdlib detection (mirrors code_parser.py — kept here to avoid import cycle)
 # ---------------------------------------------------------------------------
@@ -389,7 +388,9 @@ class GraphBuilder:
                     label=cls.name,
                     file_path=parsed_file.file_path,
                     line_number=cls.line_number,
+                    line_end=cls.line_end,
                     docstring=cls.docstring,
+                    source_code=cls.source_code,
                 ))
 
                 # File CONTAINS Class
@@ -442,7 +443,9 @@ class GraphBuilder:
                         label=method.name,
                         file_path=parsed_file.file_path,
                         line_number=method.line_number,
+                        line_end=method.line_end,
                         docstring=method.docstring,
+                        source_code=method.source_code,
                     ))
 
                     # Class CONTAINS Method
@@ -517,7 +520,9 @@ class GraphBuilder:
                     label=fn.name,
                     file_path=parsed_file.file_path,
                     line_number=fn.line_number,
+                    line_end=fn.line_end,
                     docstring=fn.docstring,
+                    source_code=fn.source_code,
                 ))
 
                 # File CONTAINS Function

@@ -60,7 +60,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 # ---------------------------------------------------------------------------
 # Internal imports — adjust the import paths to match your project layout.
@@ -69,10 +69,13 @@ from pydantic import BaseModel
 # ---------------------------------------------------------------------------
 from app.models.pydantic_models import (
     GraphEdge,
-    GraphNode,
     NodeType,
     RelationshipType,
     RepositoryGraph,
+)
+from app.retrievers.code_retriever import (
+    RepositoryRetriever,
+    RetrievalResult,
 )
 from app.retrievers.query_resolver import (
     IntentCategory,
@@ -80,11 +83,6 @@ from app.retrievers.query_resolver import (
     QueryResolutionResult,
     QueryResolver,
 )
-from app.retrievers.code_retriever import (
-    RetrievalResult,
-    RepositoryRetriever,
-)
-
 
 # ===========================================================================
 # Intent-aware traversal policies
@@ -539,8 +537,7 @@ class ContextPackage(BaseModel):
         from model_dump) but available at runtime for debugging.
     """
 
-    class Config:
-        arbitrary_types_allowed = True   # for QueryResolutionResult dataclass
+    model_config = ConfigDict(arbitrary_types_allowed=True)  # for QueryResolutionResult dataclass
 
     question:            str
     intent_categories:   list[str]
@@ -634,12 +631,14 @@ class ContextBuilder:
         top_k:               int = 10,
         max_hops:            int = 1,
         max_llm_neighbours:  int = 20,
+        max_context_tokens:  int = 24_000,
     ) -> None:
         self._resolver  = resolver
         self._retriever = retriever
-        self._top_k     = top_k
-        self._max_hops  = max_hops
-        self._max_llm_neighbours = max_llm_neighbours
+        self._top_k                = top_k
+        self._max_hops             = max_hops
+        self._max_llm_neighbours   = max_llm_neighbours
+        self._max_context_tokens   = max_context_tokens
 
     # ------------------------------------------------------------------
     # Public API
@@ -878,7 +877,22 @@ class ContextBuilder:
         else:
             lines.append("  (no edges in expanded subgraph)")
 
-        return "\n".join(lines)
+        raw_context = "\n".join(lines)
+
+        # Token-limit guard: trim context if it exceeds the configured budget.
+        # This prevents silent truncation by the LLM API and avoids 400 errors
+        # from models with smaller context windows.
+        from app.core.token_utils import count_tokens, trim_to_token_limit
+        token_count = count_tokens(raw_context)
+        if token_count > self._max_context_tokens:
+            import logging
+            logging.getLogger(__name__).warning(
+                "LLM context (%d tokens) exceeds limit (%d); trimming.",
+                token_count, self._max_context_tokens,
+            )
+            return trim_to_token_limit(raw_context, self._max_context_tokens)
+
+        return raw_context
 
 
 # ===========================================================================
@@ -909,9 +923,10 @@ def _build_subgraph_summary(subgraph: RepositoryGraph) -> SubgraphSummary:
 def build_context_builder(
     graph: RepositoryGraph,
     *,
-    top_k:              int = 10,
-    max_hops:           int = 1,
-    max_llm_neighbours: int = 20,
+    top_k:               int = 10,
+    max_hops:            int = 1,
+    max_llm_neighbours:  int = 20,
+    max_context_tokens:  int = 24_000,
 ) -> ContextBuilder:
     """
     One-call factory: build a ContextBuilder from a RepositoryGraph.
@@ -943,6 +958,7 @@ def build_context_builder(
         top_k=top_k,
         max_hops=max_hops,
         max_llm_neighbours=max_llm_neighbours,
+        max_context_tokens=max_context_tokens,
     )
 
 

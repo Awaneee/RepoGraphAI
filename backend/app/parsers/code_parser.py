@@ -1,14 +1,117 @@
 import ast
+import logging
 import os
 import sys
+from typing import Optional
 
 from app.models.pydantic_models import (
+    ParsedClass,
     ParsedDecorator,
     ParsedFile,
-    ParsedClass,
     ParsedFunction,
     ParsedRepository,
 )
+
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Source code extraction helpers
+# ---------------------------------------------------------------------------
+
+_MAX_SOURCE_LINES = 50        # functions/methods longer than this get truncated
+_KEEP_HEAD_LINES = 30         # lines to keep from the start
+_KEEP_TAIL_LINES = 5          # lines to keep from the end
+
+
+def _truncate_source(lines: list[str], start_line: int) -> str:
+    """
+    Given a list of source lines and the 1-based start line of the node,
+    return a bounded source code string.
+
+    If the body exceeds _MAX_SOURCE_LINES, it is truncated to the first
+    _KEEP_HEAD_LINES lines, a '[... N lines truncated ...]' marker, and
+    the last _KEEP_TAIL_LINES lines.  This preserves the function signature
+    and return structure while keeping LLM context bounded.
+    """
+    if not lines:
+        return ""
+    total = len(lines)
+    if total <= _MAX_SOURCE_LINES:
+        return "".join(lines)
+    head = lines[:_KEEP_HEAD_LINES]
+    tail = lines[total - _KEEP_TAIL_LINES:]
+    skipped = total - _KEEP_HEAD_LINES - _KEEP_TAIL_LINES
+    marker = f"# [... {skipped} lines truncated ...]\n"
+    return "".join(head) + marker + "".join(tail)
+
+
+def _extract_source_lines(
+    source_lines: list[str],
+    node: ast.AST,
+) -> Optional[str]:
+    """
+    Extract the source code for an AST node from a pre-split source list.
+
+    Parameters
+    ----------
+    source_lines : list[str]
+        All lines of the file (0-indexed, as returned by str.splitlines(True)).
+    node : ast.AST
+        The AST node. Must have lineno and end_lineno attributes.
+
+    Returns
+    -------
+    str | None
+        The (possibly truncated) source code, or None if extraction fails.
+    """
+    try:
+        start = node.lineno - 1          # 0-indexed
+        end   = node.end_lineno          # 0-indexed exclusive (= end_lineno)
+        if start < 0 or end > len(source_lines):
+            return None
+        return _truncate_source(source_lines[start:end], node.lineno)
+    except AttributeError:
+        return None
+
+
+def _extract_class_source_summary(
+    source_lines: list[str],
+    node: ast.ClassDef,
+) -> Optional[str]:
+    """
+    Extract a class *summary* rather than the full body.
+
+    Returns: class signature line + docstring + method signatures.
+    This is cheaper than the full body and avoids polluting LLM context
+    with implementation details of all methods.
+    """
+    try:
+        class_start = node.lineno - 1
+        if class_start < 0 or class_start >= len(source_lines):
+            return None
+
+        parts: list[str] = []
+
+        # --- Class signature line ---
+        parts.append(source_lines[class_start].rstrip() + "\n")
+
+        # --- Docstring (if present) ---
+        docstring_text = ast.get_docstring(node)
+        if docstring_text:
+            # Use the first line of the docstring only
+            first_line = docstring_text.split("\n")[0]
+            parts.append(f'    """{first_line}"""\n')
+
+        # --- Method signatures (def lines only) ---
+        for child in node.body:
+            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                method_line = source_lines[child.lineno - 1].rstrip() + "\n"
+                parts.append(method_line)
+
+        return "".join(parts) if parts else None
+
+    except (AttributeError, IndexError):
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -135,6 +238,7 @@ class CodeParser:
     def extract_function(
         self,
         node: ast.FunctionDef | ast.AsyncFunctionDef,
+        source_lines: Optional[list[str]] = None,
     ) -> ParsedFunction:
         """
         Extract a ParsedFunction from a function or async function def node.
@@ -147,6 +251,8 @@ class CodeParser:
           - all non-builtin call names (split into CALLS / INSTANTIATES by
             GraphBuilder)
           - decorators
+          - source_code: actual def block (truncated if > 50 lines)
+          - line_end: last line number of the function body
         """
 
         arguments = [
@@ -168,12 +274,20 @@ class CodeParser:
             for d in node.decorator_list
         ]
 
+        line_end: Optional[int] = getattr(node, "end_lineno", None)
+
+        source_code: Optional[str] = None
+        if source_lines is not None:
+            source_code = _extract_source_lines(source_lines, node)
+
         return ParsedFunction(
             name=node.name,
             line_number=node.lineno,
+            line_end=line_end,
             arguments=arguments,
             return_type=return_type,
             docstring=ast.get_docstring(node),
+            source_code=source_code,
             calls=calls,
             instantiates=[],   # GraphBuilder fills this in second pass
             decorators=decorators,
@@ -198,25 +312,37 @@ class CodeParser:
                 continue
         return bases
 
-    def _extract_class(self, node: ast.ClassDef) -> ParsedClass:
+    def _extract_class(
+        self,
+        node: ast.ClassDef,
+        source_lines: Optional[list[str]] = None,
+    ) -> ParsedClass:
 
         bases = self._extract_bases(node)
 
         methods: list[ParsedFunction] = []
         for child in node.body:
             if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                methods.append(self.extract_function(child))
+                methods.append(self.extract_function(child, source_lines=source_lines))
 
         decorators = [
             self._extract_decorator(d)
             for d in node.decorator_list
         ]
 
+        line_end: Optional[int] = getattr(node, "end_lineno", None)
+
+        source_code: Optional[str] = None
+        if source_lines is not None:
+            source_code = _extract_class_source_summary(source_lines, node)
+
         return ParsedClass(
             name=node.name,
             line_number=node.lineno,
+            line_end=line_end,
             inherits_from=bases,
             docstring=ast.get_docstring(node),
+            source_code=source_code,
             methods=methods,
             decorators=decorators,
         )
@@ -270,6 +396,9 @@ class CodeParser:
         except SyntaxError as exc:
             raise ValueError(f"Syntax error in {file_path}: {exc}") from exc
 
+        # Pre-split source into lines for source code extraction
+        source_lines = source_code.splitlines(keepends=True)
+
         imports = self._extract_imports(tree)
 
         classes: list[ParsedClass] = []
@@ -277,10 +406,10 @@ class CodeParser:
 
         for node in tree.body:
             if isinstance(node, ast.ClassDef):
-                classes.append(self._extract_class(node))
+                classes.append(self._extract_class(node, source_lines=source_lines))
 
             elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                functions.append(self.extract_function(node))
+                functions.append(self.extract_function(node, source_lines=source_lines))
 
         return ParsedFile(
             file_path=file_path,
@@ -321,10 +450,10 @@ class CodeParser:
                 try:
                     parsed_files.append(self.parse_file(file_path))
                 except Exception as exc:
-                    print(f"[CodeParser] Skipping {file_path}: {exc}")
+                    logger.warning("Skipping %s: %s", file_path, exc)
                     continue
 
-        print(f"[CodeParser] Parsed {len(parsed_files)} Python files")
+        logger.info("Parsed %d Python files from %s", len(parsed_files), repository_path)
 
         return ParsedRepository(
             repository_name=os.path.basename(repository_path.rstrip("/\\")),

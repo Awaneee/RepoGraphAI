@@ -74,7 +74,6 @@ from app.models.pydantic_models import (
     RepositoryGraph,
 )
 
-
 # ---------------------------------------------------------------------------
 # Result models
 # ---------------------------------------------------------------------------
@@ -435,10 +434,23 @@ class RepositoryRetriever:
         if getattr(node, "file_path", None):
             lines.append(f"File: {node.file_path}")
         if getattr(node, "line_number", None):
-            lines.append(f"Line: {node.line_number}")
-        if getattr(node, "docstring", None):
+            line_info = str(node.line_number)
+            if getattr(node, "line_end", None):
+                line_info += f"-{node.line_end}"
+            lines.append(f"Lines: {line_info}")
+        if getattr(node, "docstring", None) and node.docstring:
             doc = node.docstring.split("\n")[0]  # first line only
             lines.append(f"Docstring: {doc}")
+
+        # --- Source code (for FUNCTION/METHOD nodes) ---
+        source_code = getattr(node, "source_code", None)
+        if (
+            node_type in (NodeType.FUNCTION, NodeType.METHOD)
+            and source_code
+        ):
+            lines.append("Source:")
+            for src_line in source_code.splitlines():
+                lines.append(f"  {src_line}")
 
         # --- Specialised metadata ---
         meta = result.metadata
