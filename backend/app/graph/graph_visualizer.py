@@ -56,13 +56,17 @@ Edge colour by relationship
 
 from __future__ import annotations
 
+import logging
 import os
 from typing import TYPE_CHECKING
 
+logger = logging.getLogger(__name__)
+
 import matplotlib
+
 matplotlib.use("Agg")                           # headless — no display needed
-import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
 import networkx as nx
 
 from app.models.pydantic_models import (
@@ -167,7 +171,7 @@ def _render_graph(
     """
 
     if not view.nodes:
-        print(f"[GraphVisualizer] Skipping '{title}' — no nodes to render.")
+        logger.info("Skipping '%s' — no nodes to render.", title)
         return
 
     G = nx.DiGraph()
@@ -296,9 +300,9 @@ def _render_graph(
 
     node_count = len(view.nodes)
     edge_count = len(view.edges)
-    print(
-        f"[GraphVisualizer] Saved '{title}' → {output_path} "
-        f"({node_count} nodes, {edge_count} edges)"
+    logger.info(
+        "Saved '%s' → %s (%d nodes, %d edges)",
+        title, output_path, node_count, edge_count,
     )
 
 

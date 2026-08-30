@@ -6,8 +6,10 @@ predefined template families based on verb/noun extraction and category mapping.
 """
 
 from __future__ import annotations
+
 import re
 from typing import Optional
+
 from app.models.pydantic_models import GraphNode, NodeType
 
 # Mapping of categories and their keyword associations

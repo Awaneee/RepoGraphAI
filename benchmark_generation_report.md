@@ -33,10 +33,10 @@ The table below compares the retrieval metrics of the new curated benchmark (`v2
 
 | Metric | Baseline (`v1_manual`) | New Curated (`v2_curated`) | Status / Change |
 | :--- | :--- | :--- | :--- |
-| **Top-1 Accuracy** | 83.3% | 66.3% | 66.3% (-17.1%) |
-| **Top-3 Accuracy** | 93.3% | 84.9% | 84.9% (-8.5%) |
-| **Top-5 Accuracy** | 96.7% | 94.2% | 94.2% (-2.5%) |
-| **Mean Reciprocal Rank (MRR)** | 0.879 | 0.771 | 0.771 (-0.108) |
+| **Top-1 Accuracy** | 83.3% | 82.6% | 82.6% (-0.8%) |
+| **Top-3 Accuracy** | 93.3% | 94.2% | 94.2% (+0.9%) |
+| **Top-5 Accuracy** | 96.7% | 98.8% | 98.8% (+2.2%) |
+| **Mean Reciprocal Rank (MRR)** | 0.879 | 0.890 | 0.890 (+0.011) |
 
 > [!NOTE]
 > Lower retrieval metrics on a larger, more balanced dataset are expected if it exposes genuine architectural retrieval limits (e.g. broad coverage of 4 repositories rather than a small subset). This is part of the Quality-First validation philosophy.
@@ -48,54 +48,14 @@ The table below compares the retrieval metrics of the new curated benchmark (`v2
 
 The following questions failed to retrieve the expected symbol in the top 5 results:
 
-#### 1. What is the purpose of the retrieval result?
-- **Repository**: internal
-- **Expected Symbol**: `RetrievalResult`
-- **First Hit Rank**: Not Found
-- **Top Retrieved Symbols**:
-  - `ContextBuilder._collect_retrieval_results`
-  - `RetrievalResult.edges_of_type`
-  - `RetrievalResult.neighbour_ids`
-- **Analysis**: Expected symbol not in top 5 retrieval. The query wording might need to be refined to better match the symbol label, or the symbol holds low centrality/importance in the graph.
-
-#### 2. How does _RouterIncludeContext combine routing configurations?
-- **Repository**: FastAPI
-- **Expected Symbol**: `_RouterIncludeContext.combine`
-- **First Hit Rank**: Not Found
-- **Top Retrieved Symbols**:
-  - `APIRouter.include_router`
-  - `FastAPI.include_router`
-  - `_RouterIncludeContext`
-- **Analysis**: Expected symbol not in top 5 retrieval. The query wording might need to be refined to better match the symbol label, or the symbol holds low centrality/importance in the graph.
-
-#### 3. How does the route decorator register a route in APIRouter?
+#### 1. How does the route decorator register a route in APIRouter?
 - **Repository**: FastAPI
 - **Expected Symbol**: `APIRouter.route`
 - **First Hit Rank**: Not Found
 - **Top Retrieved Symbols**:
   - `APIRouter.add_api_route`
   - `APIRouter.add_api_websocket_route`
-  - `FastAPI.add_api_route`
-- **Analysis**: Expected symbol not in top 5 retrieval. The query wording might need to be refined to better match the symbol label, or the symbol holds low centrality/importance in the graph.
-
-#### 4. How is a route path resolved in _RouterIncludeContext?
-- **Repository**: FastAPI
-- **Expected Symbol**: `_RouterIncludeContext.path_for`
-- **First Hit Rank**: Not Found
-- **Top Retrieved Symbols**:
-  - `APIRouter.include_router`
-  - `FastAPI.include_router`
-  - `_RouterIncludeContext`
-- **Analysis**: Expected symbol not in top 5 retrieval. The query wording might need to be refined to better match the symbol label, or the symbol holds low centrality/importance in the graph.
-
-#### 5. What is the purpose of the request exception?
-- **Repository**: Requests
-- **Expected Symbol**: `RequestException`
-- **First Hit Rank**: Not Found
-- **Top Retrieved Symbols**:
-  - `Session.request`
-  - `request`
-  - `HTTPAdapter.request_url`
+  - `APIRouter.api_route`
 - **Analysis**: Expected symbol not in top 5 retrieval. The query wording might need to be refined to better match the symbol label, or the symbol holds low centrality/importance in the graph.
 
 

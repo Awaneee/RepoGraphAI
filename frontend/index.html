@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RepoGraphAI</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #388bfd;
+      --accent-hover: #58a6ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --yellow: #d29922;
+      --radius: 8px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header h1 { font-size: 18px; font-weight: 600; }
+    header .badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+    header .version { color: var(--muted); font-size: 12px; margin-left: auto; }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 0;
+      height: calc(100vh - 53px);
+    }
+
+    /* ── LEFT PANEL ── */
+    .panel-left {
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    input[type="text"], input[type="url"], textarea, select {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      padding: 8px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    .field { display: flex; flex-direction: column; }
+
+    .row { display: flex; gap: 12px; }
+    .row .field { flex: 1; }
+
+    input[type="range"] { width: 100%; accent-color: var(--accent); }
+    .range-row { display: flex; justify-content: space-between; align-items: center; }
+    .range-row span { font-size: 12px; color: var(--muted); }
+
+    .toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .toggle input { width: auto; cursor: pointer; accent-color: var(--accent); }
+    .toggle .toggle-label { font-size: 13px; color: var(--text); }
+
+    button {
+      width: 100%;
+      padding: 10px 20px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+
+    .btn-row { display: flex; gap: 8px; }
+    .btn-row button { flex: 1; }
+
+    /* ── RIGHT PANEL ── */
+    .panel-right {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .answer-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 32px;
+    }
+
+    .empty-state {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--muted);
+    }
+    .empty-state .icon { font-size: 48px; }
+    .empty-state p { font-size: 16px; }
+    .empty-state small { font-size: 12px; max-width: 320px; text-align: center; }
+
+    /* Answer card */
+    .answer-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .answer-card .q-text {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 12px;
+      color: var(--accent-hover);
+    }
+    .answer-card .answer-text {
+      white-space: pre-wrap;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .answer-card .answer-text code {
+      font-family: var(--mono);
+      background: rgba(110,118,129,0.15);
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    /* Streaming cursor */
+    .cursor { display: inline-block; width: 2px; height: 1em; background: var(--accent); animation: blink 0.9s step-end infinite; vertical-align: text-bottom; margin-left: 2px; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* Source nodes */
+    .source-nodes { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+    .source-nodes h4 { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .node-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .node-chip {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: var(--bg);
+    }
+    .node-chip.class   { border-color: #58a6ff44; color: #58a6ff; }
+    .node-chip.method  { border-color: #3fb95044; color: #3fb950; }
+    .node-chip.function { border-color: #d2992244; color: #d29922; }
+    .node-chip.file    { border-color: #8b949e44; color: #8b949e; }
+
+    /* Metadata bar */
+    .meta-bar {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .meta-item { font-size: 11px; color: var(--muted); }
+    .meta-item strong { color: var(--text); }
+
+    /* Status bar */
+    .status-bar {
+      border-top: 1px solid var(--border);
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--bg);
+      min-height: 36px;
+    }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .status-dot.idle    { background: var(--muted); }
+    .status-dot.loading { background: var(--yellow); animation: pulse 1s ease-in-out infinite; }
+    .status-dot.ok      { background: var(--green); }
+    .status-dot.err     { background: var(--red); }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* Offline context viewer */
+    .context-viewer {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 16px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .context-viewer pre {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .context-viewer summary { font-size: 12px; cursor: pointer; color: var(--muted); margin-bottom: 8px; }
+    .context-viewer summary:hover { color: var(--text); }
+
+    /* Session mode indicator */
+    .session-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--green);
+      border: 1px solid var(--green);
+      border-radius: 12px;
+      padding: 2px 8px;
+    }
+    .section-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+
+    hr { border: none; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>RepoGraphAI</h1>
+  <span class="badge">GraphRAG</span>
+  <span class="version">v0.2.0</span>
+</header>
+
+<main>
+  <!-- LEFT PANEL: Controls -->
+  <div class="panel-left">
+    <div class="field">
+      <label>Repository URL</label>
+      <input type="url" id="repoUrl" placeholder="https://github.com/owner/repo" />
+    </div>
+
+    <div class="field">
+      <label>Question</label>
+      <textarea id="question" placeholder="How does Session.send work?&#10;What calls build_graph?&#10;Explain the authentication flow." rows="3"></textarea>
+    </div>
+
+    <div>
+      <p class="section-title">Options</p>
+      <div class="row">
+        <div class="field">
+          <label>Top-K nodes</label>
+          <div class="range-row">
+            <input type="range" id="topK" min="1" max="50" value="10" />
+            <span id="topKVal">10</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Max hops</label>
+          <div class="range-row">
+            <input type="range" id="maxHops" min="0" max="3" value="1" />
+            <span id="maxHopsVal">1</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+        <label class="toggle">
+          <input type="checkbox" id="useEmbeddings" />
+          <span class="toggle-label">Hybrid retrieval (sentence-transformers)</span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="useStream" checked />
+          <span class="toggle-label">Stream response (SSE)</span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="useSession" />
+          <span class="toggle-label">Session mode (multi-turn Q&amp;A)</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="field" id="apiKeyField">
+      <label>API Key (optional)</label>
+      <input type="text" id="apiKey" placeholder="Leave blank for open access" />
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" id="askBtn" onclick="ask()">Ask</button>
+      <button class="btn-secondary" onclick="clearAll()">Clear</button>
+    </div>
+
+    <hr />
+
+    <div>
+      <p class="section-title">Server</p>
+      <div class="field">
+        <label>API Base URL</label>
+        <input type="text" id="baseUrl" value="http://localhost:8000" />
+      </div>
+      <button class="btn-secondary" style="margin-top:8px" onclick="checkHealth()">Check Health</button>
+    </div>
+
+    <div id="sessionStatus" style="display:none">
+      <hr />
+      <p class="section-title">Active Session</p>
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <span class="session-badge">● Connected</span>
+        <button class="btn-secondary" style="width:auto; padding:4px 12px; font-size:12px;" onclick="endSession()">End</button>
+      </div>
+      <div id="sessionInfo" style="margin-top:8px; font-size:12px; color:var(--muted);"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: Answers -->
+  <div class="panel-right">
+    <div class="answer-area" id="answerArea">
+      <div class="empty-state" id="emptyState">
+        <div class="icon">🕸️</div>
+        <p>Ask a question about any GitHub repository</p>
+        <small>RepoGraphAI builds a knowledge graph from the repository and answers questions using graph-traversal + LLM generation.</small>
+      </div>
+    </div>
+    <div class="status-bar">
+      <div class="status-dot idle" id="statusDot"></div>
+      <span id="statusText">Ready</span>
+    </div>
+  </div>
+</main>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  let sessionId = null;
+  let currentController = null;
+
+  // ── UI helpers ─────────────────────────────────────────────────────────────
+  const $ = id => document.getElementById(id);
+
+  $('topK').addEventListener('input', () => $('topKVal').textContent = $('topK').value);
+  $('maxHops').addEventListener('input', () => $('maxHopsVal').textContent = $('maxHops').value);
+  $('question').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); ask(); }
+  });
+
+  function setStatus(state, text) {
+    const dot = $('statusDot');
+    dot.className = 'status-dot ' + state;
+    $('statusText').textContent = text;
+  }
+
+  function setAskBtn(loading) {
+    const btn = $('askBtn');
+    btn.disabled = loading;
+    btn.textContent = loading ? 'Thinking…' : 'Ask';
+  }
+
+  function baseUrl() {
+    return ($('baseUrl').value || 'http://localhost:8000').replace(/\/$/, '');
+  }
+
+  function headers() {
+    const h = { 'Content-Type': 'application/json' };
+    const key = $('apiKey').value.trim();
+    if (key) h['X-API-Key'] = key;
+    return h;
+  }
+
+  function hideEmpty() {
+    $('emptyState').style.display = 'none';
+  }
+
+  function addCard(question) {
+    hideEmpty();
+    const card = document.createElement('div');
+    card.className = 'answer-card';
+    card.id = 'card-' + Date.now();
+    card.innerHTML = `
+      <div class="q-text">${escapeHtml(question)}</div>
+      <div class="answer-text" id="${card.id}-text"><span class="cursor"></span></div>
+    `;
+    $('answerArea').appendChild(card);
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return card;
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function renderAnswer(card, text) {
+    const el = document.getElementById(card.id + '-text');
+    // Simple markdown: bold, inline code, preserve newlines
+    const html = escapeHtml(text)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\n/g, '<br>');
+    el.innerHTML = html;
+  }
+
+  function appendSourceNodes(card, nodes) {
+    if (!nodes || !nodes.length) return;
+    const div = document.createElement('div');
+    div.className = 'source-nodes';
+    div.innerHTML = '<h4>Source nodes</h4><div class="node-chips">' +
+      nodes.map(n => {
+        const t = (n.node_type || '').toLowerCase();
+        return `<span class="node-chip ${t}" title="score: ${n.score?.toFixed(2)}">${escapeHtml(n.node_id)}</span>`;
+      }).join('') + '</div>';
+    card.appendChild(div);
+  }
+
+  function appendMeta(card, meta, extra) {
+    const div = document.createElement('div');
+    div.className = 'meta-bar';
+    const items = [];
+    if (meta) {
+      if (meta.intent_categories?.length) items.push(`<span class="meta-item">Intent: <strong>${meta.intent_categories.join(', ')}</strong></span>`);
+      if (meta.resolved_node_count != null) items.push(`<span class="meta-item">Nodes: <strong>${meta.resolved_node_count}</strong></span>`);
+      if (meta.traversal_strategy) items.push(`<span class="meta-item">Traversal: <strong>${meta.traversal_strategy}</strong></span>`);
+    }
+    if (extra) items.push(...extra.map(e => `<span class="meta-item">${e}</span>`));
+    div.innerHTML = items.join('');
+    if (items.length) card.appendChild(div);
+  }
+
+  // ── Health check ───────────────────────────────────────────────────────────
+  async function checkHealth() {
+    setStatus('loading', 'Checking server…');
+    try {
+      const r = await fetch(baseUrl() + '/health');
+      const data = await r.json();
+      const ok = data.status === 'ok';
+      setStatus(ok ? 'ok' : 'err',
+        `Server ${ok ? 'healthy' : 'degraded'} — LLM: ${data.llm_configured ? '✓' : '✗'}  Embeddings: ${data.embedding_available ? '✓' : '✗'}`
+      );
+    } catch (e) {
+      setStatus('err', 'Cannot reach server at ' + baseUrl());
+    }
+  }
+
+  // ── Session management ─────────────────────────────────────────────────────
+  async function startSession(repoUrl, topK, maxHops, useEmb) {
+    setStatus('loading', 'Creating session (cloning + building graph)…');
+    const r = await fetch(baseUrl() + '/sessions', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ repo_url: repoUrl, top_k: topK, max_hops: maxHops, use_embeddings: useEmb }),
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({ detail: r.statusText }));
+      throw new Error(err.detail || r.statusText);
+    }
+    return r.json();
+  }
+
+  function showSessionStatus(data) {
+    sessionId = data.session_id;
+    $('sessionStatus').style.display = 'block';
+    $('sessionInfo').textContent = `${data.node_count} nodes · ${data.edge_count} edges`;
+    setStatus('ok', `Session active — ${data.node_count} nodes in graph`);
+  }
+
+  function endSession() {
+    sessionId = null;
+    $('sessionStatus').style.display = 'none';
+    setStatus('idle', 'Session ended');
+  }
+
+  // ── Main ask function ──────────────────────────────────────────────────────
+  async function ask() {
+    if (currentController) { currentController.abort(); }
+
+    const repoUrl  = $('repoUrl').value.trim();
+    const question = $('question').value.trim();
+    if (!repoUrl)   { alert('Please enter a repository URL.'); return; }
+    if (!question)  { alert('Please enter a question.'); return; }
+
+    const topK     = parseInt($('topK').value);
+    const maxHops  = parseInt($('maxHops').value);
+    const useEmb   = $('useEmbeddings').checked;
+    const useStream = $('useStream').checked;
+    const useSess  = $('useSession').checked;
+
+    setAskBtn(true);
+    const card = addCard(question);
+
+    try {
+      // ── Session mode ──
+      if (useSess && !sessionId) {
+        const sessData = await startSession(repoUrl, topK, maxHops, useEmb);
+        showSessionStatus(sessData);
+      }
+
+      if (useSess && sessionId) {
+        await askSession(sessionId, question, card);
+        return;
+      }
+
+      // ── Streaming mode ──
+      if (useStream) {
+        await askStream(repoUrl, question, topK, maxHops, useEmb, card);
+        return;
+      }
+
+      // ── Sync mode ──
+      await askSync(repoUrl, question, topK, maxHops, useEmb, card);
+
+    } catch (e) {
+      if (e.name === 'AbortError') {
+        setStatus('idle', 'Cancelled');
+      } else {
+        renderAnswer(card, '⚠️ Error: ' + e.message);
+        setStatus('err', e.message);
+      }
+    } finally {
+      setAskBtn(false);
+      currentController = null;
+    }
+  }
+
+  // ── Streaming ask ──────────────────────────────────────────────────────────
+  async function askStream(repoUrl, question, topK, maxHops, useEmb, card) {
+    setStatus('loading', 'Streaming response…');
+    currentController = new AbortController();
+
+    const r = await fetch(baseUrl() + '/qa/stream', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ repo_url: repoUrl, question, top_k: topK, max_hops: maxHops, use_embeddings: useEmb }),
+      signal: currentController.signal,
+    });
+
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({ detail: r.statusText }));
+      throw new Error(err.detail || r.statusText);
+    }
+
+    const reader = r.body.getReader();
+    const decoder = new TextDecoder();
+    let accumulated = '';
+    let buffer = '';
+    let sourceNodes = [];
+
+    const textEl = document.getElementById(card.id + '-text');
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      const lines = buffer.split('\n\n');
+      buffer = lines.pop(); // Keep incomplete chunk
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        try {
+          const ev = JSON.parse(line.slice(6));
+          if (ev.type === 'metadata') {
+            sourceNodes = ev.source_nodes || [];
+            setStatus('loading', `Retrieved ${sourceNodes.length} nodes — streaming answer…`);
+          } else if (ev.type === 'token') {
+            accumulated += ev.text;
+            // Render accumulated text + cursor
+            const html = escapeHtml(accumulated)
+              .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+              .replace(/`([^`]+)`/g, '<code>$1</code>')
+              .replace(/\n/g, '<br>');
+            textEl.innerHTML = html + '<span class="cursor"></span>';
+            card.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          } else if (ev.type === 'done') {
+            // Remove cursor
+            renderAnswer(card, accumulated || ev.full_answer || '');
+            appendSourceNodes(card, sourceNodes);
+            setStatus('ok', `Done — ${sourceNodes.length} source nodes`);
+          } else if (ev.type === 'error') {
+            renderAnswer(card, '⚠️ Server error: ' + ev.detail);
+            setStatus('err', ev.detail);
+          }
+        } catch (_) { /* skip malformed SSE */ }
+      }
+    }
+  }
+
+  // ── Sync ask ───────────────────────────────────────────────────────────────
+  async function askSync(repoUrl, question, topK, maxHops, useEmb, card) {
+    setStatus('loading', 'Processing (this may take a while for large repos)…');
+    currentController = new AbortController();
+
+    const r = await fetch(baseUrl() + '/qa', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ repo_url: repoUrl, question, top_k: topK, max_hops: maxHops, use_embeddings: useEmb }),
+      signal: currentController.signal,
+    });
+
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.detail || r.statusText);
+
+    renderAnswer(card, data.answer || '(No LLM answer — offline mode)');
+    appendSourceNodes(card, data.source_nodes);
+    appendMeta(card, data.retrieval_metadata);
+
+    if (!data.answer && data.llm_context) {
+      const details = document.createElement('details');
+      details.className = 'context-viewer';
+      details.innerHTML = `<summary>Retrieval context (offline mode — no LLM key)</summary><pre>${escapeHtml(data.llm_context)}</pre>`;
+      card.appendChild(details);
+    }
+    setStatus('ok', `Done — ${(data.source_nodes || []).length} source nodes`);
+  }
+
+  // ── Session ask ────────────────────────────────────────────────────────────
+  async function askSession(sessId, question, card) {
+    setStatus('loading', 'Querying session (no re-clone)…');
+    const r = await fetch(baseUrl() + `/sessions/${sessId}/qa`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ question }),
+    });
+    const data = await r.json();
+    if (!r.ok) {
+      if (r.status === 404) { endSession(); throw new Error('Session expired — please reload.'); }
+      throw new Error(data.detail || r.statusText);
+    }
+    renderAnswer(card, data.answer || '(No LLM answer)');
+    appendSourceNodes(card, data.source_nodes);
+    appendMeta(card, data.retrieval_metadata, ['<strong>Session</strong> (no re-clone)']);
+    setStatus('ok', `Done — session query`);
+  }
+
+  // ── Clear ──────────────────────────────────────────────────────────────────
+  function clearAll() {
+    $('answerArea').innerHTML = '<div class="empty-state" id="emptyState"><div class="icon">🕸️</div><p>Ask a question about any GitHub repository</p><small>RepoGraphAI builds a knowledge graph from the repository and answers questions using graph-traversal + LLM generation.</small></div>';
+    setStatus('idle', 'Ready');
+    endSession();
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  checkHealth();
+</script>
+</body>
+</html>

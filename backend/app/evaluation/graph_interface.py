@@ -6,16 +6,18 @@ importance metrics directly from the RepositoryGraph.
 """
 
 from __future__ import annotations
+
 import os
 import re
-from typing import Optional
+
 from app.models.pydantic_models import (
-    RepositoryGraph,
-    GraphNode,
     GraphEdge,
+    GraphNode,
     NodeType,
-    RelationshipType
+    RelationshipType,
+    RepositoryGraph,
 )
+
 
 def compute_pagerank(
     node_ids: list[str],

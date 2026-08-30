@@ -1,0 +1,35 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # LLM provider — set exactly one of these
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      DEFAULT_LLM_PROVIDER: ${DEFAULT_LLM_PROVIDER:-anthropic}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-sonnet-4-5}
+
+      # Security
+      API_KEY: ${API_KEY:-}           # Leave empty for open access (local dev)
+      RATE_LIMIT_REQUESTS: ${RATE_LIMIT_REQUESTS:-20}
+      RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW_SECONDS:-60}
+
+      # Storage limits
+      MAX_REPO_SIZE_MB: ${MAX_REPO_SIZE_MB:-500}
+      CLONE_TIMEOUT_SECONDS: ${CLONE_TIMEOUT_SECONDS:-60}
+
+    volumes:
+      # Mount local dirs so repos and graphs persist across container restarts.
+      # Remove these mounts to use ephemeral container storage instead.
+      - ./repos:/app/repos
+      - ./.cache:/app/.cache
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s

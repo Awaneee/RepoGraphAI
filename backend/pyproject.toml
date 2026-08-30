@@ -1,0 +1,91 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "repographai"
+version = "0.2.0"
+description = "Graph-native RAG pipeline for Python codebase intelligence"
+readme = "../README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+
+dependencies = [
+    "fastapi>=0.119.1",
+    "uvicorn[standard]>=0.34.0",
+    "pydantic>=2.12.0",
+    "pydantic-settings>=2.8.0",
+    "gitpython>=3.1.46",
+    "python-dotenv>=1.1.0",
+    "networkx>=3.3",
+    "matplotlib>=3.9.0",
+    "numpy>=1.26",
+    "scikit-learn>=1.5",
+]
+
+[project.optional-dependencies]
+llm = [
+    "anthropic",
+    "google-genai",
+]
+embeddings = [
+    "sentence-transformers>=3.0",
+    "torch",
+]
+dev = [
+    "pytest>=9.0",
+    "httpx>=0.28",
+    "ruff>=0.8",
+    "mypy>=1.11",
+]
+all = [
+    "repographai[llm,embeddings,dev]",
+]
+
+# ---------------------------------------------------------------------------
+# Tool configuration
+# ---------------------------------------------------------------------------
+
+[tool.pytest.ini_options]
+testpaths    = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = [
+    ".git", "__pycache__", ".venv", "venv",
+    "repos",        # cloned third-party repos
+    ".cache",
+    "scratch",
+]
+
+[tool.ruff.lint]
+# E/W = pycodestyle  F = pyflakes  I = isort  N = naming  UP = pyupgrade
+# B = bugbear  SIM = simplify  C4 = comprehensions
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "C4"]
+ignore  = [
+    "E501",   # line-too-long (ruff format handles this)
+    "B008",   # do not perform function calls in default arguments (FastAPI Depends pattern)
+    "SIM108", # ternary operator (sometimes less readable)
+    "N806",   # variable in function should be lowercase (false positive on type aliases)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]   # assert is fine in tests
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version   = "3.12"
+strict           = true
+ignore_missing_imports = true
+exclude = [
+    "repos/",
+    "scratch/",
+    ".cache/",
+]

@@ -35,8 +35,8 @@ import time
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..","..")))
 
 from app.cache.repository_cache import RepositoryCache
-from app.parsers.code_parser import CodeParser
 from app.graph.graph_builder import GraphBuilder
+from app.parsers.code_parser import CodeParser
 from app.rag.graphrag_engine import (
     AnthropicLLMProvider,
     EchoLLMProvider,

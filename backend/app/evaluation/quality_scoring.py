@@ -6,9 +6,10 @@ based on graph importance and question-level ambiguity/uniqueness checks.
 """
 
 from __future__ import annotations
+
 import re
-from typing import Optional
-from app.models.pydantic_models import GraphNode, NodeType
+
+from app.models.pydantic_models import GraphNode
 
 # Stop words to filter out when checking keyword matches
 STOP_WORDS = {

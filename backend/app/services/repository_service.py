@@ -1,12 +1,182 @@
-import os
-import stat
-import shutil
 import heapq
-
+import logging
+import os
+import re
+import shutil
+import stat
+import threading
 from collections import Counter
+from urllib.parse import urlparse
+
 from git import Repo
 
+logger = logging.getLogger(__name__)
+
 from app.models.pydantic_models import RepositorySummary
+
+# ---------------------------------------------------------------------------
+# Security: URL allowlist
+# Prevents SSRF attacks — only well-known public git hosts are allowed.
+# ---------------------------------------------------------------------------
+
+_ALLOWED_CLONE_HOSTS = frozenset({
+    "github.com",
+    "gitlab.com",
+    "bitbucket.org",
+})
+
+# Repo name sanitization: only alphanumeric, hyphens, underscores, dots.
+_SAFE_REPO_NAME_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+
+# Per-repo file lock to prevent concurrent clone race conditions.
+# Maps repo_name → threading.Lock.
+_CLONE_LOCKS: dict[str, threading.Lock] = {}
+_CLONE_LOCKS_MUTEX = threading.Lock()
+
+# Security limits
+_CLONE_TIMEOUT_SECONDS = 60
+_MAX_REPO_SIZE_MB = 500
+
+
+def _get_clone_lock(repo_name: str) -> threading.Lock:
+    """Return a per-repo lock (creates one if it doesn't exist yet)."""
+    with _CLONE_LOCKS_MUTEX:
+        if repo_name not in _CLONE_LOCKS:
+            _CLONE_LOCKS[repo_name] = threading.Lock()
+        return _CLONE_LOCKS[repo_name]
+
+
+def validate_clone_url(repo_url: str) -> None:
+    """
+    Validate that repo_url is a safe, allowlisted HTTPS git URL.
+
+    Raises ValueError with a descriptive message on any security violation.
+
+    Trust boundary: this function is the single gate for all external git
+    clone operations. It must be called before any Repo.clone_from() call.
+
+    Allowed pattern: https://{allowed_host}/{owner}/{repo}[.git][/]
+    """
+    if not isinstance(repo_url, str) or not repo_url.strip():
+        raise ValueError("repo_url must be a non-empty string.")
+
+    parsed = urlparse(repo_url)
+
+    if parsed.scheme != "https":
+        raise ValueError(
+            f"Only HTTPS URLs are allowed. Got scheme: {parsed.scheme!r}. "
+            "file://, http://, ssh://, and bare paths are all rejected."
+        )
+
+    host = parsed.hostname or ""
+    if host not in _ALLOWED_CLONE_HOSTS:
+        raise ValueError(
+            f"Host {host!r} is not in the allowed list. "
+            f"Allowed hosts: {sorted(_ALLOWED_CLONE_HOSTS)}. "
+            "This restriction prevents SSRF attacks against internal services."
+        )
+
+    path = parsed.path.strip("/")
+    if not path or "/" not in path:
+        raise ValueError(
+            f"URL must include an owner and a repository name: "
+            f"https://github.com/{{owner}}/{{repo}}. Got path: {path!r}"
+        )
+
+
+def sanitize_repo_name(repo_url: str) -> str:
+    """
+    Extract and sanitize the repository name from a URL.
+
+    Uses os.path.basename to strip any path separators, then validates
+    the result against a strict allowlist pattern. Strips .git suffix.
+
+    Raises ValueError if the result would be empty, contain unsafe chars,
+    or is a path traversal component (e.g. '.' or '..').
+
+    Trust boundary: the returned name is used as a directory name under the
+    repos/ directory. A malicious URL like https://github.com/x/../../etc
+    could escape the repos/ directory without this sanitization.
+    The realpath check in clone_repository() provides a second layer of
+    defense against any edge cases that slip through here.
+    """
+    raw_name = repo_url.rstrip("/").split("/")[-1]
+
+    # Strip .git suffix
+    if raw_name.endswith(".git"):
+        raw_name = raw_name[:-4]
+
+    # Use basename to strip any path separators
+    safe_name = os.path.basename(raw_name)
+
+    # Explicitly reject path traversal components
+    if safe_name in (".", ".."):
+        raise ValueError(
+            f"Unsafe repository name: {raw_name!r} resolves to {safe_name!r}, "
+            "which is a path traversal component."
+        )
+
+    if not safe_name or not _SAFE_REPO_NAME_RE.match(safe_name):
+        raise ValueError(
+            f"Unsafe repository name extracted from URL: {raw_name!r}. "
+            "Repository names may only contain alphanumeric characters, "
+            "hyphens, underscores, and dots."
+        )
+
+    # Additional check: must not consist entirely of dots
+    if all(c == "." for c in safe_name):
+        raise ValueError(
+            f"Repository name {safe_name!r} consists only of dots "
+            "and is not a valid directory name."
+        )
+
+    return safe_name
+
+
+def _inject_token(repo_url: str, token: str) -> str:
+    """
+    Inject a personal access token into an HTTPS git URL for authentication.
+
+    Transforms:
+        https://github.com/owner/repo
+        → https://<token>@github.com/owner/repo
+
+    The token is used only for the git clone/fetch operation and is never
+    stored, logged, or returned to callers.
+
+    Parameters
+    ----------
+    repo_url : str  — validated HTTPS URL (already through validate_clone_url)
+    token    : str  — PAT (GitHub) or "username:token" (Bitbucket)
+    """
+    parsed = urlparse(repo_url)
+    authenticated = parsed._replace(netloc=f"{token}@{parsed.netloc}")
+    return authenticated.geturl()
+
+
+def _auth_url(repo_url: str) -> str:
+    """
+    Return an authenticated clone URL if a matching token is configured,
+    otherwise return the original URL (suitable for public repos).
+
+    Token selection is based on the host:
+      github.com    → GITHUB_TOKEN
+      gitlab.com    → GITLAB_TOKEN
+      bitbucket.org → BITBUCKET_TOKEN (format: "username:app_password")
+    """
+    from app.core.config import settings
+
+    parsed = urlparse(repo_url)
+    host   = parsed.hostname or ""
+
+    if "github.com" in host and settings.GITHUB_TOKEN:
+        return _inject_token(repo_url, settings.GITHUB_TOKEN)
+    if "gitlab.com" in host and settings.GITLAB_TOKEN:
+        return _inject_token(repo_url, settings.GITLAB_TOKEN)
+    if "bitbucket.org" in host and settings.BITBUCKET_TOKEN:
+        return _inject_token(repo_url, settings.BITBUCKET_TOKEN)
+
+    return repo_url   # public repo — no token needed
 
 
 class RepositoryService:
@@ -108,52 +278,139 @@ class RepositoryService:
         self,
         repo_url: str
     ) -> str:
+        """
+        Clone a repository from a public git host to a local path.
 
-        repo_name = (
-            repo_url
-            .rstrip("/")
-            .split("/")[-1]
-        )
+        Security measures applied (in order):
+        1. URL allowlist validation (SSRF prevention).
+        2. Repo name sanitization (path traversal prevention).
+        3. Per-repo file lock (concurrent clone race prevention).
+        4. Clone timeout (denial-of-service / hung-clone prevention).
+        5. Repo size check after clone (disk exhaustion prevention).
 
-        local_path = os.path.join(
-            "repos",
-            repo_name
-        )
+        Trust boundary note: the local repos/ directory is internal state.
+        The RepositoryCache (repository_cache.py) uses pickle for the graph
+        cache — this is safe because only this service writes to that cache.
+        External untrusted input (repo_url) is sanitized before any disk
+        path is derived from it.
+        """
+        # --- Security: validate URL ---
+        validate_clone_url(repo_url)
 
-        os.makedirs(
-            "repos",
-            exist_ok=True
-        )
+        # --- Security: sanitize repo name (prevents path traversal) ---
+        repo_name = sanitize_repo_name(repo_url)
 
-        if os.path.exists(local_path):
+        repos_dir = os.path.abspath("repos")
+        local_path = os.path.join(repos_dir, repo_name)
 
+        # Double-check that local_path is actually inside repos_dir
+        real_local = os.path.realpath(local_path)
+        real_repos = os.path.realpath(repos_dir)
+        if not real_local.startswith(real_repos + os.sep) and real_local != real_repos:
+            raise ValueError(
+                f"Path traversal detected: resolved path {real_local!r} "
+                f"is outside the repos directory {real_repos!r}."
+            )
+
+        os.makedirs(repos_dir, exist_ok=True)
+
+        # --- Security: per-repo lock (prevents concurrent clone race) ---
+        lock = _get_clone_lock(repo_name)
+        with lock:
+            # Resolve authenticated URL (injects PAT for private repos if configured)
+            clone_url = _auth_url(repo_url)
+
+            if os.path.exists(local_path):
+                # Fast path: repository already exists — try git pull instead of
+                # re-cloning. For large repos (200MB+), this is 30-120x faster.
+                try:
+                    existing = Repo(local_path)
+                    # Update remote URL in case a token was added/changed
+                    with existing.remotes.origin.config_writer as cw:
+                        cw.set("url", clone_url)
+                    existing.remotes.origin.fetch()
+                    local_commit  = existing.head.commit.hexsha
+                    remote_commit = existing.remotes.origin.refs[0].commit.hexsha
+                    if local_commit == remote_commit:
+                        logger.debug("Repository %s is up to date; skipping re-clone.", repo_name)
+                        return local_path
+                    # Remote has new commits — pull
+                    logger.info("Pulling updates for %s.", repo_name)
+                    existing.remotes.origin.pull()
+                    return local_path
+                except Exception as exc:
+                    logger.warning(
+                        "Could not update existing repo %s (%s); falling back to re-clone.",
+                        repo_name, exc,
+                    )
+                    try:
+                        shutil.rmtree(local_path, onerror=self.remove_readonly)
+                    except Exception as e:
+                        raise Exception(
+                            f"Failed to remove existing repository: {e}"
+                        ) from e
+
+            # Fresh clone (no existing repo at local_path)
+            logger.info("Cloning %s → %s", repo_url, local_path)
             try:
+                # Security: clone timeout prevents hung clones.
+                # signal.alarm only works on Unix AND only in the main thread.
+                # We use it when available (production uvicorn main thread),
+                # and skip gracefully in worker threads (tests, async workers).
+                import signal
+                import threading
 
-                shutil.rmtree(
-                    local_path,
-                    onerror=self.remove_readonly
+                _use_alarm = (
+                    hasattr(signal, "SIGALRM")
+                    and threading.current_thread() is threading.main_thread()
                 )
 
+                if _use_alarm:
+                    def _timeout_handler(signum, frame):
+                        raise TimeoutError(
+                            f"Git clone timed out after {_CLONE_TIMEOUT_SECONDS}s. "
+                            f"Repository may be too large or network too slow."
+                        )
+                    old_handler = signal.signal(signal.SIGALRM, _timeout_handler)
+                    signal.alarm(_CLONE_TIMEOUT_SECONDS)
+
+                try:
+                    Repo.clone_from(clone_url, local_path)
+                finally:
+                    if _use_alarm:
+                        signal.alarm(0)
+                        signal.signal(signal.SIGALRM, old_handler)
+
+            except TimeoutError:
+                if os.path.exists(local_path):
+                    shutil.rmtree(local_path, onerror=self.remove_readonly)
+                raise
             except Exception as e:
-
                 raise Exception(
-                    f"Failed to remove existing repository: {e}"
+                    f"Failed to clone repository: {e}"
+                ) from e
+
+            # --- Security: repo size limit ---
+            total_size_mb = self._directory_size_mb(local_path)
+            if total_size_mb > _MAX_REPO_SIZE_MB:
+                shutil.rmtree(local_path, onerror=self.remove_readonly)
+                raise ValueError(
+                    f"Repository size {total_size_mb:.1f} MB exceeds the "
+                    f"limit of {_MAX_REPO_SIZE_MB} MB."
                 )
-
-        try:
-
-            Repo.clone_from(
-                repo_url,
-                local_path
-            )
-
-        except Exception as e:
-
-            raise Exception(
-                f"Failed to clone repository: {e}"
-            )
 
         return local_path
+
+    def _directory_size_mb(self, path: str) -> float:
+        """Return total size of a directory tree in megabytes."""
+        total = 0
+        for root, _dirs, files in os.walk(path):
+            for fname in files:
+                try:
+                    total += os.path.getsize(os.path.join(root, fname))
+                except OSError:
+                    pass
+        return total / (1024 * 1024)
 
     def detect_framework(
         self,

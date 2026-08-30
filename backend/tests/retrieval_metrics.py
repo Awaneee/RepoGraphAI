@@ -501,25 +501,9 @@ def _evaluate_questions(
     return results
 
 def _inject_ablation_toggles(context_builder, graph, ablation_toggles):
-    from app.retrievers.query_resolver import _looks_like_dto
-    from app.models.pydantic_models import RelationshipType, NodeType
     if ablation_toggles is not None:
         context_builder._resolver.ablation_toggles = ablation_toggles
-        # Re-precompute DTO status
-        context_builder._resolver._is_dto = {
-            node_id: _looks_like_dto(node, graph, dto_fixes=ablation_toggles.get("dto_fixes", False))
-            for node_id, node in context_builder._resolver._nodes.items()
-        }
-        if ablation_toggles.get("dto_fixes", False):
-            for edge in graph.edges:
-                if (
-                    edge.relationship == RelationshipType.CONTAINS
-                    and edge.source in context_builder._resolver._is_dto
-                    and context_builder._resolver._is_dto[edge.source]
-                    and edge.target in context_builder._resolver._nodes
-                    and context_builder._resolver._nodes[edge.target].type == NodeType.METHOD
-                ):
-                    context_builder._resolver._is_dto[edge.target] = True
+        context_builder._resolver._precompute_dto_status()
 
 # ---------------------------------------------------------------------------
 # MODE 1 — Internal benchmark

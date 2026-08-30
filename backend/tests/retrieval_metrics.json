@@ -1,30 +1,30 @@
 {
-  "generated": "2026-07-01T22:32:16.564712",
+  "generated": "2026-07-01T23:53:33.929294",
   "overall": {
-    "top_1": 0.6628,
-    "top_3": 0.8488,
-    "top_5": 0.9419,
-    "recall_1": 0.6628,
-    "recall_3": 0.8488,
-    "recall_5": 0.9419,
-    "precision_1": 0.6628,
-    "precision_3": 0.2829,
-    "precision_5": 0.1884,
-    "mrr": 0.7715
+    "top_1": 0.8256,
+    "top_3": 0.9419,
+    "top_5": 0.9884,
+    "recall_1": 0.8256,
+    "recall_3": 0.9419,
+    "recall_5": 0.9884,
+    "precision_1": 0.8256,
+    "precision_3": 0.314,
+    "precision_5": 0.1977,
+    "mrr": 0.8897
   },
   "per_dataset": {
     "internal": {
       "aggregate": {
-        "top_1": 0.4737,
-        "top_3": 0.7368,
-        "top_5": 0.9474,
-        "recall_1": 0.4737,
-        "recall_3": 0.7368,
-        "recall_5": 0.9474,
-        "precision_1": 0.4737,
-        "precision_3": 0.2456,
-        "precision_5": 0.1895,
-        "mrr": 0.6377
+        "top_1": 0.9474,
+        "top_3": 1.0,
+        "top_5": 1.0,
+        "recall_1": 0.9474,
+        "recall_3": 1.0,
+        "recall_5": 1.0,
+        "precision_1": 0.9474,
+        "precision_3": 0.3333,
+        "precision_5": 0.2,
+        "mrr": 0.9737
       },
       "questions": [
         {
@@ -49,7 +49,7 @@
             "generate_graph"
           ],
           "retrieved_scores": [
-            43.0,
+            49.0,
             27.0,
             26.0,
             26.0,
@@ -57,7 +57,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0033,
+          "retrieval_time": 0.0064,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -94,7 +94,7 @@
             "build_context_builder"
           ],
           "retrieved_scores": [
-            33.0,
+            39.0,
             14.0,
             13.0,
             13.0,
@@ -102,7 +102,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0024,
+          "retrieval_time": 0.0035,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -125,41 +125,41 @@
             "LLMProvider"
           ],
           "retrieved_ids": [
+            "LLMProvider",
             "AnthropicLLMProvider",
             "GeminiLLMProvider",
-            "LLMProvider",
             "RetryingLLMProvider",
             "CallableLLMProvider"
           ],
           "retrieved_labels": [
+            "LLMProvider",
             "AnthropicLLMProvider",
             "GeminiLLMProvider",
-            "LLMProvider",
             "RetryingLLMProvider",
             "CallableLLMProvider"
           ],
           "retrieved_scores": [
-            31.0,
+            37.0,
             31.0,
             31.0,
             31.0,
             30.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 3,
-          "retrieval_time": 0.0023,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.003,
           "error": null,
           "metrics": {
-            "top_1": false,
+            "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
+            "recall_1": 1.0,
             "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
+            "precision_1": 1.0,
             "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.3333
+            "mrr": 1.0
           }
         },
         {
@@ -170,41 +170,41 @@
             "CodeParser"
           ],
           "retrieved_ids": [
+            "CodeParser",
             "CodeParser.extract_function",
             "CodeParser._extract_class",
             "CodeParser.parse_file",
-            "CodeParser",
             "CodeParser._extract_decorator"
           ],
           "retrieved_labels": [
+            "CodeParser",
             "extract_function",
             "_extract_class",
             "parse_file",
-            "CodeParser",
             "_extract_decorator"
           ],
           "retrieved_scores": [
+            47.0,
             46.0,
             43.0,
             42.0,
-            41.0,
             41.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 4,
-          "retrieval_time": 0.002,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0024,
           "error": null,
           "metrics": {
-            "top_1": false,
-            "top_3": false,
+            "top_1": true,
+            "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
-            "recall_3": 0.0,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
-            "precision_3": 0.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.25
+            "mrr": 1.0
           }
         },
         {
@@ -229,7 +229,7 @@
             "_extract_decorator"
           ],
           "retrieved_scores": [
-            51.0,
+            57.0,
             48.0,
             45.0,
             44.0,
@@ -237,7 +237,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0023,
+          "retrieval_time": 0.0027,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -282,7 +282,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0015,
+          "retrieval_time": 0.0016,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -327,7 +327,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.003,
+          "retrieval_time": 0.0038,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -364,7 +364,7 @@
             "get_class_context"
           ],
           "retrieved_scores": [
-            53.0,
+            59.0,
             47.0,
             42.0,
             39.0,
@@ -372,7 +372,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0038,
+          "retrieval_time": 0.0045,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -409,7 +409,7 @@
             "get_class_context"
           ],
           "retrieved_scores": [
-            63.0,
+            69.0,
             49.0,
             44.0,
             41.0,
@@ -417,7 +417,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0066,
+          "retrieval_time": 0.0047,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -455,14 +455,14 @@
           ],
           "retrieved_scores": [
             52.0,
-            45.0,
+            51.0,
             40.0,
             34.0,
             34.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 2,
-          "retrieval_time": 0.0054,
+          "retrieval_time": 0.0029,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -499,7 +499,7 @@
             "rank_candidates"
           ],
           "retrieved_scores": [
-            49.0,
+            55.0,
             48.0,
             36.0,
             34.0,
@@ -507,7 +507,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.006,
+          "retrieval_time": 0.0036,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -530,41 +530,41 @@
             "RetrievalResult"
           ],
           "retrieved_ids": [
+            "RetrievalResult",
             "ContextBuilder._collect_retrieval_results",
             "RetrievalResult.edges_of_type",
             "RetrievalResult.neighbour_ids",
-            "aggregate_results",
-            "_format_result_line"
+            "aggregate_results"
           ],
           "retrieved_labels": [
+            "RetrievalResult",
             "_collect_retrieval_results",
             "edges_of_type",
             "neighbour_ids",
-            "aggregate_results",
-            "_format_result_line"
+            "aggregate_results"
           ],
           "retrieved_scores": [
+            41.0,
             38.0,
             28.0,
             28.0,
-            27.0,
-            25.0
+            27.0
           ],
-          "pass_fail": "FAIL",
-          "first_hit_rank": null,
-          "retrieval_time": 0.0023,
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0028,
           "error": null,
           "metrics": {
-            "top_1": false,
-            "top_3": false,
-            "top_5": false,
-            "recall_1": 0.0,
-            "recall_3": 0.0,
-            "recall_5": 0.0,
-            "precision_1": 0.0,
-            "precision_3": 0.0,
-            "precision_5": 0.0,
-            "mrr": 0.0
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
           }
         },
         {
@@ -575,41 +575,41 @@
             "RetrievalResult"
           ],
           "retrieved_ids": [
+            "RetrievalResult",
             "RetrievalResult.edges_of_type",
             "RetrievalResult.neighbour_ids",
             "ContextBuilder._collect_retrieval_results",
-            "RepositoryRetriever.search_by_label",
-            "RetrievalResult"
+            "RepositoryRetriever.search_by_label"
           ],
           "retrieved_labels": [
+            "RetrievalResult",
             "edges_of_type",
             "neighbour_ids",
             "_collect_retrieval_results",
-            "search_by_label",
-            "RetrievalResult"
+            "search_by_label"
           ],
           "retrieved_scores": [
+            45.0,
             28.0,
             28.0,
             27.0,
-            24.0,
             24.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 5,
+          "first_hit_rank": 1,
           "retrieval_time": 0.0024,
           "error": null,
           "metrics": {
-            "top_1": false,
-            "top_3": false,
+            "top_1": true,
+            "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
-            "recall_3": 0.0,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
-            "precision_3": 0.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.2
+            "mrr": 1.0
           }
         },
         {
@@ -620,41 +620,41 @@
             "QueryResolutionResult"
           ],
           "retrieved_ids": [
-            "QueryResolver.resolve_query",
             "QueryResolutionResult",
+            "QueryResolver.resolve_query",
             "QueryResolutionResult.top_node_ids",
             "QueryResolver.resolve_to_node_ids",
             "aggregate_results"
           ],
           "retrieved_labels": [
-            "resolve_query",
             "QueryResolutionResult",
+            "resolve_query",
             "top_node_ids",
             "resolve_to_node_ids",
             "aggregate_results"
           ],
           "retrieved_scores": [
+            57.0,
             37.0,
-            36.0,
             32.0,
             28.0,
             27.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 2,
-          "retrieval_time": 0.0042,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0033,
           "error": null,
           "metrics": {
-            "top_1": false,
+            "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
+            "recall_1": 1.0,
             "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
+            "precision_1": 1.0,
             "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.5
+            "mrr": 1.0
           }
         },
         {
@@ -665,41 +665,41 @@
             "QueryResolutionResult"
           ],
           "retrieved_ids": [
-            "QueryResolver.resolve_query",
             "QueryResolutionResult",
+            "QueryResolver.resolve_query",
             "QueryResolutionResult.top_node_ids",
             "QueryResolver.resolve_to_node_ids",
             "ContextBuilder._collect_retrieval_results"
           ],
           "retrieved_labels": [
-            "resolve_query",
             "QueryResolutionResult",
+            "resolve_query",
             "top_node_ids",
             "resolve_to_node_ids",
             "_collect_retrieval_results"
           ],
           "retrieved_scores": [
+            55.0,
             37.0,
-            34.0,
             30.0,
             28.0,
             27.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 2,
-          "retrieval_time": 0.0056,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0035,
           "error": null,
           "metrics": {
-            "top_1": false,
+            "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
+            "recall_1": 1.0,
             "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
+            "precision_1": 1.0,
             "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.5
+            "mrr": 1.0
           }
         },
         {
@@ -710,41 +710,41 @@
             "QueryMatch"
           ],
           "retrieved_ids": [
+            "QueryMatch",
             "get_matching_nodes_count",
             "QueryResolver.resolve_query",
             "extract_query_keywords",
-            "QueryMatch",
             "RepositoryRetriever.search_by_label"
           ],
           "retrieved_labels": [
+            "QueryMatch",
             "get_matching_nodes_count",
             "resolve_query",
             "extract_query_keywords",
-            "QueryMatch",
             "search_by_label"
           ],
           "retrieved_scores": [
+            44.0,
             30.0,
             28.0,
             25.0,
-            23.0,
             22.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 4,
-          "retrieval_time": 0.0023,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0025,
           "error": null,
           "metrics": {
-            "top_1": false,
-            "top_3": false,
+            "top_1": true,
+            "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
-            "recall_3": 0.0,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
-            "precision_3": 0.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.25
+            "mrr": 1.0
           }
         },
         {
@@ -755,41 +755,41 @@
             "QueryMatch"
           ],
           "retrieved_ids": [
+            "QueryMatch",
             "QueryResolver.resolve_query",
             "ContextBuilder._collect_retrieval_results",
-            "QueryMatch",
             "extract_query_keywords",
             "RepositoryRetriever.search_by_label"
           ],
           "retrieved_labels": [
+            "QueryMatch",
             "resolve_query",
             "_collect_retrieval_results",
-            "QueryMatch",
             "extract_query_keywords",
             "search_by_label"
           ],
           "retrieved_scores": [
+            48.0,
             28.0,
-            27.0,
             27.0,
             25.0,
             24.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 3,
-          "retrieval_time": 0.0027,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0032,
           "error": null,
           "metrics": {
-            "top_1": false,
+            "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
+            "recall_1": 1.0,
             "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
+            "precision_1": 1.0,
             "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.3333
+            "mrr": 1.0
           }
         },
         {
@@ -800,41 +800,41 @@
             "QueryMatch"
           ],
           "retrieved_ids": [
+            "QueryMatch",
             "get_matching_nodes_count",
             "QueryResolver.resolve_query",
             "extract_query_keywords",
-            "QueryMatch",
             "RepositoryRetriever.search_by_label"
           ],
           "retrieved_labels": [
+            "QueryMatch",
             "get_matching_nodes_count",
             "resolve_query",
             "extract_query_keywords",
-            "QueryMatch",
             "search_by_label"
           ],
           "retrieved_scores": [
+            44.0,
             30.0,
             28.0,
             25.0,
-            23.0,
             22.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 4,
-          "retrieval_time": 0.002,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0024,
           "error": null,
           "metrics": {
-            "top_1": false,
-            "top_3": false,
+            "top_1": true,
+            "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
-            "recall_3": 0.0,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
-            "precision_3": 0.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.25
+            "mrr": 1.0
           }
         },
         {
@@ -867,7 +867,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0028,
+          "retrieval_time": 0.003,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -886,16 +886,16 @@
     },
     "FastAPI": {
       "aggregate": {
-        "top_1": 0.625,
+        "top_1": 0.5833,
         "top_3": 0.7917,
-        "top_5": 0.875,
-        "recall_1": 0.625,
+        "top_5": 0.9583,
+        "recall_1": 0.5833,
         "recall_3": 0.7917,
-        "recall_5": 0.875,
-        "precision_1": 0.625,
+        "recall_5": 0.9583,
+        "precision_1": 0.5833,
         "precision_3": 0.2639,
-        "precision_5": 0.175,
-        "mrr": 0.7201
+        "precision_5": 0.1917,
+        "mrr": 0.716
       },
       "questions": [
         {
@@ -920,7 +920,7 @@
             "HtmlLinkInfo"
           ],
           "retrieved_scores": [
-            29.0,
+            35.0,
             27.0,
             26.0,
             26.0,
@@ -928,7 +928,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0027,
+          "retrieval_time": 0.0034,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -965,7 +965,7 @@
             "HtmlLinkInfo"
           ],
           "retrieved_scores": [
-            29.0,
+            35.0,
             27.0,
             26.0,
             26.0,
@@ -973,7 +973,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0021,
+          "retrieval_time": 0.0031,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1010,15 +1010,15 @@
             "HeaderPermalinkInfo"
           ],
           "retrieved_scores": [
-            63.0,
+            69.0,
             51.0,
             50.0,
-            39.0,
+            45.0,
             38.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0095,
+          "retrieval_time": 0.0097,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1055,7 +1055,7 @@
             "get_cached_model_fields"
           ],
           "retrieved_scores": [
-            41.0,
+            47.0,
             36.0,
             28.0,
             27.0,
@@ -1063,7 +1063,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0033,
+          "retrieval_time": 0.0052,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1100,7 +1100,7 @@
             "get_cached_model_fields"
           ],
           "retrieved_scores": [
-            41.0,
+            47.0,
             36.0,
             28.0,
             27.0,
@@ -1108,7 +1108,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0028,
+          "retrieval_time": 0.0037,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1145,7 +1145,7 @@
             "handle"
           ],
           "retrieved_scores": [
-            55.0,
+            61.0,
             29.0,
             29.0,
             27.0,
@@ -1153,7 +1153,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0065,
+          "retrieval_time": 0.0084,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1179,26 +1179,26 @@
             "get_dependant",
             "get_flat_dependant",
             "get_parameterless_sub_dependant",
-            "Dependant.is_async_gen_callable",
-            "Dependant.is_coroutine_callable"
+            "Dependant",
+            "Dependant.is_async_gen_callable"
           ],
           "retrieved_labels": [
             "get_dependant",
             "get_flat_dependant",
             "get_parameterless_sub_dependant",
-            "is_async_gen_callable",
-            "is_coroutine_callable"
+            "Dependant",
+            "is_async_gen_callable"
           ],
           "retrieved_scores": [
             39.0,
             36.0,
             35.0,
-            24.0,
+            34.0,
             24.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0065,
+          "retrieval_time": 0.004,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1224,26 +1224,26 @@
             "get_dependant",
             "get_flat_dependant",
             "get_parameterless_sub_dependant",
-            "Dependant.is_async_gen_callable",
-            "Dependant.is_coroutine_callable"
+            "Dependant",
+            "Dependant.is_async_gen_callable"
           ],
           "retrieved_labels": [
             "get_dependant",
             "get_flat_dependant",
             "get_parameterless_sub_dependant",
-            "is_async_gen_callable",
-            "is_coroutine_callable"
+            "Dependant",
+            "is_async_gen_callable"
           ],
           "retrieved_scores": [
             39.0,
             36.0,
             35.0,
-            24.0,
+            34.0,
             24.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0038,
+          "retrieval_time": 0.0039,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1266,41 +1266,41 @@
             "get_dependant"
           ],
           "retrieved_ids": [
-            "get_dependant",
             "Dependant",
+            "get_dependant",
             "get_flat_dependant",
             "get_parameterless_sub_dependant",
             "Dependant.is_async_gen_callable"
           ],
           "retrieved_labels": [
-            "get_dependant",
             "Dependant",
+            "get_dependant",
             "get_flat_dependant",
             "get_parameterless_sub_dependant",
             "is_async_gen_callable"
           ],
           "retrieved_scores": [
+            24.0,
             20.0,
-            18.0,
             17.0,
             16.0,
             9.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 1,
-          "retrieval_time": 0.0026,
+          "first_hit_rank": 2,
+          "retrieval_time": 0.0033,
           "error": null,
           "metrics": {
-            "top_1": true,
+            "top_1": false,
             "top_3": true,
             "top_5": true,
-            "recall_1": 1.0,
+            "recall_1": 0.0,
             "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 1.0,
+            "precision_1": 0.0,
             "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 1.0
+            "mrr": 0.5
           }
         },
         {
@@ -1315,25 +1315,25 @@
             "OAuthFlowAuthorizationCode",
             "HTTPAuthorizationCredentials",
             "OAuth2AuthorizationCodeBearer",
-            "get_flat_params"
+            "Param"
           ],
           "retrieved_labels": [
             "get_authorization_scheme_param",
             "OAuthFlowAuthorizationCode",
             "HTTPAuthorizationCredentials",
             "OAuth2AuthorizationCodeBearer",
-            "get_flat_params"
+            "Param"
           ],
           "retrieved_scores": [
             68.0,
             36.0,
             34.0,
             34.0,
-            33.0
+            34.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0054,
+          "retrieval_time": 0.006,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1357,28 +1357,28 @@
           ],
           "retrieved_ids": [
             "request_response",
+            "Response",
             "get_graphql_response",
             "get_request_handler",
-            "request_body_to_args",
-            "request_params_to_args"
+            "request_body_to_args"
           ],
           "retrieved_labels": [
             "request_response",
+            "Response",
             "get_graphql_response",
             "get_request_handler",
-            "request_body_to_args",
-            "request_params_to_args"
+            "request_body_to_args"
           ],
           "retrieved_scores": [
-            48.0,
-            32.0,
+            54.0,
+            34.0,
             32.0,
             32.0,
             32.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0074,
+          "retrieval_time": 0.0077,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1415,7 +1415,7 @@
             "http_exception_handler"
           ],
           "retrieved_scores": [
-            48.0,
+            54.0,
             46.0,
             40.0,
             40.0,
@@ -1423,7 +1423,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0076,
+          "retrieval_time": 0.0116,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1468,7 +1468,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 2,
-          "retrieval_time": 0.0101,
+          "retrieval_time": 0.0133,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -1513,7 +1513,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 3,
-          "retrieval_time": 0.0096,
+          "retrieval_time": 0.0116,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -1536,41 +1536,41 @@
             "_RouterIncludeContext.combine"
           ],
           "retrieved_ids": [
+            "_RouterIncludeContext",
             "APIRouter.include_router",
             "FastAPI.include_router",
-            "_RouterIncludeContext",
             "_RouterIncludeContext.for_include",
-            "_get_scope_effective_route_context"
+            "_RouterIncludeContext.combine"
           ],
           "retrieved_labels": [
-            "include_router",
-            "include_router",
             "_RouterIncludeContext",
+            "include_router",
+            "include_router",
             "for_include",
-            "_get_scope_effective_route_context"
+            "combine"
           ],
           "retrieved_scores": [
+            81.0,
             62.0,
             60.0,
-            60.0,
-            51.0,
-            50.0
+            57.0,
+            52.0
           ],
-          "pass_fail": "FAIL",
-          "first_hit_rank": null,
-          "retrieval_time": 0.0094,
+          "pass_fail": "PASS",
+          "first_hit_rank": 5,
+          "retrieval_time": 0.0117,
           "error": null,
           "metrics": {
             "top_1": false,
             "top_3": false,
-            "top_5": false,
+            "top_5": true,
             "recall_1": 0.0,
             "recall_3": 0.0,
-            "recall_5": 0.0,
+            "recall_5": 1.0,
             "precision_1": 0.0,
             "precision_3": 0.0,
-            "precision_5": 0.0,
-            "mrr": 0.0
+            "precision_5": 0.2,
+            "mrr": 0.2
           }
         },
         {
@@ -1584,26 +1584,26 @@
             "_IncludedRouter.effective_route_contexts",
             "_get_scope_effective_route_context",
             "_IncludedRouter._build_effective_context",
-            "APIRouter.add_api_route",
-            "APIRoute.get_route_handler"
+            "_EffectiveRouteContext",
+            "APIRouter.add_api_route"
           ],
           "retrieved_labels": [
             "effective_route_contexts",
             "_get_scope_effective_route_context",
             "_build_effective_context",
-            "add_api_route",
-            "get_route_handler"
+            "_EffectiveRouteContext",
+            "add_api_route"
           ],
           "retrieved_scores": [
             70.0,
             62.0,
             57.0,
-            55.0,
-            54.0
+            56.0,
+            55.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0152,
+          "retrieval_time": 0.0151,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1648,7 +1648,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 2,
-          "retrieval_time": 0.0104,
+          "retrieval_time": 0.0111,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -1693,7 +1693,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 2,
-          "retrieval_time": 0.0104,
+          "retrieval_time": 0.0113,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -1738,7 +1738,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 5,
-          "retrieval_time": 0.0111,
+          "retrieval_time": 0.0102,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -1783,7 +1783,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 4,
-          "retrieval_time": 0.0119,
+          "retrieval_time": 0.0111,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -1808,27 +1808,27 @@
           "retrieved_ids": [
             "APIRouter.add_api_route",
             "APIRouter.add_api_websocket_route",
-            "FastAPI.add_api_route",
-            "FastAPI.add_api_websocket_route",
-            "APIRouter.api_route"
+            "APIRouter.api_route",
+            "APIRouter",
+            "FastAPI.add_api_route"
           ],
           "retrieved_labels": [
             "add_api_route",
             "add_api_websocket_route",
-            "add_api_route",
-            "add_api_websocket_route",
-            "api_route"
+            "api_route",
+            "APIRouter",
+            "add_api_route"
           ],
           "retrieved_scores": [
             62.0,
             61.0,
+            61.0,
             57.0,
-            56.0,
-            55.0
+            57.0
           ],
           "pass_fail": "FAIL",
           "first_hit_rank": null,
-          "retrieval_time": 0.0109,
+          "retrieval_time": 0.0145,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -1851,41 +1851,41 @@
             "_RouterIncludeContext.path_for"
           ],
           "retrieved_ids": [
+            "_RouterIncludeContext",
             "APIRouter.include_router",
             "FastAPI.include_router",
-            "_RouterIncludeContext",
             "_RouterIncludeContext.for_include",
-            "_IncludedRouter.url_path_for"
+            "_RouterIncludeContext.path_for"
           ],
           "retrieved_labels": [
-            "include_router",
-            "include_router",
             "_RouterIncludeContext",
+            "include_router",
+            "include_router",
             "for_include",
-            "url_path_for"
+            "path_for"
           ],
           "retrieved_scores": [
+            69.0,
             56.0,
             54.0,
-            48.0,
-            47.0,
-            44.0
+            53.0,
+            48.0
           ],
-          "pass_fail": "FAIL",
-          "first_hit_rank": null,
-          "retrieval_time": 0.0091,
+          "pass_fail": "PASS",
+          "first_hit_rank": 5,
+          "retrieval_time": 0.0088,
           "error": null,
           "metrics": {
             "top_1": false,
             "top_3": false,
-            "top_5": false,
+            "top_5": true,
             "recall_1": 0.0,
             "recall_3": 0.0,
-            "recall_5": 0.0,
+            "recall_5": 1.0,
             "precision_1": 0.0,
             "precision_3": 0.0,
-            "precision_5": 0.0,
-            "mrr": 0.0
+            "precision_5": 0.2,
+            "mrr": 0.2
           }
         },
         {
@@ -1918,7 +1918,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0076,
+          "retrieval_time": 0.0092,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1963,7 +1963,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0096,
+          "retrieval_time": 0.0081,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -1982,16 +1982,16 @@
     },
     "Typer": {
       "aggregate": {
-        "top_1": 0.7143,
-        "top_3": 0.9524,
+        "top_1": 0.8571,
+        "top_3": 1.0,
         "top_5": 1.0,
-        "recall_1": 0.7143,
-        "recall_3": 0.9524,
+        "recall_1": 0.8571,
+        "recall_3": 1.0,
         "recall_5": 1.0,
-        "precision_1": 0.7143,
-        "precision_3": 0.3175,
+        "precision_1": 0.8571,
+        "precision_3": 0.3333,
         "precision_5": 0.2,
-        "mrr": 0.8452
+        "mrr": 0.9286
       },
       "questions": [
         {
@@ -2002,41 +2002,41 @@
             "Context"
           ],
           "retrieved_ids": [
-            "Command.make_context",
             "Context",
+            "Command.make_context",
             "_build_prompt",
             "get_current_context",
             "pop_context"
           ],
           "retrieved_labels": [
-            "make_context",
             "Context",
+            "make_context",
             "_build_prompt",
             "get_current_context",
             "pop_context"
           ],
           "retrieved_scores": [
-            18.0,
+            24.0,
             18.0,
             17.0,
             17.0,
             14.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 2,
-          "retrieval_time": 0.0038,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0041,
           "error": null,
           "metrics": {
-            "top_1": false,
+            "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
+            "recall_1": 1.0,
             "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
+            "precision_1": 1.0,
             "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.5
+            "mrr": 1.0
           }
         },
         {
@@ -2061,7 +2061,7 @@
             "make_default_short_help"
           ],
           "retrieved_scores": [
-            28.0,
+            34.0,
             28.0,
             27.0,
             24.0,
@@ -2069,7 +2069,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0055,
+          "retrieval_time": 0.0072,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -2106,7 +2106,7 @@
             "make_default_short_help"
           ],
           "retrieved_scores": [
-            18.0,
+            24.0,
             18.0,
             17.0,
             14.0,
@@ -2114,7 +2114,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0044,
+          "retrieval_time": 0.005,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -2159,7 +2159,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0062,
+          "retrieval_time": 0.0056,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -2204,7 +2204,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0044,
+          "retrieval_time": 0.0072,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -2249,7 +2249,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 2,
-          "retrieval_time": 0.0076,
+          "retrieval_time": 0.0087,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -2294,7 +2294,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 2,
-          "retrieval_time": 0.0064,
+          "retrieval_time": 0.0098,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -2339,7 +2339,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 2,
-          "retrieval_time": 0.004,
+          "retrieval_time": 0.0058,
           "error": null,
           "metrics": {
             "top_1": false,
@@ -2376,7 +2376,7 @@
             "format_help_text"
           ],
           "retrieved_scores": [
-            62.0,
+            68.0,
             53.0,
             53.0,
             52.0,
@@ -2384,7 +2384,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0042,
+          "retrieval_time": 0.0086,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -2407,41 +2407,41 @@
             "ParamType"
           ],
           "retrieved_ids": [
-            "_param_type_to_user_string",
-            "BoolParamType",
-            "FuncParamType",
             "ParamType",
-            "CompositeParamType"
+            "_param_type_to_user_string",
+            "_NumberParamTypeBase",
+            "_typer_param_setup_autocompletion_compat",
+            "Parameter.type_cast_value"
           ],
           "retrieved_labels": [
-            "_param_type_to_user_string",
-            "BoolParamType",
-            "FuncParamType",
             "ParamType",
-            "CompositeParamType"
+            "_param_type_to_user_string",
+            "_NumberParamTypeBase",
+            "_typer_param_setup_autocompletion_compat",
+            "type_cast_value"
           ],
           "retrieved_scores": [
+            31.0,
             26.0,
-            25.0,
-            25.0,
-            25.0,
-            24.0
+            24.0,
+            23.0,
+            22.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 4,
-          "retrieval_time": 0.006,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0073,
           "error": null,
           "metrics": {
-            "top_1": false,
-            "top_3": false,
+            "top_1": true,
+            "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
-            "recall_3": 0.0,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
-            "precision_3": 0.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.25
+            "mrr": 1.0
           }
         },
         {
@@ -2466,7 +2466,7 @@
             "set_parameter_source"
           ],
           "retrieved_scores": [
-            39.0,
+            45.0,
             35.0,
             35.0,
             34.0,
@@ -2474,7 +2474,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0027,
+          "retrieval_time": 0.0031,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -2497,41 +2497,41 @@
             "UsageError"
           ],
           "retrieved_ids": [
-            "augment_usage_errors",
             "UsageError",
+            "augment_usage_errors",
             "Command.get_usage",
             "Context.get_usage",
             "UsageError.show"
           ],
           "retrieved_labels": [
-            "augment_usage_errors",
             "UsageError",
+            "augment_usage_errors",
             "get_usage",
             "get_usage",
             "show"
           ],
           "retrieved_scores": [
+            31.0,
             27.0,
-            25.0,
             19.0,
             17.0,
             17.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 2,
-          "retrieval_time": 0.0024,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0044,
           "error": null,
           "metrics": {
-            "top_1": false,
+            "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
+            "recall_1": 1.0,
             "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
+            "precision_1": 1.0,
             "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.5
+            "mrr": 1.0
           }
         },
         {
@@ -2556,7 +2556,7 @@
             "get_param_completion"
           ],
           "retrieved_scores": [
-            31.0,
+            37.0,
             28.0,
             28.0,
             28.0,
@@ -2564,7 +2564,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0032,
+          "retrieval_time": 0.0043,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -2601,7 +2601,7 @@
             "get_param_completion"
           ],
           "retrieved_scores": [
-            31.0,
+            37.0,
             28.0,
             28.0,
             28.0,
@@ -2609,7 +2609,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.003,
+          "retrieval_time": 0.0037,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -2647,14 +2647,14 @@
           ],
           "retrieved_scores": [
             40.0,
-            18.0,
+            24.0,
             18.0,
             14.0,
             14.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0045,
+          "retrieval_time": 0.0035,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -2679,27 +2679,27 @@
           "retrieved_ids": [
             "resolve_color_default",
             "solve_typer_info_defaults",
-            "MixedAnnotatedAndDefaultStyleError",
             "Default",
+            "MixedAnnotatedAndDefaultStyleError",
             "Parameter.get_default"
           ],
           "retrieved_labels": [
             "resolve_color_default",
             "solve_typer_info_defaults",
-            "MixedAnnotatedAndDefaultStyleError",
             "Default",
+            "MixedAnnotatedAndDefaultStyleError",
             "get_default"
           ],
           "retrieved_scores": [
             40.0,
             27.0,
             24.0,
-            18.0,
+            24.0,
             18.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0031,
+          "retrieval_time": 0.0049,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -2725,15 +2725,15 @@
             "get_current_context",
             "get_current_version",
             "Context.lookup_default",
-            "Context.find_object",
-            "Context.find_root"
+            "Context",
+            "Context.find_object"
           ],
           "retrieved_labels": [
             "get_current_context",
             "get_current_version",
             "lookup_default",
-            "find_object",
-            "find_root"
+            "Context",
+            "find_object"
           ],
           "retrieved_scores": [
             53.0,
@@ -2744,7 +2744,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0053,
+          "retrieval_time": 0.007,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -2769,27 +2769,27 @@
           "retrieved_ids": [
             "get_current_context",
             "get_current_version",
+            "Context",
             "Command.make_context",
-            "current_version",
-            "_resolve_context"
+            "current_version"
           ],
           "retrieved_labels": [
             "get_current_context",
             "get_current_version",
+            "Context",
             "make_context",
-            "current_version",
-            "_resolve_context"
+            "current_version"
           ],
           "retrieved_scores": [
             53.0,
             36.0,
+            34.0,
             33.0,
-            32.0,
-            29.0
+            32.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0066,
+          "retrieval_time": 0.0061,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -2813,28 +2813,28 @@
           ],
           "retrieved_ids": [
             "get_current_context",
-            "Command.make_context",
             "Context",
+            "Command.make_context",
             "_build_prompt",
             "current_version"
           ],
           "retrieved_labels": [
             "get_current_context",
-            "make_context",
             "Context",
+            "make_context",
             "_build_prompt",
             "current_version"
           ],
           "retrieved_scores": [
             34.0,
-            18.0,
+            24.0,
             18.0,
             17.0,
             17.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0046,
+          "retrieval_time": 0.0071,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -2879,7 +2879,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0071,
+          "retrieval_time": 0.0082,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -2924,7 +2924,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0061,
+          "retrieval_time": 0.0101,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -2943,16 +2943,16 @@
     },
     "Requests": {
       "aggregate": {
-        "top_1": 0.8182,
-        "top_3": 0.9091,
-        "top_5": 0.9545,
-        "recall_1": 0.8182,
-        "recall_3": 0.9091,
-        "recall_5": 0.9545,
-        "precision_1": 0.8182,
-        "precision_3": 0.303,
-        "precision_5": 0.1909,
-        "mrr": 0.8727
+        "top_1": 0.9545,
+        "top_3": 1.0,
+        "top_5": 1.0,
+        "recall_1": 0.9545,
+        "recall_3": 1.0,
+        "recall_5": 1.0,
+        "precision_1": 0.9545,
+        "precision_3": 0.3333,
+        "precision_5": 0.2,
+        "mrr": 0.9697
       },
       "questions": [
         {
@@ -2963,41 +2963,41 @@
             "RequestException"
           ],
           "retrieved_ids": [
-            "Session.request",
+            "RequestException",
             "request",
-            "HTTPAdapter.request_url",
-            "Session.prepare_request",
-            "HTTPAdapter.send"
+            "Request",
+            "Session.request",
+            "HTTPAdapter.request_url"
           ],
           "retrieved_labels": [
+            "RequestException",
             "request",
+            "Request",
             "request",
-            "request_url",
-            "prepare_request",
-            "send"
+            "request_url"
           ],
           "retrieved_scores": [
+            47.0,
+            39.0,
+            34.0,
             33.0,
-            33.0,
-            32.0,
-            32.0,
-            27.0
+            32.0
           ],
-          "pass_fail": "FAIL",
-          "first_hit_rank": null,
-          "retrieval_time": 0.0055,
+          "pass_fail": "PASS",
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0058,
           "error": null,
           "metrics": {
-            "top_1": false,
-            "top_3": false,
-            "top_5": false,
-            "recall_1": 0.0,
-            "recall_3": 0.0,
-            "recall_5": 0.0,
-            "precision_1": 0.0,
-            "precision_3": 0.0,
-            "precision_5": 0.0,
-            "mrr": 0.0
+            "top_1": true,
+            "top_3": true,
+            "top_5": true,
+            "recall_1": 1.0,
+            "recall_3": 1.0,
+            "recall_5": 1.0,
+            "precision_1": 1.0,
+            "precision_3": 0.3333,
+            "precision_5": 0.2,
+            "mrr": 1.0
           }
         },
         {
@@ -3008,41 +3008,41 @@
             "Session"
           ],
           "retrieved_ids": [
-            "Session.send",
-            "SessionRedirectMixin.send",
-            "HTTPAdapter.build_connection_pool_key_attributes",
             "session",
-            "Session"
+            "Session.send",
+            "Session",
+            "SessionRedirectMixin.send",
+            "HTTPAdapter.build_connection_pool_key_attributes"
           ],
           "retrieved_labels": [
-            "send",
-            "send",
-            "build_connection_pool_key_attributes",
             "session",
-            "Session"
+            "send",
+            "Session",
+            "send",
+            "build_connection_pool_key_attributes"
           ],
           "retrieved_scores": [
+            36.0,
             35.0,
+            34.0,
             32.0,
-            30.0,
-            30.0,
-            28.0
+            30.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 5,
+          "first_hit_rank": 3,
           "retrieval_time": 0.0042,
           "error": null,
           "metrics": {
             "top_1": false,
-            "top_3": false,
+            "top_3": true,
             "top_5": true,
             "recall_1": 0.0,
-            "recall_3": 0.0,
+            "recall_3": 1.0,
             "recall_5": 1.0,
             "precision_1": 0.0,
-            "precision_3": 0.0,
+            "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.2
+            "mrr": 0.3333
           }
         },
         {
@@ -3075,7 +3075,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0028,
+          "retrieval_time": 0.0032,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3120,7 +3120,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0032,
+          "retrieval_time": 0.0037,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3157,7 +3157,7 @@
             "stream_decode_response_unicode"
           ],
           "retrieved_scores": [
-            40.0,
+            46.0,
             13.0,
             12.0,
             11.0,
@@ -3165,7 +3165,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0016,
+          "retrieval_time": 0.0017,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3202,7 +3202,7 @@
             "should_strip_auth"
           ],
           "retrieved_scores": [
-            40.0,
+            46.0,
             14.0,
             13.0,
             12.0,
@@ -3210,7 +3210,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0022,
+          "retrieval_time": 0.0024,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3255,7 +3255,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0049,
+          "retrieval_time": 0.0042,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3300,7 +3300,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0029,
+          "retrieval_time": 0.0041,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3325,27 +3325,27 @@
           "retrieved_ids": [
             "Response",
             "HTTPAdapter.build_response",
-            "MockResponse",
             "get_unicode_from_response",
-            "stream_decode_response_unicode"
+            "stream_decode_response_unicode",
+            "Response.iter_content"
           ],
           "retrieved_labels": [
             "Response",
             "build_response",
-            "MockResponse",
             "get_unicode_from_response",
-            "stream_decode_response_unicode"
+            "stream_decode_response_unicode",
+            "iter_content"
           ],
           "retrieved_scores": [
-            18.0,
+            24.0,
             17.0,
             14.0,
             14.0,
-            14.0
+            10.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.002,
+          "retrieval_time": 0.0025,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3382,7 +3382,7 @@
             "get_connection_with_tls_context"
           ],
           "retrieved_scores": [
-            31.0,
+            37.0,
             29.0,
             29.0,
             28.0,
@@ -3390,7 +3390,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.004,
+          "retrieval_time": 0.0061,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3413,41 +3413,41 @@
             "HTTPBasicAuth"
           ],
           "retrieved_ids": [
-            "_basic_auth_str",
             "HTTPBasicAuth",
+            "_basic_auth_str",
             "HTTPDigestAuth",
             "HTTPProxyAuth",
             "HTTPAdapter.send"
           ],
           "retrieved_labels": [
-            "_basic_auth_str",
             "HTTPBasicAuth",
+            "_basic_auth_str",
             "HTTPDigestAuth",
             "HTTPProxyAuth",
             "send"
           ],
           "retrieved_scores": [
+            51.0,
             46.0,
-            45.0,
             39.0,
             37.0,
             35.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 2,
-          "retrieval_time": 0.0044,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0066,
           "error": null,
           "metrics": {
-            "top_1": false,
+            "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
+            "recall_1": 1.0,
             "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
+            "precision_1": 1.0,
             "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.5
+            "mrr": 1.0
           }
         },
         {
@@ -3458,41 +3458,41 @@
             "HTTPBasicAuth"
           ],
           "retrieved_ids": [
-            "_basic_auth_str",
             "HTTPBasicAuth",
+            "_basic_auth_str",
             "HTTPDigestAuth",
             "HTTPProxyAuth",
             "HTTPAdapter.send"
           ],
           "retrieved_labels": [
-            "_basic_auth_str",
             "HTTPBasicAuth",
+            "_basic_auth_str",
             "HTTPDigestAuth",
             "HTTPProxyAuth",
             "send"
           ],
           "retrieved_scores": [
+            51.0,
             46.0,
-            45.0,
             39.0,
             37.0,
             35.0
           ],
           "pass_fail": "PASS",
-          "first_hit_rank": 2,
-          "retrieval_time": 0.0044,
+          "first_hit_rank": 1,
+          "retrieval_time": 0.0056,
           "error": null,
           "metrics": {
-            "top_1": false,
+            "top_1": true,
             "top_3": true,
             "top_5": true,
-            "recall_1": 0.0,
+            "recall_1": 1.0,
             "recall_3": 1.0,
             "recall_5": 1.0,
-            "precision_1": 0.0,
+            "precision_1": 1.0,
             "precision_3": 0.3333,
             "precision_5": 0.2,
-            "mrr": 0.5
+            "mrr": 1.0
           }
         },
         {
@@ -3517,7 +3517,7 @@
             "send"
           ],
           "retrieved_scores": [
-            45.0,
+            51.0,
             39.0,
             38.0,
             37.0,
@@ -3525,7 +3525,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0041,
+          "retrieval_time": 0.0061,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3551,26 +3551,26 @@
             "MockResponse",
             "Response",
             "HTTPAdapter.build_response",
-            "MockRequest",
-            "MockResponse.getheaders"
+            "MockResponse.getheaders",
+            "get_unicode_from_response"
           ],
           "retrieved_labels": [
             "MockResponse",
             "Response",
             "build_response",
-            "MockRequest",
-            "getheaders"
+            "getheaders",
+            "get_unicode_from_response"
           ],
           "retrieved_scores": [
-            25.0,
-            18.0,
+            31.0,
+            24.0,
             17.0,
             14.0,
             14.0
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0024,
+          "retrieval_time": 0.0048,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3612,7 +3612,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0018,
+          "retrieval_time": 0.0021,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3651,7 +3651,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0018,
+          "retrieval_time": 0.0023,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3696,7 +3696,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0015,
+          "retrieval_time": 0.0018,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3741,7 +3741,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.003,
+          "retrieval_time": 0.0023,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3786,7 +3786,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0019,
+          "retrieval_time": 0.0018,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3831,7 +3831,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0024,
+          "retrieval_time": 0.0037,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3876,7 +3876,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0017,
+          "retrieval_time": 0.0031,
           "error": null,
           "metrics": {
             "top_1": true,
@@ -3921,7 +3921,7 @@
           ],
           "pass_fail": "PASS",
           "first_hit_rank": 1,
-          "retrieval_time": 0.0023,
+          "retrieval_time": 0.0027,
           "error": null,
           "metrics": {
             "top_1": true,
