@@ -5,9 +5,9 @@
 # Run:     docker run -p 7860:7860 -e GOOGLE_API_KEY=... repographai
 # Compose: docker compose up
 #
-# Port 7860 serves the Streamlit UI (public). Backend runs on 127.0.0.1:8000
-# inside the container and is not exposed. This layout is what Hugging Face
-# Spaces expects for a Docker Space.
+# The Streamlit UI listens on $PORT (Render sets this to 10000; local `docker
+# run` uses the 7860 default). The FastAPI backend runs on 127.0.0.1:8000
+# inside the container and is not exposed publicly.
 
 FROM python:3.12-slim AS base
 
@@ -28,14 +28,18 @@ FROM base AS deps
 COPY backend/requirements.txt ./backend-requirements.txt
 COPY frontend/requirements.txt ./frontend-requirements.txt
 
-# sentence-transformers and torch are heavy — install CPU-only torch first
-RUN pip install --no-cache-dir \
-        torch --index-url https://download.pytorch.org/whl/cpu \
-    && pip install --no-cache-dir \
-        sentence-transformers \
-    && pip install --no-cache-dir -r backend-requirements.txt \
+# Lean install for free-tier hosts (Render 512 MB, HF free, etc.).
+# sentence-transformers + torch are intentionally omitted here: the
+# "Semantic search" toggle is off by default and the extra ~1.2 GB
+# blows past the free-tier image/memory budget. Add them back if you
+# upgrade the plan.
+RUN pip install --no-cache-dir -r backend-requirements.txt \
     && pip install --no-cache-dir -r frontend-requirements.txt \
-    && pip install --no-cache-dir google-genai anthropic
+    && pip install --no-cache-dir \
+        google-genai \
+        anthropic \
+        tree-sitter \
+        tree-sitter-typescript
 
 # --- Application layer ---
 FROM deps AS app
@@ -45,26 +49,17 @@ COPY frontend/ /app/frontend/
 COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
-# Cache the ML model in a location owned by /app so it survives the chown
-# below and is reused (not re-downloaded) at container start.
-ENV HF_HOME=/app/.hf_cache \
-    SENTENCE_TRANSFORMERS_HOME=/app/.hf_cache/sentence-transformers
-
-RUN python -c "\
-from sentence_transformers import SentenceTransformer; \
-SentenceTransformer('all-MiniLM-L6-v2', device='cpu'); \
-print('Model cached.')"
-
-# Non-root user for security. On HF Spaces the writable location is /home/user
-# (or /data for persistent storage); we use /app/backend/{repos,.cache} which
-# are ephemeral but writable by appuser.
+# Non-root user for security. On free-tier hosts (Render, Fly, etc.) the
+# writable location is inside the container; we use /app/backend/{repos,.cache}
+# which are ephemeral but writable by appuser.
 RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
 
 RUN mkdir -p /app/backend/repos /app/backend/.cache
 
-# HF Spaces exposes exactly one port; 7860 is the default. Streamlit binds
-# to 7860 in start.sh; the FastAPI backend runs on 127.0.0.1:8000 internally.
+# Streamlit binds to $PORT (set by the platform: 10000 on Render, 7860 on HF,
+# etc.). Falls back to 7860 for local `docker run` invocations.
+ENV PORT=7860
 EXPOSE 7860
 
 CMD ["/app/start.sh"]

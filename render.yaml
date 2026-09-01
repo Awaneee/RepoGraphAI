@@ -1,0 +1,33 @@
+# Render blueprint — https://render.com/docs/blueprint-spec
+#
+# One-click deploy: on Render, click "New" → "Blueprint" → paste this repo's
+# URL. Render will read this file and create the service automatically.
+#
+# Manual deploy is equally fine: "New" → "Web Service" → connect this repo →
+# runtime "Docker". The dashboard values below become the defaults.
+
+services:
+  - type: web
+    name: repographai
+    runtime: docker
+    plan: free                # 512 MB RAM, sleeps after 15 min of no traffic
+    region: oregon            # change to your nearest region if you like
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /_stcore/health   # Streamlit's built-in health endpoint
+
+    envVars:
+      # Provide exactly one LLM key via the Render dashboard — mark as "sync: false"
+      # so Render prompts you for it instead of reading it from this file.
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+
+      # Optional knobs
+      - key: DEFAULT_LLM_PROVIDER
+        value: gemini
+      - key: MAX_REPO_SIZE_MB
+        value: "100"          # keep well under the 512 MB memory ceiling
+      - key: LOG_LEVEL
+        value: INFO

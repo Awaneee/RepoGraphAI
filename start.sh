@@ -25,7 +25,7 @@ for _ in $(seq 1 30); do
 done
 
 exec streamlit run /app/frontend/app.py \
-    --server.port 7860 \
+    --server.port "${PORT:-7860}" \
     --server.address 0.0.0.0 \
     --server.headless true \
     --server.enableXsrfProtection false \

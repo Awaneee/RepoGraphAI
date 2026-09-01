@@ -3,8 +3,9 @@ title: RepoGraphAI
 emoji: 🕸️
 colorFrom: blue
 colorTo: purple
-sdk: docker
-app_port: 7860
+sdk: streamlit
+sdk_version: 1.35.0
+app_file: space_app.py
 pinned: false
 license: mit
 short_description: Ask natural-language questions about any Python/TS repo.
@@ -23,8 +24,10 @@ search.
 
 ## How it works on this Space
 
-Both processes run inside one Docker container. Streamlit binds to the
-public port (`7860`). FastAPI runs on `127.0.0.1:8000` internally.
+HF Spaces runs `streamlit run space_app.py`. `space_app.py` launches the
+FastAPI backend as a subprocess on `127.0.0.1:8000`, waits for it to be
+healthy, then hands off to the existing Streamlit UI in `frontend/app.py`.
+No Docker, no port mapping — just Streamlit SDK.
 
 ## Environment (set as Space secrets)
 
