@@ -1,8 +1,11 @@
 services:
-  api:
+  app:
     build: .
+    # Port 7860 = Streamlit frontend (public). The FastAPI backend on 8000
+    # is internal to the container; if you want to poke it directly, add
+    # "- 8000:8000" here and change start.sh to bind uvicorn to 0.0.0.0.
     ports:
-      - "8000:8000"
+      - "7860:7860"
     environment:
       # LLM provider — set exactly one of these
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
@@ -22,13 +25,14 @@ services:
     volumes:
       # Mount local dirs so repos and graphs persist across container restarts.
       # Remove these mounts to use ephemeral container storage instead.
-      - ./repos:/app/repos
-      - ./.cache:/app/.cache
+      - ./repos:/app/backend/repos
+      - ./.cache:/app/backend/.cache
 
     restart: unless-stopped
 
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs')"]
+      # Streamlit's root page is served on 7860; backend is internal.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:7860/')"]
       interval: 30s
       timeout: 10s
       retries: 3
