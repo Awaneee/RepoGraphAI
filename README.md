@@ -1,12 +1,12 @@
 # RepoGraphAI
 
-A Python FastAPI backend that builds a typed knowledge graph from any Python repository and answers natural-language questions about it using graph-native retrieval (no embeddings, no vector databases).
+A Python FastAPI backend that builds a typed knowledge graph from any Python **or TypeScript / JavaScript** repository and answers natural-language questions about it using graph-native retrieval (no embeddings, no vector databases). A Streamlit frontend is included.
 
 ---
 
 ## Problem Statement
 
-Reading unfamiliar codebases is expensive. Developers spend hours navigating file trees, tracing call chains, and piecing together class hierarchies before they can reason about a change or answer a question. RepoGraphAI automates this by converting a Python repository into a queryable knowledge graph and answering questions like:
+Reading unfamiliar codebases is expensive. Developers spend hours navigating file trees, tracing call chains, and piecing together class hierarchies before they can reason about a change or answer a question. RepoGraphAI automates this by converting a repository into a queryable knowledge graph and answering questions like:
 
 - "How does authentication work?"
 - "What methods does GraphBuilder expose?"
@@ -36,8 +36,9 @@ RepositoryService    GraphService      GraphService
                             |        (Anthropic or Gemini)
                             v
                +------------------------+
-               |      CodeParser        |
-               |  (AST-based, Python)   |
+               |   CodeParser (Python)  |
+               |   TypeScriptParser     |
+               |   (tree-sitter, TS/JS) |
                +----------+-------------+
                           |
                           v
@@ -85,7 +86,7 @@ RepositoryService    GraphService      GraphService
 
 | Type | Description |
 |------|-------------|
-| File | A Python source file (.py). ID = file path. |
+| File | A source file (`.py` or `.ts` / `.tsx` / `.js` / `.jsx` / `.mjs` / `.cjs`). ID = file path. |
 | Module | A dotted import path, e.g. fastapi, os.path. Classified as stdlib / third_party / internal. |
 | Class | A class definition. Hub for INHERITS, CONTAINS, INSTANTIATES edges. |
 | Function | A module-level (top-level) function. |
@@ -183,12 +184,25 @@ These are retrieval metrics -- they measure whether the correct graph node appea
 
 ```bash
 cd backend
-pip install fastapi uvicorn pydantic pydantic-settings gitpython python-dotenv
+pip install fastapi uvicorn pydantic pydantic-settings gitpython python-dotenv networkx
 
 # Optional: for LLM answers
 pip install anthropic       # Anthropic Claude
 pip install google-genai    # Google Gemini
+
+# Optional: for TypeScript / JavaScript support
+pip install tree-sitter tree-sitter-typescript
 ```
+
+### Frontend (Streamlit)
+
+```bash
+pip install -r frontend/requirements.txt
+streamlit run frontend/app.py
+```
+
+The frontend defaults to `http://localhost:8000` for the backend; override with
+`REPOGRAPHAI_BACKEND_URL` or the sidebar's Advanced settings.
 
 ### Configuration
 
@@ -290,12 +304,15 @@ If no LLM key is configured: `answer` is null, `llm_context` is populated (usefu
 ## Technologies Actually Present
 
 - FastAPI -- web framework
+- Streamlit -- frontend chat UI
 - Pydantic + pydantic-settings -- data validation and settings
-- GitPython -- repository cloning
-- Python ast module -- purely syntactic code analysis (no runtime imports)
+- GitPython -- repository cloning (shallow, `--depth=1`)
+- Python `ast` module -- purely syntactic Python analysis (no runtime imports)
+- tree-sitter + tree-sitter-typescript -- syntactic TS/JS analysis (optional)
 - NetworkX -- graph analysis utilities
 - anthropic SDK -- Claude LLM provider (optional)
 - google-genai -- Gemini LLM provider (optional)
+- sentence-transformers -- opt-in embedding re-ranker (optional)
 - pickle -- internal graph cache
 - threading.Lock -- concurrent clone safety
 
@@ -306,29 +323,27 @@ This project does NOT use:
 - Kubernetes or Docker
 - Kafka or message queues
 - Neo4j or any graph database
-- Vector databases (Chroma, Qdrant, pgvector, etc.)
+- Vector databases (Chroma, Qdrant, pgvector, etc.) -- embeddings, when enabled, are computed on-the-fly and re-rank the keyword-ranked candidates; no persistent vector store
 - Celery
-- Text embeddings or semantic similarity
 
 ---
 
 ## Known Limitations
 
-1. **Python only** -- CodeParser handles only .py files.
-2. **Keyword-based retrieval** -- No embeddings; questions with no keyword overlap may return poor results.
-3. **Full re-clone on each request** -- The cache avoids re-parsing, but the git clone step always runs.
-4. **Synchronous** -- All operations are synchronous; requests queue under load.
-5. **No authentication** -- Suitable for local use only.
-6. **Clone timeout** -- SIGALRM only works in the Unix main thread; test/worker threads have no timeout.
-7. **Source code truncation** -- Functions > 50 lines are truncated to first 30 + last 5 lines.
+1. **Python and TypeScript/JavaScript only** -- other languages (Go, Rust, Java, C++, Ruby, …) are not parsed; the graph for such repos will be effectively empty.
+2. **Keyword-based retrieval** -- No embeddings by default; questions with no keyword overlap may return poor results. Optional semantic re-ranking is available via the sidebar's "Semantic search" toggle.
+3. **Synchronous** -- All operations are synchronous; requests queue under load.
+4. **No authentication** -- Suitable for local use only.
+5. **Clone timeout** -- SIGALRM only works in the Unix main thread; test/worker threads have no timeout.
+6. **Source code truncation** -- Functions > 50 lines are truncated to first 30 + last 5 lines.
+7. **Shallow-clone tradeoff** -- Repos are cloned with `--depth=1 --single-branch --no-tags` for speed; historical `git blame` / commit-diff features are not available inside the graph.
 
 ---
 
 ## Future Work
 
 - Async clone and graph build (asyncio subprocess or BackgroundTasks)
-- TypeScript / Java / Go parser support
-- Hybrid retrieval: graph keyword signals + embedding re-ranking
+- Additional language parsers (Java, Go, Rust)
+- Deeper hybrid retrieval (embedding re-ranker is present as an opt-in toggle)
 - Incremental graph update (diff-based re-parse on file change)
 - Authentication / rate limiting layer
-- Streaming LLM responses via Server-Sent Events
