@@ -299,83 +299,120 @@ for k, v in {
     "session_id":   None,
     "session_info": None,
     "last_repo":    "",
+    "health":       None,   # cached health dict, refreshed on demand
 }.items():
     if k not in st.session_state:
         st.session_state[k] = v
 
+
+def _fetch_health(url: str) -> dict | None:
+    try:
+        r = requests.get(f"{url}/health", timeout=3)
+        return r.json() if r.status_code == 200 else None
+    except Exception:
+        return None
+
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("# 🕸️ RepoGraphAI")
-    st.markdown("<p style='color:#8b949e;font-size:0.85rem;margin-top:-10px'>Graph-native RAG for codebase Q&A</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#8b949e;font-size:0.85rem;margin-top:-10px'>Ask questions about any Python repo</p>", unsafe_allow_html=True)
     st.divider()
 
-    backend_url = st.text_input(
-        "🔗 Backend URL",
-        value=_DEFAULT_BACKEND,
-        help="Set REPOGRAPHAI_BACKEND_URL env var to change the default.",
-    ).rstrip("/")
+    # ── Primary input: repo URL ──────────────────────────────────────────
+    # Starter-repo buttons on the welcome screen prefill this via session_state.
+    if "_starter_repo" in st.session_state:
+        st.session_state["repo_url_input"] = st.session_state.pop("_starter_repo")
 
     repo_url = st.text_input(
-        "📦 Repository URL",
+        "GitHub repository",
         placeholder="https://github.com/psf/requests",
+        help="Paste any public Python repo URL.",
+        key="repo_url_input",
     )
 
-    api_key = st.text_input("🔑 API Key", type="password", placeholder="Optional")
-
-    st.divider()
-    st.markdown("<p style='color:#8b949e;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em'>Retrieval</p>", unsafe_allow_html=True)
-
-    col1, col2 = st.columns(2)
-    with col1:
-        top_k = st.slider("Top-K", 1, 30, 10, help="Nodes retrieved per query")
-    with col2:
-        max_hops = st.slider("Hops", 0, 3, 1, help="Graph expansion depth")
-
-    use_embeddings = st.toggle("🔀 Hybrid retrieval", help="Keyword + semantic (sentence-transformers)")
-
-    st.divider()
-    st.markdown("<p style='color:#8b949e;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em'>Mode</p>", unsafe_allow_html=True)
-
-    use_session = st.toggle("💬 Session mode", help="Build graph once, reuse for follow-ups")
-    use_stream  = st.toggle("⚡ Stream tokens", value=True, help="Live word-by-word output")
-
-    st.divider()
-
-    # Session status
+    # ── Live status: current session or ready state ─────────────────────
     if st.session_state.session_id:
         info = st.session_state.session_info or {}
         st.markdown(
             f'<div class="session-active"><div class="session-dot"></div>'
-            f'Session active &nbsp;·&nbsp; {info.get("node_count","?")} nodes</div>',
+            f'Loaded &nbsp;·&nbsp; {info.get("node_count","?")} nodes &nbsp;·&nbsp; {info.get("edge_count","?")} edges</div>',
             unsafe_allow_html=True,
         )
-        st.caption(f'↳ {info.get("edge_count","?")} edges in graph')
-        if st.button("✕ End session", use_container_width=True):
+        if st.button("Load a different repo", use_container_width=True):
             st.session_state.session_id   = None
             st.session_state.session_info = None
             st.session_state.last_repo    = ""
+            st.session_state.messages     = []
             st.rerun()
 
-    # Health check
-    if st.button("🔍 Server health", use_container_width=True):
-        try:
-            r = requests.get(f"{backend_url}/health", timeout=5)
-            h = r.json()
-            if h.get("status") == "ok":
-                st.success("✓ Server healthy")
-            else:
-                st.warning("⚠ Server degraded")
-            c1, c2 = st.columns(2)
-            c1.metric("LLM", "✓" if h.get("llm_configured") else "✗")
-            c2.metric("Embeddings", "✓" if h.get("embedding_available") else "✗")
-        except Exception as e:
-            st.error(f"Cannot reach server: {e}")
+    st.divider()
 
-    if st.button("🗑️ Clear chat", use_container_width=True):
-        st.session_state.messages   = []
-        st.session_state.session_id = None
-        st.session_state.session_info = None
-        st.rerun()
+    # ── Advanced: everything technical goes here, collapsed by default ──
+    with st.expander("⚙️ Advanced settings", expanded=False):
+        backend_url = st.text_input(
+            "Backend URL",
+            value=_DEFAULT_BACKEND,
+            help="Where the FastAPI server is running.",
+        ).rstrip("/")
+
+        api_key = st.text_input(
+            "API key",
+            type="password",
+            placeholder="Only if your backend requires one",
+        )
+
+        st.markdown("<p style='color:#8b949e;font-size:0.75rem;margin-top:12px'>Retrieval tuning</p>", unsafe_allow_html=True)
+        col1, col2 = st.columns(2)
+        with col1:
+            top_k = st.slider("Results", 1, 30, 10, help="How many code nodes to retrieve per question.")
+        with col2:
+            max_hops = st.slider("Graph depth", 0, 3, 1, help="How far to expand along call/import edges.")
+
+        use_embeddings = st.toggle(
+            "Semantic search",
+            value=False,
+            help="Use embeddings on top of keyword search. Slower first query, better recall.",
+        )
+
+    st.divider()
+
+    # ── Live backend status (auto-fetched, refresh button) ──────────────
+    if st.session_state.health is None:
+        st.session_state.health = _fetch_health(backend_url)
+    h = st.session_state.health
+
+    if h is None:
+        st.markdown(
+            '<div style="display:flex;align-items:center;gap:8px;color:#f85149;font-size:0.85rem">'
+            '<span style="width:8px;height:8px;border-radius:50%;background:#f85149;"></span>'
+            'Backend unreachable</div>',
+            unsafe_allow_html=True,
+        )
+        st.caption(f"Tried `{backend_url}`. Open Advanced to change.")
+    else:
+        llm_ok = h.get("llm_configured")
+        emb_ok = h.get("embedding_available")
+        dot_color = "#3fb950" if llm_ok else "#d29922"
+        label = "Ready" if llm_ok else "Ready (no LLM key — retrieval only)"
+        st.markdown(
+            f'<div style="display:flex;align-items:center;gap:8px;color:#8b949e;font-size:0.85rem">'
+            f'<span style="width:8px;height:8px;border-radius:50%;background:{dot_color};"></span>'
+            f'{label}</div>',
+            unsafe_allow_html=True,
+        )
+        st.caption(f"LLM: {'✓' if llm_ok else '—'} · Embeddings: {'✓' if emb_ok else '—'}")
+
+    c1, c2 = st.columns(2)
+    with c1:
+        if st.button("Refresh", use_container_width=True):
+            st.session_state.health = _fetch_health(backend_url)
+            st.rerun()
+    with c2:
+        if st.button("Clear chat", use_container_width=True):
+            st.session_state.messages   = []
+            st.session_state.session_id = None
+            st.session_state.session_info = None
+            st.rerun()
 
 
 # ── Header ────────────────────────────────────────────────────────────────────
@@ -638,27 +675,41 @@ if not st.session_state.messages:
     st.markdown("""
     <div class="welcome-card">
         <h2>🕸️ RepoGraphAI</h2>
-        <p>Ask natural-language questions about any GitHub repository.<br>
-        The answer is grounded in a typed knowledge graph built from the code — not just file search.</p>
+        <p>Ask natural-language questions about any Python repository on GitHub.<br>
+        Answers are grounded in a knowledge graph built from the actual code — classes, methods, imports, call sites.</p>
         <div class="welcome-steps">
-            <div class="welcome-step"><span class="step-num">1</span>Paste a GitHub URL in the sidebar</div>
-            <div class="welcome-step"><span class="step-num">2</span>Type a question below</div>
-            <div class="welcome-step"><span class="step-num">3</span>Watch the answer stream</div>
+            <div class="welcome-step"><span class="step-num">1</span>Paste a repo URL in the sidebar</div>
+            <div class="welcome-step"><span class="step-num">2</span>Ask a question below</div>
+            <div class="welcome-step"><span class="step-num">3</span>Explore with follow-ups</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Example questions
-    st.markdown("<p style='text-align:center;color:#8b949e;font-size:0.85rem;margin-top:1rem'>Try these with <code>https://github.com/psf/requests</code></p>", unsafe_allow_html=True)
+    # Starter repos users can load with one click
+    st.markdown("<p style='text-align:center;color:#8b949e;font-size:0.85rem;margin-top:1rem;margin-bottom:0.5rem'>Try a repo</p>", unsafe_allow_html=True)
+    starter_repos = [
+        ("psf/requests",           "https://github.com/psf/requests"),
+        ("tiangolo/typer",         "https://github.com/tiangolo/typer"),
+        ("pydantic/pydantic",      "https://github.com/pydantic/pydantic"),
+    ]
+    rc = st.columns(len(starter_repos))
+    for col, (label, url) in zip(rc, starter_repos):
+        with col:
+            if st.button(label, use_container_width=True, key=f"starter_{label}"):
+                st.session_state["_starter_repo"] = url
+                st.rerun()
+
+    # Example questions (generic — work for most Python repos)
+    st.markdown("<p style='text-align:center;color:#8b949e;font-size:0.85rem;margin-top:1.25rem;margin-bottom:0.5rem'>Or try a question</p>", unsafe_allow_html=True)
     ex_cols = st.columns(3)
     examples = [
-        "How does Session.send work?",
-        "What does HTTPAdapter do?",
-        "How are redirects handled?",
+        "What does this project do?",
+        "Show me the main entry points",
+        "How is authentication handled?",
     ]
     for col, ex in zip(ex_cols, examples):
         with col:
-            if st.button(f'"{ex}"', use_container_width=True):
+            if st.button(ex, use_container_width=True, key=f"ex_{ex}"):
                 st.session_state["_prefill"] = ex
                 st.rerun()
 
@@ -689,30 +740,23 @@ if question and repo_url:
     with st.chat_message("assistant", avatar="🕸️"):
         answer = None
 
-        if use_session:
-            # Create session if none exists or repo changed
-            if not st.session_state.session_id or st.session_state.last_repo != repo_url:
-                ok = _create_session(repo_url)
-                if not ok:
-                    st.stop()
+        # Always use session mode: build graph once per repo, reuse for follow-ups.
+        if not st.session_state.session_id or st.session_state.last_repo != repo_url:
+            ok = _create_session(repo_url)
+            if not ok:
+                st.stop()
 
-            answer = _ask_session(question)
+        answer = _ask_session(question)
 
-            # Session expired (404) — auto-rebuild once, then fall back to streaming
-            if answer is None and not st.session_state.session_id:
-                st.info("Rebuilding session after expiry…")
-                ok = _create_session(repo_url)
-                if ok:
-                    answer = _ask_session(question)
-                else:
-                    # Session creation itself failed — fall back to streaming
-                    st.warning("Session rebuild failed. Falling back to streaming mode.")
-                    answer = _ask_streaming(question)
-
-        elif use_stream:
-            answer = _ask_streaming(question)
-        else:
-            answer = _ask_sync(question)
+        # Session expired (server restart) — auto-rebuild once
+        if answer is None and not st.session_state.session_id:
+            st.info("Rebuilding graph after server restart…")
+            ok = _create_session(repo_url)
+            if ok:
+                answer = _ask_session(question)
+            else:
+                st.warning("Rebuild failed. Falling back to one-shot mode.")
+                answer = _ask_streaming(question)
 
     if answer and answer not in ("(offline)",):
         st.session_state.messages.append({"role": "assistant", "content": answer})

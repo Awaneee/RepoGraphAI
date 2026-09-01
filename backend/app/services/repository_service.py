@@ -351,7 +351,14 @@ class RepositoryService:
                     signal.alarm(_CLONE_TIMEOUT_SECONDS)
 
                 try:
-                    Repo.clone_from(clone_url, local_path)
+                    # Shallow clone (depth=1, no tags): we only need the current
+                    # tree for static analysis — history is dead weight and
+                    # dominates wall time on large repos.
+                    Repo.clone_from(
+                        clone_url,
+                        local_path,
+                        multi_options=["--depth=1", "--single-branch", "--no-tags"],
+                    )
                 finally:
                     if _use_alarm:
                         signal.alarm(0)
