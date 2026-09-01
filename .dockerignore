@@ -1,0 +1,63 @@
+# Prevent build context bloat. Anything listed here is invisible to the
+# `docker build` context and won't be COPY-able. Keeps the image lean on
+# free-tier hosts.
+
+# --- Local runtime state (backend service writes here at runtime) ---
+backend/repos/
+backend/.cache/
+backend/data/generated_candidates.json
+repos/
+.cache/
+
+# --- Python caches ---
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+
+# --- Virtualenvs ---
+.venv/
+venv/
+backend/.venv/
+
+# --- Git ---
+.git/
+.gitignore
+.gitattributes
+
+# --- Docs, notebooks, ancillary reports ---
+notebooks/
+docs/
+*.md
+!README.md
+todo.md
+todo1.md
+benchmark_error_analysis.md
+benchmark_generation_report.md
+backend/benchmark_generation_report.md
+PROJECT_MAP.md
+
+# --- Test artifacts / scratch ---
+backend/tests/
+backend/scratch/
+backend/scripts/
+backend/test_*.py
+backend/generated_candidates.json
+backend/conftest.py
+backend/*.png
+backend/mypy.ini
+backend/pyproject.toml
+
+# --- Env / secrets ---
+.env
+backend/.env
+
+# --- IDE ---
+.vscode/
+.idea/
+
+# --- OS ---
+.DS_Store
+Thumbs.db

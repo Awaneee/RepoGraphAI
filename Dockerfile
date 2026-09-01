@@ -44,18 +44,18 @@ RUN pip install --no-cache-dir -r backend-requirements.txt \
 # --- Application layer ---
 FROM deps AS app
 
-COPY backend/ /app/backend/
-COPY frontend/ /app/frontend/
-COPY start.sh /app/start.sh
-RUN chmod +x /app/start.sh
+# Create the non-root user BEFORE the big COPY so we can use --chown and
+# avoid a duplicate 1+ GB layer from a post-copy `chown -R`.
+RUN useradd -m appuser
 
-# Non-root user for security. On free-tier hosts (Render, Fly, etc.) the
-# writable location is inside the container; we use /app/backend/{repos,.cache}
-# which are ephemeral but writable by appuser.
-RUN useradd -m appuser && chown -R appuser:appuser /app
+COPY --chown=appuser:appuser backend/  /app/backend/
+COPY --chown=appuser:appuser frontend/ /app/frontend/
+COPY --chown=appuser:appuser start.sh  /app/start.sh
+RUN chmod +x /app/start.sh \
+    && mkdir -p /app/backend/repos /app/backend/.cache \
+    && chown appuser:appuser /app/backend/repos /app/backend/.cache
+
 USER appuser
-
-RUN mkdir -p /app/backend/repos /app/backend/.cache
 
 # Streamlit binds to $PORT (set by the platform: 10000 on Render, 7860 on HF,
 # etc.). Falls back to 7860 for local `docker run` invocations.
