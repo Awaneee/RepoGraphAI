@@ -2,6 +2,12 @@
 
 A Python FastAPI backend that builds a typed knowledge graph from any Python **or TypeScript / JavaScript** repository and answers natural-language questions about it using graph-native retrieval (no embeddings, no vector databases). A Streamlit frontend is included.
 
+**Live demo:** [repographai.onrender.com](https://repographai.onrender.com)
+
+> Free-tier hosting: the service sleeps after 15 min of inactivity, so the first
+> request after a nap takes ~30 s to wake up. Paste any public Python or TS/JS
+> repo URL in the sidebar and ask a question — no signup required.
+
 ---
 
 ## Problem Statement
