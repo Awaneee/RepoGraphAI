@@ -10,8 +10,14 @@
 set -euo pipefail
 
 cd /app/backend
+
+# Uvicorn's --log-level CLI arg only accepts lowercase (critical/error/warning/
+# info/debug/trace). LOG_LEVEL may be set to "INFO" (upper) for Python logging;
+# lowercase it here before passing to uvicorn.
+_uv_log_level="$(printf '%s' "${LOG_LEVEL:-info}" | tr '[:upper:]' '[:lower:]')"
+
 uvicorn app.main:app --host 127.0.0.1 --port 8000 \
-    --log-level "${LOG_LEVEL:-info}" &
+    --log-level "${_uv_log_level}" &
 
 export REPOGRAPHAI_BACKEND_URL="http://127.0.0.1:8000"
 
