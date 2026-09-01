@@ -687,9 +687,7 @@ class ContextBuilder:
             and resolution.intent.categories[0] == IntentCategory.OVERVIEW
             and len(resolution.matches) < effective_k
         ):
-            resolution = self._augment_with_structural_nodes(
-                resolution, question, effective_k
-            )
+            resolution = self._augment_with_structural_nodes(resolution, question, effective_k)
 
         # --- Step 2: per-node retrieval ----------------------------------
         retrieval_results = self._collect_retrieval_results(resolution.matches)
@@ -793,8 +791,17 @@ class ContextBuilder:
                     return 1
                 return 2
             # Penalise scripts, migrations, tests, examples
-            if any(seg in path for seg in ("/scripts/", "/migrations/", "/tests/",
-                                            "/test_", "/examples/", "/scratch/")):
+            if any(
+                seg in path
+                for seg in (
+                    "/scripts/",
+                    "/migrations/",
+                    "/tests/",
+                    "/test_",
+                    "/examples/",
+                    "/scratch/",
+                )
+            ):
                 return 9
             return 5  # default (top-level files, docs)
 
@@ -803,13 +810,15 @@ class ContextBuilder:
             node = node_index.get(node_id)
             if node is None or node.type not in type_priority:
                 continue
-            structural.append((
-                type_priority[node.type],
-                _path_priority(node),
-                -deg,
-                node_id,
-                node,
-            ))
+            structural.append(
+                (
+                    type_priority[node.type],
+                    _path_priority(node),
+                    -deg,
+                    node_id,
+                    node,
+                )
+            )
 
         structural.sort()  # by (type, path priority, -degree, id)
 
