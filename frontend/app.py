@@ -5,301 +5,465 @@ Run: streamlit run frontend/app.py
 
 import json
 import os
+from datetime import datetime
 
 import requests
 import streamlit as st
 
-# Read backend URL from environment variable if set (useful for deployment)
-# Falls back to localhost:8000 — change this if running backend on a different port
 _DEFAULT_BACKEND = os.getenv("REPOGRAPHAI_BACKEND_URL", "http://localhost:8000")
 
-# ── Page config (must be first) ───────────────────────────────────────────────
 st.set_page_config(
-    page_title="RepoGraphAI",
-    page_icon="🕸️",
+    page_title="RepoGraphAI — Python repository intelligence",
+    page_icon="◆",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# ── Custom CSS ────────────────────────────────────────────────────────────────
+# ── CSS ───────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-/* ── Global ── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
+:root {
+  --bg-base:      #0A0E17;
+  --bg-panel:     #101725;
+  --bg-inset:     #0C1220;
+  --bg-elevated:  #131B2B;
+  --border-hair:  rgba(255,255,255,0.06);
+  --border-lit:   rgba(255,255,255,0.14);
+  --mint:         #10B981;
+  --mint-soft:    #34D399;
+  --mint-glow:    rgba(16,185,129,0.18);
+  --user-blue:    #60A5FA;
+  --text-hi:      #F1F5F9;
+  --text-mid:     #94A3B8;
+  --text-low:     #64748B;
+  --warn:         #FBBF24;
+  --err:          #F87171;
 }
 
-/* Hide Streamlit default chrome */
+html, body, [class*="css"] {
+  font-family: 'Inter', system-ui, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+}
 #MainMenu, footer, header { visibility: hidden; }
 .stDeployButton { display: none; }
 
-/* ── App background ── */
-.stApp {
-    background: linear-gradient(135deg, #0d1117 0%, #0f1923 100%);
+.stApp { background: var(--bg-base); color: var(--text-mid); }
+.main .block-container {
+  max-width: 1100px;
+  padding-top: 1.5rem;
+  padding-bottom: 3rem;
 }
 
-/* ── Sidebar ── */
+/* ── Sidebar ────────────────────────────────────────────────── */
 [data-testid="stSidebar"] {
-    background: #0d1117;
-    border-right: 1px solid #21262d;
+  background: var(--bg-inset);
+  border-right: 1px solid var(--border-hair);
+  width: 260px !important;
 }
+[data-testid="stSidebar"] > div:first-child { padding-top: 1.2rem; }
+[data-testid="stSidebar"] hr { display: none; }
+
 [data-testid="stSidebar"] .stMarkdown h1 {
-    background: linear-gradient(90deg, #388bfd, #58a6ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  color: var(--text-hi);
+  font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em;
+  margin: 0 0 4px 0;
 }
 
-/* ── Inputs ── */
+.eyebrow {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--text-low); font-weight: 700; margin: 0 0 8px 0;
+}
+.hairline { border: 0; border-top: 1px solid var(--border-hair); margin: 18px 0; }
+
+/* Inputs */
 .stTextInput input, .stTextArea textarea {
-    background: #161b22 !important;
-    border: 1px solid #30363d !important;
-    border-radius: 8px !important;
-    color: #e6edf3 !important;
-    font-family: 'Inter', sans-serif !important;
-    transition: border-color 0.2s !important;
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border-hair) !important;
+  border-radius: 8px !important;
+  color: var(--text-hi) !important;
+  font-family: 'Inter', sans-serif !important;
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out !important;
+  font-size: 13px !important;
 }
+.stTextInput input:hover, .stTextArea textarea:hover { border-color: var(--border-lit) !important; }
 .stTextInput input:focus, .stTextArea textarea:focus {
-    border-color: #388bfd !important;
-    box-shadow: 0 0 0 3px rgba(56,139,253,0.15) !important;
+  border-color: var(--mint) !important;
+  box-shadow: 0 0 0 3px var(--mint-glow) !important;
+  outline: none !important;
+}
+.stTextInput label, .stTextArea label, .stSlider label {
+  color: var(--text-mid) !important; font-size: 12px !important; font-weight: 500 !important;
+}
+[data-testid="stSidebar"] .stTextInput input {
+  font-family: 'JetBrains Mono', ui-monospace, monospace !important;
+  font-size: 12px !important;
+  color: var(--text-hi) !important;
+}
+[data-testid="stSidebar"] .stTextInput input[type="password"] {
+  font-family: 'Inter', sans-serif !important;
 }
 
-/* ── Sliders ── */
-.stSlider [data-testid="stSlider"] > div > div > div {
-    background: #388bfd;
+/* Sliders */
+.stSlider [data-baseweb="slider"] > div > div { background: var(--mint) !important; }
+.stSlider [role="slider"] {
+  background: var(--text-hi) !important;
+  box-shadow: 0 0 0 2px var(--bg-base) !important;
+}
+.stSlider [data-testid="stTickBar"] { display: none !important; }
+
+/* Toggle */
+[data-testid="stToggle"] label { color: var(--text-mid) !important; font-size: 13px !important; }
+
+/* Default buttons */
+.stButton > button, .stFormSubmitButton > button {
+  background: var(--bg-elevated) !important;
+  color: var(--text-mid) !important;
+  border: 1px solid var(--border-hair) !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 13px !important;
+  transition: all 150ms ease-out !important;
+  padding: 0.45rem 0.9rem !important;
+  box-shadow: none !important;
+}
+.stButton > button:hover, .stFormSubmitButton > button:hover {
+  border-color: var(--mint) !important;
+  color: var(--text-hi) !important;
+  transform: none !important;
+  background: rgba(16,185,129,0.06) !important;
 }
 
-/* ── Buttons ── */
-.stButton > button {
-    background: linear-gradient(135deg, #1f6feb, #388bfd) !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-    font-family: 'Inter', sans-serif !important;
-    transition: all 0.2s !important;
-    padding: 0.5rem 1rem !important;
-}
-.stButton > button:hover {
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 20px rgba(56,139,253,0.4) !important;
-}
-.stButton > button:active { transform: translateY(0) !important; }
-
-/* ── Chat messages ── */
-[data-testid="stChatMessage"] {
-    background: #161b22 !important;
-    border: 1px solid #21262d !important;
-    border-radius: 12px !important;
-    padding: 1rem !important;
-    margin-bottom: 0.75rem !important;
-}
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-    background: #1c2434 !important;
-    border-color: #1f3a5f !important;
-}
-
-/* ── Chat input ── */
+/* Chat input */
 [data-testid="stChatInput"] {
-    background: #161b22 !important;
-    border: 1px solid #30363d !important;
-    border-radius: 12px !important;
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border-hair) !important;
+  border-radius: 12px !important;
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
 }
 [data-testid="stChatInput"]:focus-within {
-    border-color: #388bfd !important;
-    box-shadow: 0 0 0 3px rgba(56,139,253,0.15) !important;
+  border-color: var(--mint) !important;
+  box-shadow: 0 0 0 3px var(--mint-glow) !important;
 }
 [data-testid="stChatInput"] textarea {
-    background: transparent !important;
-    color: #e6edf3 !important;
-    font-family: 'Inter', sans-serif !important;
+  background: transparent !important;
+  color: var(--text-hi) !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 14px !important;
 }
+[data-testid="stChatInput"] button {
+  background: transparent !important;
+}
+[data-testid="stChatInput"] button svg { fill: var(--mint) !important; color: var(--mint) !important; }
 
-/* ── Expanders ── */
+/* Expanders */
 [data-testid="stExpander"] {
-    background: #0d1117 !important;
-    border: 1px solid #21262d !important;
-    border-radius: 10px !important;
+  background: var(--bg-panel) !important;
+  border: 1px solid var(--border-hair) !important;
+  border-radius: 10px !important;
 }
 [data-testid="stExpander"] summary {
-    color: #8b949e !important;
-    font-size: 0.85rem !important;
-    font-weight: 500 !important;
+  color: var(--text-mid) !important; font-size: 13px !important; font-weight: 500 !important;
 }
-[data-testid="stExpander"] summary:hover { color: #e6edf3 !important; }
+[data-testid="stExpander"] summary:hover { color: var(--text-hi) !important; }
 
-/* ── Metrics ── */
+/* Metrics */
 [data-testid="stMetric"] {
-    background: #161b22;
-    border: 1px solid #21262d;
-    border-radius: 10px;
-    padding: 0.75rem 1rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-hair);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
 }
-[data-testid="stMetricValue"] { color: #58a6ff !important; font-weight: 700 !important; }
-[data-testid="stMetricLabel"] { color: #8b949e !important; font-size: 0.75rem !important; }
+[data-testid="stMetricValue"] {
+  color: var(--mint-soft) !important;
+  font-weight: 600 !important;
+  font-size: 1.05rem !important;
+  font-family: 'JetBrains Mono', monospace !important;
+}
+[data-testid="stMetricLabel"] {
+  color: var(--text-low) !important;
+  font-size: 10px !important;
+  text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700;
+}
 
-/* ── Dividers ── */
-hr { border-color: #21262d !important; }
-
-/* ── Code blocks ── */
+/* Code */
 code {
-    font-family: 'JetBrains Mono', monospace !important;
-    background: #161b22 !important;
-    color: #79c0ff !important;
-    border-radius: 4px !important;
-    padding: 2px 6px !important;
-    font-size: 0.85em !important;
+  font-family: 'JetBrains Mono', ui-monospace, monospace !important;
+  background: var(--bg-inset) !important;
+  color: var(--mint-soft) !important;
+  border: 1px solid var(--border-hair) !important;
+  border-radius: 5px !important;
+  padding: 1px 6px !important;
+  font-size: 0.85em !important;
 }
 
-/* ── Success / Info / Error ── */
+/* Alerts */
 .stAlert {
-    border-radius: 10px !important;
-    border: none !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--border-hair) !important;
+  background: var(--bg-panel) !important;
 }
 
-/* ── Toggle / Checkbox ── */
-.stCheckbox label, [data-testid="stToggle"] label {
-    color: #c9d1d9 !important;
-    font-size: 0.9rem !important;
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1a2332; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #253247; }
+
+/* ── Session state (loaded) sidebar badge ───────────────────── */
+.loaded-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(16,185,129,0.08);
+  border: 1px solid rgba(16,185,129,0.35);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--mint-soft);
+  font-size: 12.5px; font-weight: 500;
+  width: 100%; box-sizing: border-box;
+}
+.loaded-pill .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 6px rgba(16,185,129,0.7);
+  animation: pulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse { 50% { opacity: 0.55; } }
+
+/* Backend health row */
+.backend-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12.5px; color: var(--text-mid);
+  margin-top: 4px;
+}
+.mini-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.mini-dot.g { background: var(--mint); box-shadow: 0 0 6px rgba(16,185,129,0.6); }
+.mini-dot.a { background: var(--warn); box-shadow: 0 0 6px rgba(251,191,36,0.6); }
+.mini-dot.r { background: var(--err); box-shadow: 0 0 6px rgba(248,113,113,0.6); }
+
+/* ── Welcome hero card ──────────────────────────────────────── */
+.hero-card {
+  background:
+    radial-gradient(ellipse 90% 60% at 20% 0%, rgba(16,185,129,0.06) 0%, transparent 60%),
+    linear-gradient(180deg, #10182A 0%, #0B121F 100%);
+  border: 1px solid var(--border-hair);
+  border-radius: 16px;
+  padding: 40px 44px 36px;
+  margin: 0 0 1.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 24px 60px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.03);
+}
+.hero-card::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse 60% 60% at 90% 20%, black 20%, transparent 70%);
+  pointer-events: none;
+}
+.hero-card .corner {
+  position: absolute; top: 24px; right: 26px;
+  color: var(--mint-soft); opacity: 0.55;
+}
+.hero-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px; position: relative;
+}
+.pill-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 12px; border-radius: 999px;
+  background: rgba(16,185,129,0.08);
+  border: 1px solid rgba(16,185,129,0.35);
+  color: var(--mint-soft);
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em;
+  font-weight: 700;
+}
+.hero-brand {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 16px; position: relative;
+}
+.hero-mark {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.05));
+  border: 1px solid rgba(16,185,129,0.35);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--mint-soft);
+  box-shadow: 0 0 20px rgba(16,185,129,0.15);
+  flex-shrink: 0;
+}
+.hero-title {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-size: 46px; font-weight: 700; letter-spacing: -0.03em;
+  color: var(--text-hi); line-height: 1; margin: 0;
+}
+.hero-desc {
+  color: var(--text-mid); font-size: 14.5px; line-height: 1.7;
+  max-width: 640px; margin: 0 0 28px; position: relative;
+}
+.action-row { display: flex; gap: 10px; flex-wrap: wrap; position: relative; }
+.action-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: 999px;
+  background: rgba(16,185,129,0.06);
+  border: 1px solid rgba(16,185,129,0.30);
+  color: var(--mint-soft);
+  font-size: 12.5px; font-weight: 500;
+  transition: all 150ms ease-out;
+}
+.action-pill:hover {
+  background: rgba(16,185,129,0.10);
+  border-color: rgba(16,185,129,0.50);
+}
+.action-pill .num {
+  color: var(--mint); font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px; font-weight: 600; opacity: 0.75;
+  padding-right: 2px;
+}
+.hero-footnote {
+  color: var(--text-low); font-size: 12px;
+  text-align: center; margin-top: 1.5rem;
+  padding-top: 1rem;
+}
+@media (max-width: 768px) { .hero-title { font-size: 32px; } .hero-mark { width: 36px; height: 36px; } }
+
+/* ── Chip rows below hero ──────────────────────────────────── */
+.chip-row-label {
+  color: var(--text-low); font-size: 12px; font-weight: 500;
+  min-width: 110px; padding-top: 6px;
+}
+.chip-mono {
+  font-family: 'JetBrains Mono', monospace !important;
+  color: var(--mint-soft) !important;
+  font-size: 12px !important;
 }
 
-/* ── Scrollbar ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #0d1117; }
-::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #484f58; }
-
-/* ── Custom node badge ── */
-.node-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 8px;
+/* ── Session header (chat state) ───────────────────────────── */
+.session-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 4px 10px;
+  border-bottom: 1px solid var(--border-hair);
+  margin-bottom: 20px;
 }
+.session-header .left {
+  color: var(--text-low); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.14em; font-weight: 600;
+}
+.session-header .left .repo { color: var(--mint-soft); }
+.session-header .right {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--mint-soft); font-size: 10.5px;
+  text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700;
+}
+.session-header .right .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 6px rgba(16,185,129,0.7);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+/* ── Message bubbles (custom, since we right-align user) ───── */
+.msg-wrap { display: flex; margin-bottom: 14px; }
+.msg-wrap.user  { justify-content: flex-end; }
+.msg-wrap.assistant { justify-content: flex-start; }
+.bubble {
+  max-width: 78%;
+  border-radius: 14px;
+  padding: 12px 16px;
+  border: 1px solid var(--border-hair);
+  background: var(--bg-panel);
+}
+.bubble.user {
+  background: rgba(96,165,250,0.06);
+  border-color: rgba(96,165,250,0.30);
+}
+.bubble.assistant {
+  background: rgba(16,185,129,0.04);
+  border-color: rgba(16,185,129,0.28);
+}
+.bubble-head {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.14em;
+  font-weight: 700; margin-bottom: 8px;
+}
+.bubble.user .bubble-head .who      { color: var(--user-blue); }
+.bubble.assistant .bubble-head .who { color: var(--mint-soft); }
+.bubble-head .time { color: var(--text-low); font-weight: 500; }
+.bubble-body { color: var(--text-hi); font-size: 14px; line-height: 1.6; }
+.bubble-body p { margin: 0 0 8px; }
+.bubble-body p:last-child { margin-bottom: 0; }
+.bubble-body code { color: var(--mint-soft) !important; }
+
+/* ── Source-node pills (shown inline under assistant answer) ─ */
+.src-row {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-top: 10px;
+}
+.src-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  border: 1px solid;
+}
+.src-pill .dot { width: 5px; height: 5px; border-radius: 50%; }
+.src-Class    { background: rgba(96,165,250,0.10); border-color: rgba(96,165,250,0.40); color: #60A5FA; }
+.src-Class .dot   { background: #60A5FA; }
+.src-Method   { background: rgba(16,185,129,0.10); border-color: rgba(16,185,129,0.45); color: #34D399; }
+.src-Method .dot  { background: #34D399; }
+.src-Function { background: rgba(251,191,36,0.10); border-color: rgba(251,191,36,0.40); color: #FBBF24; }
+.src-Function .dot { background: #FBBF24; }
+.src-File     { background: rgba(16,185,129,0.10); border-color: rgba(16,185,129,0.45); color: #34D399; }
+.src-File .dot    { background: #34D399; }
+.src-Module   { background: rgba(248,113,113,0.10); border-color: rgba(248,113,113,0.40); color: #F87171; }
+.src-Module .dot  { background: #F87171; }
+
+/* ── Diagnostics expander interior ─────────────────────────── */
+.node-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .node-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    font-weight: 500;
-    border: 1px solid;
-    white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  border: 1px solid; white-space: nowrap;
 }
-.node-Class    { background:#1f3a5f22; border-color:#388bfd66; color:#58a6ff; }
-.node-Method   { background:#1a3a2222; border-color:#3fb95066; color:#3fb950; }
-.node-Function { background:#3a2d1022; border-color:#d2992266; color:#d29922; }
-.node-File     { background:#2a2a2a22; border-color:#8b949e66; color:#8b949e; }
-.node-Module   { background:#3a1f1f22; border-color:#f8514966; color:#f85149; }
+.node-Class    { background: rgba(96,165,250,0.10); border-color: rgba(96,165,250,0.40); color: #60A5FA; }
+.node-Method   { background: rgba(16,185,129,0.10); border-color: rgba(16,185,129,0.45); color: #34D399; }
+.node-Function { background: rgba(251,191,36,0.10); border-color: rgba(251,191,36,0.40); color: #FBBF24; }
+.node-File     { background: rgba(148,163,184,0.10); border-color: rgba(148,163,184,0.35); color: #94A3B8; }
+.node-Module   { background: rgba(248,113,113,0.10); border-color: rgba(248,113,113,0.40); color: #F87171; }
 
-/* ── Stat chips ── */
-.stat-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin: 6px 0;
-}
+.stat-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
 .stat-chip {
-    background: #161b22;
-    border: 1px solid #21262d;
-    border-radius: 6px;
-    padding: 3px 10px;
-    font-size: 0.78rem;
-    color: #8b949e;
+  background: var(--bg-inset); border: 1px solid var(--border-hair);
+  border-radius: 6px; padding: 4px 10px;
+  font-size: 12px; color: var(--text-mid);
 }
-.stat-chip strong { color: #c9d1d9; }
+.stat-chip strong { color: var(--text-hi); font-weight: 600; }
 
-/* ── Welcome card ── */
-.welcome-card {
-    background: linear-gradient(135deg, #161b22, #1c2434);
-    border: 1px solid #21262d;
-    border-radius: 16px;
-    padding: 2.5rem;
-    text-align: center;
-    margin: 2rem auto;
-    max-width: 600px;
-}
-.welcome-card h2 {
-    background: linear-gradient(90deg, #388bfd, #79c0ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-.welcome-card p { color: #8b949e; font-size: 0.95rem; line-height: 1.6; }
-.welcome-steps {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-    flex-wrap: wrap;
-}
-.welcome-step {
-    background: #0d1117;
-    border: 1px solid #30363d;
-    border-radius: 10px;
-    padding: 0.75rem 1.25rem;
-    font-size: 0.85rem;
-    color: #c9d1d9;
-}
-.welcome-step .step-num {
-    display: block;
-    color: #388bfd;
-    font-weight: 700;
-    font-size: 1.1rem;
-    margin-bottom: 4px;
-}
-
-/* ── Streaming cursor ── */
+/* streaming cursor */
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 .cursor {
-    display: inline-block;
-    width: 2px;
-    height: 1.1em;
-    background: #388bfd;
-    animation: blink 0.8s step-end infinite;
-    vertical-align: text-bottom;
-    margin-left: 2px;
-    border-radius: 1px;
-}
-
-/* ── Session badge ── */
-.session-active {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #1a3a22;
-    border: 1px solid #3fb95066;
-    border-radius: 20px;
-    padding: 4px 12px;
-    color: #3fb950;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-.session-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #3fb950;
-    animation: blink 1.5s ease-in-out infinite;
+  display: inline-block; width: 2px; height: 1.05em;
+  background: var(--mint);
+  animation: blink 0.8s step-end infinite;
+  vertical-align: text-bottom; margin-left: 2px; border-radius: 1px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ── Session state ──────────────────────────────────────────────────────────────
+
+# ── Session state ──────────────────────────────────────────────
 for k, v in {
-    "messages":     [],
+    "messages":     [],   # each: {role, content, time}
     "session_id":   None,
     "session_info": None,
     "last_repo":    "",
-    "health":       None,   # cached health dict, refreshed on demand
+    "health":       None,
 }.items():
     if k not in st.session_state:
         st.session_state[k] = v
@@ -307,35 +471,56 @@ for k, v in {
 
 def _fetch_health(url: str) -> dict | None:
     try:
-        r = requests.get(f"{url}/health", timeout=3)
+        r = requests.get(f"{url}/health", timeout=8)
         return r.json() if r.status_code == 200 else None
     except Exception:
         return None
 
-# ── Sidebar ───────────────────────────────────────────────────────────────────
+
+def _safe_detail(resp) -> str:
+    try:
+        j = resp.json()
+        if isinstance(j, dict):
+            return str(j.get("detail", j))
+    except Exception:
+        pass
+    return (resp.text or "")[:300]
+
+
+def _now_str() -> str:
+    return datetime.now().strftime("%I:%M %p").lstrip("0")
+
+
+# ── SIDEBAR ────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("# 🕸️ RepoGraphAI")
-    st.markdown("<p style='color:#8b949e;font-size:0.85rem;margin-top:-10px'>Ask questions about any Python repo</p>", unsafe_allow_html=True)
-    st.divider()
+    st.markdown(
+        "<p style='color:var(--text-low);font-size:12px;margin-top:-6px'>"
+        "Ask questions about any Python repo</p>",
+        unsafe_allow_html=True,
+    )
 
-    # ── Primary input: repo URL ──────────────────────────────────────────
-    # Starter-repo buttons on the welcome screen prefill this via session_state.
+    st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
+
     if "_starter_repo" in st.session_state:
         st.session_state["repo_url_input"] = st.session_state.pop("_starter_repo")
 
     repo_url = st.text_input(
         "GitHub repository",
         placeholder="https://github.com/psf/requests",
-        help="Paste any public Python repo URL.",
         key="repo_url_input",
     )
 
-    # ── Live status: current session or ready state ─────────────────────
     if st.session_state.session_id:
         info = st.session_state.session_info or {}
+        n = info.get("node_count", "?")
+        e = info.get("edge_count", "?")
+        n_str = f"{n:,}" if isinstance(n, int) else str(n)
+        e_str = f"{e:,}" if isinstance(e, int) else str(e)
         st.markdown(
-            f'<div class="session-active"><div class="session-dot"></div>'
-            f'Loaded &nbsp;·&nbsp; {info.get("node_count","?")} nodes &nbsp;·&nbsp; {info.get("edge_count","?")} edges</div>',
+            f'<div class="loaded-pill"><span class="dot"></span>'
+            f'Loaded · <strong style="color:var(--mint-soft)">{n_str}</strong> nodes · '
+            f'<strong style="color:var(--mint-soft)">{e_str}</strong> edges</div>',
             unsafe_allow_html=True,
         )
         if st.button("Load a different repo", use_container_width=True):
@@ -345,9 +530,8 @@ with st.sidebar:
             st.session_state.messages     = []
             st.rerun()
 
-    st.divider()
+    st.markdown('<hr class="hairline"/>', unsafe_allow_html=True)
 
-    # ── Advanced: everything technical goes here, collapsed by default ──
     with st.expander("⚙️ Advanced settings", expanded=False):
         backend_url = st.text_input(
             "Backend URL",
@@ -361,7 +545,7 @@ with st.sidebar:
             placeholder="Only if your backend requires one",
         )
 
-        st.markdown("<p style='color:#8b949e;font-size:0.75rem;margin-top:12px'>Retrieval tuning</p>", unsafe_allow_html=True)
+        st.markdown("<p class='eyebrow' style='margin-top:12px'>Retrieval tuning</p>", unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1:
             top_k = st.slider("Results", 1, 30, 10, help="How many code nodes to retrieve per question.")
@@ -369,58 +553,72 @@ with st.sidebar:
             max_hops = st.slider("Graph depth", 0, 3, 1, help="How far to expand along call/import edges.")
 
         use_embeddings = st.toggle(
-            "Semantic search",
-            value=False,
+            "Semantic search", value=False,
             help="Use embeddings on top of keyword search. Slower first query, better recall.",
         )
 
-    st.divider()
+    st.markdown('<hr class="hairline"/>', unsafe_allow_html=True)
 
-    # ── Live backend status (auto-fetched, refresh button) ──────────────
+    # Backend health — retry each rerun until success
     if st.session_state.health is None:
-        st.session_state.health = _fetch_health(backend_url)
-    h = st.session_state.health
+        h = _fetch_health(backend_url)
+        if h is not None:
+            st.session_state.health = h
+    else:
+        h = st.session_state.health
 
     if h is None:
         st.markdown(
-            '<div style="display:flex;align-items:center;gap:8px;color:#f85149;font-size:0.85rem">'
-            '<span style="width:8px;height:8px;border-radius:50%;background:#f85149;"></span>'
-            'Backend unreachable</div>',
+            '<div class="backend-row"><span class="mini-dot r"></span>Backend unreachable</div>',
             unsafe_allow_html=True,
         )
         st.caption(f"Tried `{backend_url}`. Open Advanced to change.")
     else:
         llm_ok = h.get("llm_configured")
         emb_ok = h.get("embedding_available")
-        dot_color = "#3fb950" if llm_ok else "#d29922"
+        cls = "g" if llm_ok else "a"
         label = "Ready" if llm_ok else "Ready (no LLM key — retrieval only)"
         st.markdown(
-            f'<div style="display:flex;align-items:center;gap:8px;color:#8b949e;font-size:0.85rem">'
-            f'<span style="width:8px;height:8px;border-radius:50%;background:{dot_color};"></span>'
-            f'{label}</div>',
+            f'<div class="backend-row"><span class="mini-dot {cls}"></span>{label}</div>',
             unsafe_allow_html=True,
         )
         st.caption(f"LLM: {'✓' if llm_ok else '—'} · Embeddings: {'✓' if emb_ok else '—'}")
 
+    st.markdown("<div style='flex:1'></div>", unsafe_allow_html=True)
+    st.markdown('<hr class="hairline"/>', unsafe_allow_html=True)
+
     c1, c2 = st.columns(2)
     with c1:
-        if st.button("Refresh", use_container_width=True):
+        if st.button("↻ Refresh", use_container_width=True):
             st.session_state.health = _fetch_health(backend_url)
             st.rerun()
     with c2:
-        if st.button("Clear chat", use_container_width=True):
-            st.session_state.messages   = []
-            st.session_state.session_id = None
+        if st.button("⌫ Clear chat", use_container_width=True):
+            st.session_state.messages     = []
+            st.session_state.session_id   = None
             st.session_state.session_info = None
             st.rerun()
 
 
-# ── Header ────────────────────────────────────────────────────────────────────
+# ── Helpers used by main area ───────────────────────────────────
 def _headers():
     h = {"Content-Type": "application/json"}
     if api_key:
         h["X-API-Key"] = api_key
     return h
+
+
+def _src_pill(node: dict) -> str:
+    ntype = node.get("node_type", "")
+    label = node.get("label") or node.get("node_id", "")
+    fp    = node.get("file_path")
+    ln    = node.get("line_number")
+    if fp:
+        display = f"{fp}:{ln}" if ln else fp
+    else:
+        display = label
+    return (f'<span class="src-pill src-{ntype}"><span class="dot"></span>'
+            f'{display}</span>')
 
 
 def _node_badge(node: dict) -> str:
@@ -429,19 +627,17 @@ def _node_badge(node: dict) -> str:
     score = node.get("score", 0)
     icons = {"Class": "□", "Method": "◈", "Function": "◆", "File": "◻", "Module": "○"}
     icon  = icons.get(ntype, "·")
-    return (
-        f'<span class="node-badge node-{ntype}" title="{ntype} · score {score:.2f}">'
-        f'{icon} {nid}</span>'
-    )
+    return (f'<span class="node-badge node-{ntype}" title="{ntype} · score {score:.2f}">'
+            f'{icon} {nid}</span>')
 
 
 def _render_metadata(meta: dict, source_nodes: list):
-    with st.expander("📊 Retrieval diagnostics", expanded=False):
+    with st.expander("⚡  Retrieval diagnostics", expanded=False):
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Nodes retrieved",  meta.get("resolved_node_count", "—"))
-        c2.metric("Subgraph nodes",   meta.get("subgraph_node_count", "—"))
-        c3.metric("Subgraph edges",   meta.get("subgraph_edge_count", "—"))
-        c4.metric("Strategy",         meta.get("traversal_strategy", "—"))
+        c1.metric("Nodes retrieved", meta.get("resolved_node_count", "—"))
+        c2.metric("Subgraph nodes",  meta.get("subgraph_node_count", "—"))
+        c3.metric("Subgraph edges",  meta.get("subgraph_edge_count", "—"))
+        c4.metric("Strategy",        meta.get("traversal_strategy", "—"))
 
         chips = ""
         if meta.get("intent_categories"):
@@ -454,7 +650,7 @@ def _render_metadata(meta: dict, source_nodes: list):
             st.markdown(f'<div class="stat-row">{chips}</div>', unsafe_allow_html=True)
 
         if source_nodes:
-            st.markdown("<p style='color:#8b949e;font-size:0.8rem;margin:12px 0 6px'>Source nodes</p>", unsafe_allow_html=True)
+            st.markdown('<p class="eyebrow" style="margin-top:12px">All source nodes</p>', unsafe_allow_html=True)
             badges = "".join(_node_badge(n) for n in source_nodes)
             st.markdown(f'<div class="node-grid">{badges}</div>', unsafe_allow_html=True)
 
@@ -481,7 +677,7 @@ def _create_session(repo: str) -> bool:
         st.session_state.session_info = d
         st.session_state.last_repo    = repo
         return True
-    st.error(f"Session failed ({r.status_code}): {r.json().get('detail', r.text)}")
+    st.error(f"Session failed ({r.status_code}): {_safe_detail(r)}")
     return False
 
 
@@ -491,15 +687,11 @@ def _ask_streaming(question: str):
     source_nodes = []
     meta         = {}
 
-    # Diagnose connection before streaming
     try:
         requests.get(f"{backend_url}/health", timeout=3)
     except Exception:
-        st.error(
-            f"Cannot reach backend at **{backend_url}**. "
-            "Check the Backend URL in the sidebar and make sure the server is running."
-        )
-        return None
+        st.error(f"Cannot reach backend at **{backend_url}**. Check the Backend URL in the sidebar and make sure the server is running.")
+        return None, [], {}
 
     try:
         with requests.post(
@@ -510,36 +702,20 @@ def _ask_streaming(question: str):
             stream=True, timeout=300,
         ) as resp:
             if resp.status_code == 422:
-                try:
-                    detail = resp.json().get("detail", resp.text)
-                except Exception:
-                    detail = resp.text
-                st.error(f"Validation error: {detail}")
-                return None
+                st.error(f"Validation error: {_safe_detail(resp)}"); return None, [], {}
             if resp.status_code == 401:
-                st.error("API key required. Enter it in the sidebar under **API Key**.")
-                return None
+                st.error("API key required. Enter it in the sidebar under **API Key**."); return None, [], {}
             if resp.status_code == 429:
-                st.error("Rate limit exceeded. Wait a moment and try again.")
-                return None
+                st.error("Rate limit exceeded. Wait a moment and try again."); return None, [], {}
             if resp.status_code != 200:
-                try:
-                    detail = resp.json().get("detail", resp.text)
-                except Exception:
-                    detail = resp.text
-                st.error(f"Server error {resp.status_code}: {detail}")
-                return None
+                st.error(f"Server error {resp.status_code}: {_safe_detail(resp)}"); return None, [], {}
 
             for raw in resp.iter_lines():
-                if not raw:
-                    continue
+                if not raw: continue
                 line = raw.decode("utf-8") if isinstance(raw, bytes) else raw
-                if not line.startswith("data: "):
-                    continue
-                try:
-                    ev = json.loads(line[6:])
-                except json.JSONDecodeError:
-                    continue
+                if not line.startswith("data: "): continue
+                try: ev = json.loads(line[6:])
+                except json.JSONDecodeError: continue
 
                 t = ev.get("type")
                 if t == "metadata":
@@ -558,63 +734,23 @@ def _ask_streaming(question: str):
                 elif t == "done":
                     full = ev.get("full_answer", accumulated)
                     placeholder.markdown(full)
-                    if meta or source_nodes:
-                        _render_metadata(meta, source_nodes)
-                    return full
+                    return full, source_nodes, meta
                 elif t == "error":
                     st.error("Server error: " + ev.get("detail", "Unknown error"))
-                    return None
+                    return None, [], {}
 
     except requests.exceptions.Timeout:
         st.error("Request timed out. Try a smaller repository or simpler question.")
     except requests.exceptions.ConnectionError:
-        st.error(
-            f"Connection refused at **{backend_url}**. "
-            "Is the backend running? Try clicking **🔍 Server health** in the sidebar."
-        )
+        st.error(f"Connection refused at **{backend_url}**. Is the backend running?")
     except Exception as e:
         st.error(f"Unexpected error: {e}")
-    return None
-
-
-def _ask_sync(question: str):
-    with st.spinner("Thinking…"):
-        try:
-            r = requests.post(
-                f"{backend_url}/qa",
-                headers=_headers(),
-                json={"repo_url": repo_url, "question": question,
-                      "top_k": top_k, "max_hops": max_hops, "use_embeddings": use_embeddings},
-                timeout=300,
-            )
-        except Exception as e:
-            st.error(f"Error: {e}")
-            return None
-
-    if r.status_code != 200:
-        st.error(f"Error {r.status_code}: {r.json().get('detail', r.text)}")
-        return None
-
-    d      = r.json()
-    answer = d.get("answer")
-    meta   = d.get("retrieval_metadata", {})
-    nodes  = d.get("source_nodes", [])
-
-    if answer:
-        st.markdown(answer)
-    else:
-        st.info("⚡ Offline mode — no LLM key configured. Showing retrieval context.")
-        st.code(d.get("llm_context", ""), language=None)
-
-    if meta or nodes:
-        _render_metadata(meta, nodes)
-    return answer or "(offline)"
+    return None, [], {}
 
 
 def _ask_session(question: str):
-    """Ask a question within an existing session. Handles expired sessions gracefully."""
     if not st.session_state.session_id:
-        return None
+        return None, [], {}
 
     with st.spinner("Querying session (no re-clone)…"):
         try:
@@ -625,138 +761,189 @@ def _ask_session(question: str):
                 timeout=120,
             )
         except requests.exceptions.ConnectionError:
-            st.error(
-                f"Connection refused at **{backend_url}**. "
-                "Is the backend running? The session is still saved — try again."
-            )
-            return None
+            st.error(f"Connection refused at **{backend_url}**. The session is still saved — try again.")
+            return None, [], {}
         except Exception as e:
             st.error(f"Error: {e}")
-            return None
+            return None, [], {}
 
     if r.status_code == 404:
-        # Session lost — server may have restarted. Rebuild transparently.
         st.toast("Session expired — rebuilding graph…", icon="🔄")
         st.session_state.session_id = None
-        return None  # caller will handle retry
-
+        return None, [], {}
     if r.status_code == 401:
         st.error("API key required. Enter it in the sidebar under **API Key**.")
-        return None
-
+        return None, [], {}
     if r.status_code != 200:
-        try:
-            detail = r.json().get("detail", r.text)
-        except Exception:
-            detail = r.text
-        st.error(f"Error {r.status_code}: {detail}")
-        return None
+        st.error(f"Error {r.status_code}: {_safe_detail(r)}")
+        return None, [], {}
 
     d      = r.json()
     answer = d.get("answer")
     meta   = d.get("retrieval_metadata", {})
     nodes  = d.get("source_nodes", [])
 
-    if answer:
-        st.markdown(answer)
-    else:
-        st.info("⚡ No LLM key configured — showing retrieval context.")
+    if not answer:
+        st.info("⚡ Offline mode — no LLM key configured. Showing retrieval context.")
         st.code(d.get("llm_context", ""), language=None)
-
-    if meta or nodes:
-        _render_metadata(meta, nodes)
-    return answer or "(offline)"
+        return "(offline)", nodes, meta
+    return answer, nodes, meta
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+# ── MAIN ────────────────────────────────────────────────────────
+def _bubble(role: str, content: str, ts: str, source_nodes: list | None = None):
+    who = "You" if role == "user" else "RepoGraphAI"
+    src_html = ""
+    if source_nodes:
+        pills = "".join(_src_pill(n) for n in source_nodes[:6])
+        src_html = f'<div class="src-row">{pills}</div>'
+    # convert markdown-ish paragraphs to <p>
+    body_html = "".join(f"<p>{line}</p>" for line in content.split("\n\n") if line.strip())
+    st.markdown(
+        f'<div class="msg-wrap {role}">'
+        f'  <div class="bubble {role}">'
+        f'    <div class="bubble-head"><span class="who">{who}</span><span class="time">{ts}</span></div>'
+        f'    <div class="bubble-body">{body_html}{src_html}</div>'
+        f'  </div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
 
-# Welcome screen
+
+# Welcome screen — no messages yet
 if not st.session_state.messages:
-    st.markdown("""
-    <div class="welcome-card">
-        <h2>🕸️ RepoGraphAI</h2>
-        <p>Ask natural-language questions about any Python repository on GitHub.<br>
-        Answers are grounded in a knowledge graph built from the actual code — classes, methods, imports, call sites.</p>
-        <div class="welcome-steps">
-            <div class="welcome-step"><span class="step-num">1</span>Paste a repo URL in the sidebar</div>
-            <div class="welcome-step"><span class="step-num">2</span>Ask a question below</div>
-            <div class="welcome-step"><span class="step-num">3</span>Explore with follow-ups</div>
-        </div>
+    def _graph_svg(size: int, sw: float = 1.8) -> str:
+        return (f'<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" '
+                f'stroke="currentColor" stroke-width="{sw}" stroke-linecap="round" stroke-linejoin="round">'
+                '<circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="6" r="2.2"/>'
+                '<circle cx="12" cy="18" r="2.2"/><line x1="7.7" y1="7.6" x2="10.5" y2="16"/>'
+                '<line x1="16.3" y1="7.6" x2="13.5" y2="16"/><line x1="8.5" y1="6" x2="15.5" y2="6"/></svg>')
+
+    st.markdown(f"""
+    <div class="hero-card">
+      <div class="hero-top">
+        <div class="pill-badge">▸ Code Intelligence</div>
+        <div class="corner">{_graph_svg(26, 1.7)}</div>
+      </div>
+      <div class="hero-brand">
+        <div class="hero-mark">{_graph_svg(24, 1.9)}</div>
+        <h1 class="hero-title">RepoGraphAI</h1>
+      </div>
+      <p class="hero-desc">Ask natural-language questions about any Python repository on GitHub. Answers are grounded in a knowledge graph built from the actual code — classes, methods, imports, call sites.</p>
+      <div class="action-row">
+        <span class="action-pill"><span class="num">1</span>Paste a repo URL in the sidebar</span>
+        <span class="action-pill"><span class="num">2</span>Ask a question below</span>
+        <span class="action-pill"><span class="num">3</span>Explore with follow-ups</span>
+      </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Starter repos users can load with one click
-    st.markdown("<p style='text-align:center;color:#8b949e;font-size:0.85rem;margin-top:1rem;margin-bottom:0.5rem'>Try a repo</p>", unsafe_allow_html=True)
-    starter_repos = [
-        ("psf/requests",           "https://github.com/psf/requests"),
-        ("tiangolo/typer",         "https://github.com/tiangolo/typer"),
-        ("pydantic/pydantic",      "https://github.com/pydantic/pydantic"),
-    ]
-    rc = st.columns(len(starter_repos))
-    for col, (label, url) in zip(rc, starter_repos):
-        with col:
-            if st.button(label, use_container_width=True, key=f"starter_{label}"):
-                st.session_state["_starter_repo"] = url
-                st.rerun()
+    # Try a repo
+    label_col, chips_col = st.columns([0.22, 0.78], gap="small")
+    with label_col:
+        st.markdown('<div class="chip-row-label">▸ Try a repo</div>', unsafe_allow_html=True)
+    with chips_col:
+        cc = st.columns(3)
+        for col, (lbl, url) in zip(cc, [
+            ("psf/requests",      "https://github.com/psf/requests"),
+            ("tiangolo/typer",    "https://github.com/tiangolo/typer"),
+            ("pydantic/pydantic", "https://github.com/pydantic/pydantic"),
+        ]):
+            with col:
+                if st.button(lbl, use_container_width=True, key=f"starter_{lbl}"):
+                    st.session_state["_starter_repo"] = url
+                    st.rerun()
 
-    # Example questions (generic — work for most Python repos)
-    st.markdown("<p style='text-align:center;color:#8b949e;font-size:0.85rem;margin-top:1.25rem;margin-bottom:0.5rem'>Or try a question</p>", unsafe_allow_html=True)
-    ex_cols = st.columns(3)
-    examples = [
-        "What does this project do?",
-        "Show me the main entry points",
-        "How is authentication handled?",
-    ]
-    for col, ex in zip(ex_cols, examples):
-        with col:
-            if st.button(ex, use_container_width=True, key=f"ex_{ex}"):
-                st.session_state["_prefill"] = ex
-                st.rerun()
+    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
-# Render existing messages
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"], avatar="👤" if msg["role"] == "user" else "🕸️"):
-        st.markdown(msg["content"])
+    # Ask a question
+    label_col2, chips_col2 = st.columns([0.22, 0.78], gap="small")
+    with label_col2:
+        st.markdown('<div class="chip-row-label">▸ Ask a question</div>', unsafe_allow_html=True)
+    with chips_col2:
+        ex_cols = st.columns(3)
+        examples = [
+            "Where is authentication handled?",
+            "How does connection pooling work?",
+            "Show me the main entry points",
+        ]
+        for col, ex in zip(ex_cols, examples):
+            with col:
+                if st.button(ex, use_container_width=True, key=f"ex_{ex}"):
+                    st.session_state["_prefill"] = ex
+                    st.rerun()
 
-# Pre-fill from example buttons
-default_q = st.session_state.pop("_prefill", "")
+# Chat state — session header + messages
+else:
+    repo_label = st.session_state.last_repo or repo_url
+    try:
+        repo_slug = "/".join(repo_label.rstrip("/").split("/")[-2:])
+    except Exception:
+        repo_slug = repo_label
+    st.markdown(
+        f'<div class="session-header">'
+        f'  <div class="left">Session / <span class="repo">{repo_slug}</span></div>'
+        f'  <div class="right"><span class="dot"></span>Live graph</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    for msg in st.session_state.messages:
+        _bubble(
+            msg["role"],
+            msg["content"],
+            msg.get("time", ""),
+            msg.get("source_nodes") if msg["role"] == "assistant" else None,
+        )
 
 # Chat input
+default_q = st.session_state.pop("_prefill", "")
 question = st.chat_input(
-    "Ask anything about the repository…",
+    "Ask a question about this repository…",
     disabled=not repo_url,
 )
+
+if not st.session_state.messages:
+    st.markdown(
+        '<p class="hero-footnote">Load a repository to unlock deep answers grounded in the graph.</p>',
+        unsafe_allow_html=True,
+    )
 if default_q and not question:
     question = default_q
 
-if not repo_url and not st.session_state.messages:
-    pass  # welcome screen already shown
-
 if question and repo_url:
-    st.session_state.messages.append({"role": "user", "content": question})
-    with st.chat_message("user", avatar="👤"):
-        st.markdown(question)
+    ts_user = _now_str()
+    st.session_state.messages.append({"role": "user", "content": question, "time": ts_user})
+    _bubble("user", question, ts_user)
 
-    with st.chat_message("assistant", avatar="🕸️"):
-        answer = None
+    # Ensure session
+    if not st.session_state.session_id or st.session_state.last_repo != repo_url:
+        ok = _create_session(repo_url)
+        if not ok:
+            st.stop()
 
-        # Always use session mode: build graph once per repo, reuse for follow-ups.
-        if not st.session_state.session_id or st.session_state.last_repo != repo_url:
-            ok = _create_session(repo_url)
-            if not ok:
-                st.stop()
+    answer, src_nodes, meta = _ask_session(question)
 
-        answer = _ask_session(question)
+    # Session expired — rebuild once
+    if answer is None and not st.session_state.session_id:
+        st.info("Rebuilding graph after server restart…")
+        ok = _create_session(repo_url)
+        if ok:
+            answer, src_nodes, meta = _ask_session(question)
+        else:
+            st.warning("Rebuild failed. Falling back to one-shot mode.")
+            answer, src_nodes, meta = _ask_streaming(question)
 
-        # Session expired (server restart) — auto-rebuild once
-        if answer is None and not st.session_state.session_id:
-            st.info("Rebuilding graph after server restart…")
-            ok = _create_session(repo_url)
-            if ok:
-                answer = _ask_session(question)
-            else:
-                st.warning("Rebuild failed. Falling back to one-shot mode.")
-                answer = _ask_streaming(question)
-
-    if answer and answer not in ("(offline)",):
-        st.session_state.messages.append({"role": "assistant", "content": answer})
+    if answer:
+        ts_a = _now_str()
+        display = answer if answer != "(offline)" else "_Offline mode — see retrieval context above._"
+        _bubble("assistant", display, ts_a, src_nodes)
+        if meta or src_nodes:
+            _render_metadata(meta, src_nodes)
+        if answer != "(offline)":
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": display,
+                "time": ts_a,
+                "source_nodes": src_nodes,
+            })
