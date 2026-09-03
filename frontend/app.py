@@ -674,10 +674,29 @@ def _headers():
     return h
 
 
+def _short_path(fp: str) -> str:
+    """Strip container/clone prefixes so a citation reads like the repo would show it."""
+    if not fp:
+        return ""
+    p = fp.replace("\\", "/")
+    for marker in ("/repos/", "/backend/repos/", "/app/backend/repos/"):
+        idx = p.find(marker)
+        if idx != -1:
+            p = p[idx + len(marker):]
+            # drop the top-level repo folder — leaves e.g. src/requests/... or requests/...
+            parts = p.split("/", 1)
+            p = parts[1] if len(parts) == 2 else p
+            break
+    # further trim a leading "src/" so it reads like the import path
+    if p.startswith("src/"):
+        p = p[4:]
+    return p
+
+
 def _src_pill(node: dict) -> str:
     ntype = node.get("node_type", "")
     label = node.get("label") or node.get("node_id", "")
-    fp    = node.get("file_path")
+    fp    = _short_path(node.get("file_path") or "")
     ln    = node.get("line_number")
     if fp:
         display = f"{fp}:{ln}" if ln else fp
