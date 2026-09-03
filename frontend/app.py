@@ -151,10 +151,11 @@ html, body, [class*="css"] {
   border-radius: 8px !important;
   font-weight: 500 !important;
   font-family: 'Inter', sans-serif !important;
-  font-size: 13px !important;
+  font-size: 12.5px !important;
   transition: all 150ms ease-out !important;
-  padding: 0.45rem 0.9rem !important;
+  padding: 0.4rem 0.55rem !important;
   box-shadow: none !important;
+  white-space: nowrap !important;
 }
 .stButton > button:hover, .stFormSubmitButton > button:hover {
   border-color: var(--mint) !important;
@@ -565,7 +566,7 @@ with st.sidebar:
     st.markdown("# 🕸️ RepoGraphAI")
     st.markdown(
         "<p style='color:var(--text-low);font-size:12px;margin-top:-6px'>"
-        "Ask questions about any Python repo</p>",
+        "Ask questions about any Python or TypeScript repo</p>",
         unsafe_allow_html=True,
     )
 
@@ -655,11 +656,11 @@ with st.sidebar:
 
     c1, c2 = st.columns(2)
     with c1:
-        if st.button("↻ Refresh", use_container_width=True):
+        if st.button("↻ Sync", use_container_width=True, help="Re-check backend status"):
             st.session_state.health = _fetch_health(backend_url)
             st.rerun()
     with c2:
-        if st.button("⌫ Clear chat", use_container_width=True):
+        if st.button("⌫ Reset", use_container_width=True, help="Clear chat and unload the repo"):
             st.session_state.messages     = []
             st.session_state.session_id   = None
             st.session_state.session_info = None
@@ -913,7 +914,7 @@ if not st.session_state.messages:
         <div class="hero-mark">{_graph_svg(24, 1.9)}</div>
         <h1 class="hero-title">RepoGraphAI</h1>
       </div>
-      <p class="hero-desc">Ask natural-language questions about any Python repository on GitHub. Answers are grounded in a knowledge graph built from the actual code — classes, methods, imports, call sites.</p>
+      <p class="hero-desc">Ask natural-language questions about any Python or TypeScript/JavaScript repository on GitHub. Answers are grounded in a knowledge graph built from the actual code — classes, methods, imports, call sites.</p>
       <div class="action-row">
         <span class="action-pill"><span class="num">1</span>Paste a repo URL in the sidebar</span>
         <span class="action-pill"><span class="num">2</span>Ask a question below</span>
@@ -947,8 +948,8 @@ if not st.session_state.messages:
     with chips_col2:
         ex_cols = st.columns(3)
         examples = [
-            "Where is authentication handled?",
-            "How does connection pooling work?",
+            "What is this repo about?",
+            "How is the code organized?",
             "Show me the main entry points",
         ]
         for col, ex in zip(ex_cols, examples):
