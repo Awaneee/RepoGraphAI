@@ -120,6 +120,29 @@ html, body, [class*="css"] {
 /* Toggle */
 [data-testid="stToggle"] label { color: var(--text-mid) !important; font-size: 13px !important; }
 
+/* Recent-chat rows */
+.history-list .stButton > button {
+  width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 7px 8px !important;
+  color: var(--text-mid) !important;
+  font-size: 12.5px !important;
+  text-align: left !important;
+  justify-content: flex-start !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
+  font-weight: 400 !important;
+}
+.history-list .stButton > button:hover {
+  background: rgba(16,185,129,0.06) !important;
+  color: var(--text-hi) !important;
+  border: none !important;
+}
+
 /* Default buttons */
 .stButton > button, .stFormSubmitButton > button {
   background: var(--bg-elevated) !important;
@@ -576,36 +599,39 @@ with st.sidebar:
             st.session_state.messages     = []
             st.rerun()
 
-    st.markdown('<hr class="hairline"/>', unsafe_allow_html=True)
-
-    with st.expander("⚙️ Advanced settings", expanded=False):
-        backend_url = st.text_input(
-            "Backend URL",
-            value=_DEFAULT_BACKEND,
-            help="Where the FastAPI server is running.",
-        ).rstrip("/")
-
-        api_key = st.text_input(
-            "API key",
-            type="password",
-            placeholder="Only if your backend requires one",
-        )
-
-        st.markdown("<p class='eyebrow' style='margin-top:12px'>Retrieval tuning</p>", unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
-        with col1:
-            top_k = st.slider("Results", 1, 30, 10, help="How many code nodes to retrieve per question.")
-        with col2:
-            max_hops = st.slider("Graph depth", 0, 3, 1, help="How far to expand along call/import edges.")
-
-        use_embeddings = st.toggle(
-            "Semantic search", value=False,
-            help="Use embeddings on top of keyword search. Slower first query, better recall.",
-        )
+    # Backend parameters — sensible defaults, no user-facing controls.
+    backend_url    = _DEFAULT_BACKEND.rstrip("/")
+    api_key        = ""
+    top_k          = 10
+    max_hops       = 1
+    use_embeddings = False
 
     st.markdown('<hr class="hairline"/>', unsafe_allow_html=True)
 
-    # Backend health — retry each rerun until success
+    # Recent chat — past user questions, click to re-run.
+    st.markdown('<p class="eyebrow">Recent chat</p>', unsafe_allow_html=True)
+    history_qs = [m["content"] for m in st.session_state.messages if m["role"] == "user"]
+    if history_qs:
+        seen, ordered = set(), []
+        for q in reversed(history_qs):
+            if q not in seen:
+                seen.add(q); ordered.append(q)
+        st.markdown('<div class="history-list">', unsafe_allow_html=True)
+        for i, q in enumerate(ordered[:12]):
+            label = q if len(q) <= 48 else q[:46].rstrip() + "…"
+            if st.button(f"↺  {label}", key=f"hist_{i}", use_container_width=True, help=q):
+                st.session_state["_prefill"] = q
+                st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        st.markdown(
+            '<p style="color:var(--text-low);font-size:12px;margin:0">No questions yet.</p>',
+            unsafe_allow_html=True,
+        )
+
+    st.markdown('<hr class="hairline"/>', unsafe_allow_html=True)
+
+    # Backend health — retry each rerun until success. Single line, no caption.
     if st.session_state.health is None:
         h = _fetch_health(backend_url)
         if h is not None:
@@ -618,20 +644,14 @@ with st.sidebar:
             '<div class="backend-row"><span class="mini-dot r"></span>Backend unreachable</div>',
             unsafe_allow_html=True,
         )
-        st.caption(f"Tried `{backend_url}`. Open Advanced to change.")
     else:
         llm_ok = h.get("llm_configured")
-        emb_ok = h.get("embedding_available")
-        cls = "g" if llm_ok else "a"
-        label = "Ready" if llm_ok else "Ready (no LLM key — retrieval only)"
+        cls   = "g" if llm_ok else "a"
+        label = "Ready" if llm_ok else "Ready · retrieval only"
         st.markdown(
             f'<div class="backend-row"><span class="mini-dot {cls}"></span>{label}</div>',
             unsafe_allow_html=True,
         )
-        st.caption(f"LLM: {'✓' if llm_ok else '—'} · Embeddings: {'✓' if emb_ok else '—'}")
-
-    st.markdown("<div style='flex:1'></div>", unsafe_allow_html=True)
-    st.markdown('<hr class="hairline"/>', unsafe_allow_html=True)
 
     c1, c2 = st.columns(2)
     with c1:
