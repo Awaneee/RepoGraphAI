@@ -9,6 +9,9 @@ from datetime import datetime
 
 import requests
 import streamlit as st
+from markdown_it import MarkdownIt
+
+_md = MarkdownIt("commonmark", {"linkify": True, "breaks": True}).enable("table")
 
 _DEFAULT_BACKEND = os.getenv("REPOGRAPHAI_BACKEND_URL", "http://localhost:8000")
 
@@ -393,10 +396,53 @@ code {
 .bubble.user .bubble-head .who      { color: var(--user-blue); }
 .bubble.assistant .bubble-head .who { color: var(--mint-soft); }
 .bubble-head .time { color: var(--text-low); font-weight: 500; }
-.bubble-body { color: var(--text-hi); font-size: 14px; line-height: 1.6; }
-.bubble-body p { margin: 0 0 8px; }
+.bubble-body { color: var(--text-hi); font-size: 14px; line-height: 1.65; }
+.bubble-body p { margin: 0 0 10px; }
 .bubble-body p:last-child { margin-bottom: 0; }
-.bubble-body code { color: var(--mint-soft) !important; }
+.bubble-body strong { color: #E2E8F0; font-weight: 600; }
+.bubble-body em { color: var(--mint-soft); font-style: normal; }
+.bubble-body a { color: var(--mint-soft); text-decoration: underline; text-underline-offset: 2px; }
+.bubble-body code { color: var(--mint-soft) !important; font-size: 12.5px !important; }
+.bubble-body pre {
+  background: var(--bg-inset) !important;
+  border: 1px solid var(--border-hair);
+  border-left: 2px solid var(--mint);
+  border-radius: 8px;
+  padding: 10px 12px !important;
+  margin: 10px 0 !important;
+  overflow-x: auto;
+}
+.bubble-body pre code {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  color: var(--text-hi) !important;
+  font-size: 12.5px !important;
+  line-height: 1.55;
+}
+.bubble-body ul, .bubble-body ol { margin: 6px 0 10px; padding-left: 22px; }
+.bubble-body li { margin: 3px 0; }
+.bubble-body h1, .bubble-body h2, .bubble-body h3, .bubble-body h4 {
+  color: var(--text-hi);
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  margin: 12px 0 6px;
+  letter-spacing: -0.01em;
+}
+.bubble-body h1 { font-size: 17px; }
+.bubble-body h2 { font-size: 15.5px; }
+.bubble-body h3 { font-size: 14.5px; }
+.bubble-body h4 { font-size: 13.5px; }
+.bubble-body blockquote {
+  margin: 8px 0;
+  padding: 4px 12px;
+  border-left: 2px solid var(--mint);
+  color: var(--text-mid);
+}
+.bubble-body hr {
+  border: 0; border-top: 1px solid var(--border-hair);
+  margin: 12px 0;
+}
 
 /* ── Source-node pills (shown inline under assistant answer) ─ */
 .src-row {
@@ -797,8 +843,7 @@ def _bubble(role: str, content: str, ts: str, source_nodes: list | None = None):
     if source_nodes:
         pills = "".join(_src_pill(n) for n in source_nodes[:6])
         src_html = f'<div class="src-row">{pills}</div>'
-    # convert markdown-ish paragraphs to <p>
-    body_html = "".join(f"<p>{line}</p>" for line in content.split("\n\n") if line.strip())
+    body_html = _md.render(content or "")
     st.markdown(
         f'<div class="msg-wrap {role}">'
         f'  <div class="bubble {role}">'
